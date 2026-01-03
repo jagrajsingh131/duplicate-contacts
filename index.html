@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Duplicate Contacts Tool</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
+
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background: linear-gradient(135deg, #4f46e5, #9333ea);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .container {
+      background: white;
+      width: 420px;
+      padding: 30px;
+      border-radius: 14px;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.25);
+      text-align: center;
+    }
+
+    h1 {
+      margin-bottom: 10px;
+      color: #111827;
+    }
+
+    p {
+      font-size: 14px;
+      color: #6b7280;
+      margin-bottom: 25px;
+    }
+
+    input[type="file"] {
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 20px;
+    }
+
+    button {
+      width: 100%;
+      padding: 12px;
+      background: #4f46e5;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background: #4338ca;
+    }
+
+    .footer {
+      margin-top: 15px;
+      font-size: 12px;
+      color: #9ca3af;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="container">
+    <h1>Duplicate Contacts</h1>
+    <p>Upload a CSV file and download a duplicated version instantly.</p>
+
+    <input type="file" id="fileInput" accept=".csv">
+    <button onclick="duplicateCSV()">Upload & Download</button>
+
+    <div class="footer">
+      CSV only • No data stored • Instant download
+    </div>
+  </div>
+
+<script>
+function duplicateCSV() {
+  const file = document.getElementById("fileInput").files[0];
+
+  if (!file) {
+    alert("Please upload a CSV file");
+    return;
+  }
+
+  Papa.parse(file, {
+    complete: function(results) {
+      const original = results.data;
+      let duplicated = [];
+
+      original.forEach(row => {
+        if (row.length > 0) {
+          duplicated.push(row);
+          duplicated.push(row);
+        }
+      });
+
+      const csv = Papa.unparse(duplicated);
+      download(csv);
+    }
+  });
+}
+
+function download(csv) {
+  const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+  const link = document.createElement("a");
+  link.href = URL.createObjectURL(blob);
+  link.download = "duplicated_contacts.csv";
+  link.click();
+}
+</script>
+
+</body>
+</html>
