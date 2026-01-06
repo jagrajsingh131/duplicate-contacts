@@ -1,23 +1,106 @@
-body {
-  font-family: Arial;
-  background: #f3f4f6;
+:root{
+  --bg:#f5f7fb;
+  --card:#ffffff;
+  --text:#0f172a;
+  --muted:#64748b;
+  --border:#e2e8f0;
+  --primary:#4f46e5;
+  --success:#16a34a;
+  --info:#0ea5e9;
 }
 
-.card {
-  max-width: 500px;
-  margin: 60px auto;
-  padding: 20px;
-  background: white;
-  border-radius: 10px;
+*{box-sizing:border-box}
+body{
+  margin:0;
+  font-family: Arial, Helvetica, sans-serif;
+  background:var(--bg);
+  color:var(--text);
 }
 
-input, textarea {
-  width: 100%;
-  margin: 8px 0;
-  padding: 10px;
+.card{
+  width:92%;
+  margin:40px auto;
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:16px;
+  padding:20px;
+  box-shadow:0 8px 24px rgba(15,23,42,.08);
 }
 
-button {
-  margin: 6px 4px;
-  padding: 10px 14px;
+.brand{
+  font-weight:800;
+  font-size:22px;
+  margin-bottom:6px;
+}
+
+.sub{
+  color:var(--muted);
+  margin-bottom:16px;
+}
+
+label{
+  display:block;
+  margin:10px 0 6px;
+  font-size:13px;
+  color:var(--muted);
+}
+
+input, textarea{
+  width:100%;
+  padding:10px 12px;
+  border:1px solid var(--border);
+  border-radius:10px;
+  outline:none;
+  background:#fff;
+}
+
+textarea{resize:vertical}
+
+.row{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:12px;
+}
+
+.btnRow{
+  display:flex;
+  gap:10px;
+  margin-top:12px;
+  flex-wrap:wrap;
+}
+
+button{
+  border:none;
+  padding:10px 14px;
+  border-radius:10px;
+  cursor:pointer;
+  font-weight:700;
+}
+
+.primary{background:var(--primary); color:#fff}
+.success{background:var(--success); color:#fff}
+.info{background:var(--info); color:#fff}
+.ghost{background:#eef2ff; color:#1e293b}
+
+.msg{
+  display:none;
+  margin-top:12px;
+  padding:10px 12px;
+  border-radius:10px;
+  font-size:13px;
+}
+.msg.ok{display:none; background:#dcfce7; color:#14532d}
+.msg.info{display:none; background:#e0f2fe; color:#075985}
+.msg.err{display:none; background:#fee2e2; color:#7f1d1d}
+
+.hr{
+  height:1px;
+  background:var(--border);
+  margin:14px 0;
+}
+
+.small{font-size:12px}
+
+@media(max-width:800px){
+  .row{grid-template-columns:1fr}
 }
