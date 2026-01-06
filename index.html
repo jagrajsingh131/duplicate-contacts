@@ -8,25 +8,31 @@
 
 <div class="card">
   <h2>Login</h2>
-  <input id="email" placeholder="Enter your email">
+  <input id="email" placeholder="Email">
+  <input id="password" type="password" placeholder="Password">
   <button id="login">Login</button>
+  <button onclick="location.href='signup.html'">Create Account</button>
+  <div id="msg"></div>
 </div>
 
 <script type="module">
-  import { loginLocal, getUser } from "./local.js";
+import { auth } from "./firebase.js";
+import { signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+import { saveSession } from "./cache.js";
 
-  const user = getUser();
-  if (user && user.loggedIn) {
+login.onclick = async () => {
+  try {
+    const res = await signInWithEmailAndPassword(auth, email.value, password.value);
+    if (!res.user.emailVerified) {
+      msg.textContent = "Verify email first.";
+      return;
+    }
+    saveSession({ uid: res.user.uid, email: res.user.email });
     location.href = "profile.html";
+  } catch (e) {
+    msg.textContent = e.message;
   }
-
-  document.getElementById("login").onclick = () => {
-    const email = document.getElementById("email").value.trim();
-    if (!email) return alert("Enter email");
-
-    loginLocal(email);
-    location.href = "profile.html";
-  };
+};
 </script>
 
 </body>
