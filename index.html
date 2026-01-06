@@ -59,46 +59,75 @@
   const showIn = (t)=>{ inf.style.display="block"; ok.style.display="none"; er.style.display="none"; inf.textContent=t; };
   const showEr = (t)=>{ er.style.display="block"; ok.style.display="none"; inf.style.display="none"; er.textContent=t; };
 
-  // ✅ IMPORTANT: redirect logic ONLY here (not inside login submit)
-  onAuthStateChanged(auth, async (user) => {
-    if (!user) return;
+  let routing = false; // prevent double redirects
+
+  async function routeUser(user) {
+    if (routing) return;
+    routing = true;
+
+    if (!user) { routing = false; return; }
 
     if (!user.emailVerified) {
       showIn("Email not verified. Verify first, then login again.");
+      routing = false;
       return;
     }
 
-    try {
-      const snap = await getDoc(doc(db, "users", user.uid));
+    // Firestore getDoc with small retry (fixes timing/unavailable)
+    for (let attempt = 1; attempt <= 3; attempt++) {
+      try {
+        const snap = await getDoc(doc(db, "users", user.uid));
 
-      // If doc missing, send to profile creation
-      if (!snap.exists()) {
-        window.location.href = "profile.html";
+        if (!snap.exists()) {
+          window.location.href = "profile.html";
+          return;
+        }
+
+        const data = snap.data();
+        const done = data && data.profileCompleted === true;
+
+        window.location.href = done ? "dashboard.html" : "profile.html";
         return;
+
+      } catch (e) {
+        console.error("routeUser Firestore attempt", attempt, e);
+        if (attempt === 3) {
+          showEr("Cannot load profile from Firestore: " + (e.code || "") + " | " + (e.message || e));
+          routing = false;
+          return;
+        }
+        // wait a bit then retry
+        await new Promise(r => setTimeout(r, 600));
       }
+    }
+  }
 
-      const profileDone = snap.data().profileCompleted === true;
-      window.location.href = profileDone ? "dashboard.html" : "profile.html";
-
-    } catch (e) {
-      showEr("Firestore error: " + (e.code || "") + " | " + (e.message || e));
-      console.error(e);
+  // Auto-route if already logged in
+  onAuthStateChanged(auth, async (user) => {
+    // only try routing if user exists
+    if (user) {
+      showOk("Session found ✅ Loading profile...");
+      await routeUser(user);
     }
   });
 
-  // LOGIN: only sign in (no Firestore here)
+  // LOGIN submit: sign in, then route immediately (reliable)
   document.getElementById("loginForm").addEventListener("submit", async (e) => {
     e.preventDefault();
 
     const email = document.getElementById("email").value.trim();
     const pass = document.getElementById("password").value;
+    const btn = document.getElementById("loginBtn");
 
     try {
-      document.getElementById("loginBtn").disabled = true;
-      document.getElementById("loginBtn").textContent = "Logging in...";
+      routing = false;
+      btn.disabled = true;
+      btn.textContent = "Logging in...";
 
-      await signInWithEmailAndPassword(auth, email, pass);
-      showOk("Login success ✅ Loading profile...");
+      const userCred = await signInWithEmailAndPassword(auth, email, pass);
+
+      showOk("Login successful ✅ Loading profile...");
+      await routeUser(userCred.user);
 
     } catch (e2) {
       if (e2.code === "auth/invalid-credential") {
@@ -108,8 +137,8 @@
       }
       console.error(e2);
     } finally {
-      document.getElementById("loginBtn").disabled = false;
-      document.getElementById("loginBtn").textContent = "Login";
+      btn.disabled = false;
+      btn.textContent = "Login";
     }
   });
 
