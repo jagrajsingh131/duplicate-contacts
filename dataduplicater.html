@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Buckup‑Media Data Duplicater</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <!-- Libraries -->
+  <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      background: radial-gradient(circle at top, #1e1b4b, #020617);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      color: #0f172a;
+    }
+
+    .container {
+      background: linear-gradient(180deg, #ffffff, #f8fafc);
+      width: 560px;
+      padding: 34px;
+      border-radius: 22px;
+      box-shadow: 0 40px 80px rgba(0,0,0,0.45);
+    }
+
+    .brand {
+      text-align: center;
+      margin-bottom: 6px;
+      font-size: 26px;
+      font-weight: 800;
+      background: linear-gradient(90deg, #4f46e5, #22c55e);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .subtitle {
+      text-align: center;
+      font-size: 14px;
+      color: #64748b;
+      margin-bottom: 26px;
+    }
+
+    label {
+      font-size: 13px;
+      font-weight: 600;
+      color: #334155;
+      display: block;
+      margin-top: 18px;
+      margin-bottom: 6px;
+    }
+
+    input, select, textarea {
+      width: 100%;
+      padding: 12px;
+      border-radius: 10px;
+      border: 1px solid #cbd5f5;
+      font-size: 14px;
+      background: #ffffff;
+    }
+
+    textarea {
+      height: 130px;
+      resize: vertical;
+    }
+
+    .btn-row {
+      display: flex;
+      gap: 12px;
+      margin-top: 20px;
+    }
+
+    button {
+      flex: 1;
+      padding: 14px;
+      border-radius: 12px;
+      border: none;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: transform 0.15s ease, box-shadow 0.15s ease;
+    }
+
+    button:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+    }
+
+    .dup-btn {
+      background: linear-gradient(135deg, #4f46e5, #6366f1);
+      color: white;
+    }
+
+    .down-btn {
+      background: linear-gradient(135deg, #22c55e, #16a34a);
+      color: white;
+    }
+
+    .copy-btn {
+      margin-top: 14px;
+      background: linear-gradient(135deg, #0ea5e9, #0284c7);
+      color: white;
+      width: 100%;
+      padding: 12px;
+      border-radius: 12px;
+      border: none;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .footer {
+      text-align: center;
+      font-size: 12px;
+      color: #94a3b8;
+      margin-top: 18px;
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <div class="brand">Buckup‑Media Data Duplicater</div>
+  <div class="subtitle">Duplicate any data instantly. Upload, paste, copy or download in any format.</div>
+
+  <label>Upload File (CSV / Excel / TXT)</label>
+  <input type="file" id="fileInput">
+
+  <label>Or Paste Data Directly</label>
+  <textarea id="pasteBox" placeholder="Paste your data here…"></textarea>
+
+  <label>Download Format</label>
+  <select id="format">
+    <option value="csv">CSV</option>
+    <option value="xlsx">Excel (.xlsx)</option>
+    <option value="txt">Text (.txt)</option>
+  </select>
+
+  <div class="btn-row">
+    <button class="dup-btn" onclick="processData()">Duplicate Data</button>
+    <button class="down-btn" onclick="downloadFile()">Download File</button>
+  </div>
+
+  <button class="copy-btn" onclick="copyOutput()">Copy Duplicated Data</button>
+
+  <textarea id="output" placeholder="Duplicated output will appear here…"></textarea>
+
+  <div class="footer">Client‑side only • No uploads stored • Buckup‑Media</div>
+</div>
+
+<script>
+let duplicatedData = [];
+
+function processData() {
+  const file = document.getElementById('fileInput').files[0];
+  const pasted = document.getElementById('pasteBox').value.trim();
+
+  if (!file && !pasted) {
+    alert('Upload a file or paste data first');
+    return;
+  }
+
+  if (file) {
+    const ext = file.name.split('.').pop().toLowerCase();
+
+    if (ext === 'csv' || ext === 'txt') {
+      Papa.parse(file, { complete: res => duplicateRows(res.data) });
+    } else if (ext === 'xlsx') {
+      const reader = new FileReader();
+      reader.onload = e => {
+        const wb = XLSX.read(e.target.result, { type: 'binary' });
+        const sheet = wb.Sheets[wb.SheetNames[0]];
+        duplicateRows(XLSX.utils.sheet_to_json(sheet, { header: 1 }));
+      };
+      reader.readAsBinaryString(file);
+    } else {
+      alert('Unsupported file type');
+    }
+  } else {
+    const rows = pasted.split('\n').map(r => r.split(/\t|,/));
+    duplicateRows(rows);
+  }
+}
+
+function duplicateRows(rows) {
+  duplicatedData = [];
+  rows.forEach(r => {
+    if (r.join('').trim() !== '') {
+      duplicatedData.push(r);
+      duplicatedData.push(r);
+    }
+  });
+  document.getElementById('output').value = duplicatedData.map(r => r.join('\t')).join('\n');
+}
+
+function downloadFile() {
+  if (duplicatedData.length === 0) {
+    alert('Duplicate data first');
+    return;
+  }
+
+  const format = document.getElementById('format').value;
+
+  if (format === 'csv') {
+    save(Papa.unparse(duplicatedData), 'duplicated.csv', 'text/csv');
+  }
+
+  if (format === 'txt') {
+    save(duplicatedData.map(r => r.join('\t')).join('\n'), 'duplicated.txt', 'text/plain');
+  }
+
+  if (format === 'xlsx') {
+    const ws = XLSX.utils.aoa_to_sheet(duplicatedData);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, 'Data');
+    XLSX.writeFile(wb, 'duplicated.xlsx');
+  }
+}
+
+function save(content, filename, type) {
+  const blob = new Blob([content], { type });
+  const link = document.createElement('a');
+  link.href = URL.createObjectURL(blob);
+  link.download = filename;
+  link.click();
+}
+
+function copyOutput() {
+  const out = document.getElementById('output');
+  out.select();
+  document.execCommand('copy');
+  alert('Copied to clipboard');
+}
+</script>
+
+</body>
+</html>

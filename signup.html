@@ -3,9 +3,9 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Login | Buckup-Media Data Duplicater</title>
+  <title>Signup | Buckup-Media Data Duplicater</title>
 
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
 
   <style>
     * { box-sizing: border-box; font-family: 'Poppins', sans-serif; }
@@ -22,21 +22,33 @@
     .card {
       background: #fff;
       width: 100%;
-      max-width: 380px;
-      padding: 30px;
+      max-width: 420px;
+      padding: 32px;
       border-radius: 16px;
       box-shadow: 0 20px 40px rgba(0,0,0,0.2);
     }
 
     h1 {
       text-align: center;
-      margin-bottom: 10px;
+      margin-bottom: 6px;
+    }
+
+    p {
+      text-align: center;
+      color: #666;
+      font-size: 14px;
+      margin-bottom: 24px;
+    }
+
+    label {
+      font-size: 13px;
+      color: #444;
     }
 
     input {
       width: 100%;
       padding: 10px;
-      margin: 10px 0;
+      margin: 6px 0 14px;
       border-radius: 8px;
       border: 1px solid #ccc;
     }
@@ -44,7 +56,6 @@
     button {
       width: 100%;
       padding: 12px;
-      margin-top: 10px;
       border: none;
       border-radius: 10px;
       background: linear-gradient(135deg, #667eea, #764ba2);
@@ -69,41 +80,55 @@
 <body>
 
   <div class="card">
-    <h1>Login</h1>
+    <h1>Create Account</h1>
+    <p>Buckup-Media Data Duplicater</p>
 
-    <form id="loginForm">
-      <input id="email" type="email" placeholder="Email" required>
-      <input id="password" type="password" placeholder="Password" required>
-      <button type="submit">Login</button>
+    <form id="signupForm">
+      <label>Full Name</label>
+      <input id="name" type="text" required>
+
+      <label>Email (Gmail)</label>
+      <input id="email" type="email" required>
+
+      <label>Phone Number</label>
+      <input id="phone" type="tel" required>
+
+      <label>Password</label>
+      <input id="password" type="password" required>
+
+      <label>Confirm Password</label>
+      <input id="confirmPassword" type="password" required>
+
+      <button type="submit">Create Account</button>
     </form>
 
     <div class="link">
-      New user? <a href="signup.html">Create account</a>
+      Already have an account? <a href="index.html">Login</a>
     </div>
   </div>
 
-  <!-- 🔐 LOGIN LOGIC -->
+  <!-- 🔥 SIGNUP LOGIC -->
   <script type="module">
-    import { auth } from "./firebase.js";
-    import { signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+    import { signupUser } from "./auth.js";
 
-    const form = document.getElementById("loginForm");
+    const form = document.getElementById("signupForm");
 
     form.addEventListener("submit", async (e) => {
       e.preventDefault();
 
       const email = document.getElementById("email").value;
       const password = document.getElementById("password").value;
+      const confirm = document.getElementById("confirmPassword").value;
+
+      if (password !== confirm) {
+        alert("Passwords do not match");
+        return;
+      }
 
       try {
-        const userCred = await signInWithEmailAndPassword(auth, email, password);
-
-        if (!userCred.user.emailVerified) {
-          alert("Please verify your email before logging in.");
-          return;
-        }
-
-        window.location.href = "dashboard.html";
+        await signupUser(email, password);
+        alert("Verification link sent to your email. Please verify before login.");
+        window.location.href = "index.html";
       } catch (err) {
         alert(err.message);
       }
