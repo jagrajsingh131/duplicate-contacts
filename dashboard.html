@@ -2,361 +2,72 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8"/>
-  <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Dashboard | Buckup-Media</title>
   <link rel="stylesheet" href="./style.css">
-
-  <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 </head>
 <body>
-  <div class="card">
-    <div class="brand">Buckup-Media Data Duplicater</div>
-    <div class="sub">Dashboard • Manage account • Payments • Tools • Worksheet</div>
 
-    <div class="shell">
-      <!-- SIDEBAR -->
-      <div class="sidebar">
-        <div class="sbTitle">Navigation</div>
+<div class="card" style="max-width:720px">
+  <div class="brand">Dashboard</div>
+  <div class="sub" id="welcome">Loading...</div>
 
-        <div class="sbUser">
-          <div class="avatar" id="avatarBox">BM</div>
-          <div>
-            <div class="sbName" id="sbName">Loading...</div>
-            <div class="sbEmail" id="sbEmail">...</div>
-          </div>
-        </div>
-
-        <button class="navBtn active" data-target="secAccount">Manage Account</button>
-        <button class="navBtn" data-target="secPayments">Payments</button>
-        <button class="navBtn" data-target="secDuplicater">Data Duplicater</button>
-        <button class="navBtn" data-target="secWorksheet">Worksheet</button>
-
-        <div class="hr"></div>
-
-        <button class="navBtn" id="logoutBtn">Logout</button>
-        <div class="small" style="margin-top:8px;">Verified users only • Buckup-Media</div>
-      </div>
-
-      <!-- CONTENT -->
-      <div class="content">
-
-        <!-- Manage Account -->
-        <div class="section active" id="secAccount">
-          <div class="h2">Manage Account</div>
-          <div class="small">Update your profile details and Google Sheet link.</div>
-          <div class="hr"></div>
-
-          <form id="accountForm">
-            <div class="row">
-              <div>
-                <label>Name</label>
-                <input id="accName" required>
-              </div>
-              <div>
-                <label>Email</label>
-                <input id="accEmail" disabled>
-              </div>
-            </div>
-
-            <div class="row">
-              <div>
-                <label>Phone</label>
-                <input id="accPhone" required>
-              </div>
-              <div>
-                <label>Age</label>
-                <input id="accAge" type="number" min="1" max="120" required>
-              </div>
-            </div>
-
-            <label>Google Sheet Link</label>
-            <input id="accSheet" required placeholder="https://docs.google.com/spreadsheets/d/...">
-
-            <div class="btnRow">
-              <button class="primary" type="submit">Save Changes</button>
-              <button class="ghost" type="button" id="openSheetBtn">Open My Sheet</button>
-            </div>
-
-            <div id="accOk" class="msg ok"></div>
-            <div id="accEr" class="msg err"></div>
-          </form>
-        </div>
-
-        <!-- Payments -->
-        <div class="section" id="secPayments">
-          <div class="h2">Payments</div>
-          <div class="small">This page is ready for Stripe/Razorpay integration later.</div>
-          <div class="hr"></div>
-          <div class="small">
-            Suggested features for later:
-            <ul>
-              <li>Free plan limits</li>
-              <li>Pro plan subscription</li>
-              <li>Invoices & billing history</li>
-            </ul>
-          </div>
-        </div>
-
-        <!-- Data Duplicater -->
-        <div class="section" id="secDuplicater">
-          <div class="h2">Data Duplicater</div>
-          <div class="small">Upload/paste → duplicate → copy or download.</div>
-          <div class="hr"></div>
-
-          <label>Upload File (CSV / Excel / TXT)</label>
-          <input type="file" id="fileInput">
-
-          <label>Or Paste Data Directly</label>
-          <textarea id="pasteBox" placeholder="Paste data here… (tab/comma supported)"></textarea>
-
-          <label>Download Format</label>
-          <select id="format">
-            <option value="csv">CSV</option>
-            <option value="xlsx">Excel (.xlsx)</option>
-            <option value="txt">Text (.txt)</option>
-          </select>
-
-          <div class="btnRow">
-            <button class="primary" id="dupBtn" type="button">Duplicate Data</button>
-            <button class="success" id="downBtn" type="button">Download File</button>
-            <button class="info" id="copyBtn" type="button">Copy Output</button>
-            <button class="ghost" id="clearBtn" type="button">Clear</button>
-          </div>
-
-          <label>Output</label>
-          <textarea id="output" readonly placeholder="Duplicated output will appear here…"></textarea>
-
-          <div id="dupOk" class="msg ok"></div>
-          <div id="dupEr" class="msg err"></div>
-        </div>
-
-        <!-- Worksheet -->
-        <div class="section" id="secWorksheet">
-          <div class="h2">Worksheet</div>
-          <div class="small">Open your saved Google Sheet instantly.</div>
-          <div class="hr"></div>
-
-          <div class="btnRow">
-            <button class="success" id="openSheetBig">Open Google Sheet</button>
-            <button class="ghost" id="editSheetLink">Edit Sheet Link</button>
-          </div>
-
-          <div id="wsInfo" class="msg info"></div>
-        </div>
-
-      </div>
-    </div>
-
-    <div class="footer">Buckup-Media • Dashboard</div>
+  <div class="btnRow">
+    <button class="success" id="openSheet">Open Worksheet (Google Sheet)</button>
+    <button class="ghost" id="goDuplicater">Go to Data Duplicater Page</button>
+    <button class="ghost" id="logoutBtn">Logout</button>
   </div>
+
+  <div id="er" class="msg err"></div>
+</div>
 
 <script type="module">
   import { auth, db } from "./firebase.js";
   import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-  import { doc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+  import { doc, getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-  let userDoc = null;
-  let uid = null;
+  const er = document.getElementById("er");
+  const showEr = (t)=>{ er.style.display="block"; er.textContent=t; };
 
-  // Protect + Load user profile
-  onAuthStateChanged(auth, async (user)=>{
-    if(!user || !user.emailVerified){
-      window.location.href = "index.html";
-      return;
+  let sheetLink = "";
+
+  onAuthStateChanged(auth, async (user) => {
+    if (!user) { window.location.href = "index.html"; return; }
+    if (!user.emailVerified) { window.location.href = "index.html"; return; }
+
+    try {
+      const snap = await getDoc(doc(db, "users", user.uid));
+
+      if (!snap.exists() || snap.data().profileCompleted !== true) {
+        window.location.href = "profile.html";
+        return;
+      }
+
+      const d = snap.data();
+      sheetLink = d.googleSheetUrl || "";
+
+      document.getElementById("welcome").textContent =
+        "Welcome, " + (d.name || "User") + " ✅";
+
+    } catch (e) {
+      showEr("Firestore error: " + (e.code || "") + " | " + (e.message || e));
+      console.error(e);
     }
-
-    uid = user.uid;
-    const snap = await getDoc(doc(db,"users",uid));
-
-    if(!snap.exists() || snap.data().profileCompleted !== true){
-      window.location.href = "profile.html";
-      return;
-    }
-
-    userDoc = snap.data();
-
-    // sidebar info
-    document.getElementById("sbName").textContent = userDoc.name || "User";
-    document.getElementById("sbEmail").textContent = user.email;
-
-    // avatar
-    const avatarBox = document.getElementById("avatarBox");
-    if(userDoc.photoURL){
-      avatarBox.innerHTML = `<img src="${userDoc.photoURL}" alt="Profile">`;
-    } else {
-      const initials = (userDoc.name || "BM").split(" ").slice(0,2).map(x=>x[0]).join("").toUpperCase();
-      avatarBox.textContent = initials;
-    }
-
-    // Manage account fields
-    document.getElementById("accName").value = userDoc.name || "";
-    document.getElementById("accEmail").value = user.email || "";
-    document.getElementById("accPhone").value = userDoc.phone || "";
-    document.getElementById("accAge").value = userDoc.age || "";
-    document.getElementById("accSheet").value = userDoc.googleSheetUrl || "";
-
-    // Worksheet info
-    const wsInfo = document.getElementById("wsInfo");
-    wsInfo.style.display="block";
-    wsInfo.textContent = userDoc.googleSheetUrl ? "Sheet linked ✅ Ready to open." : "No sheet link saved. Add it in Manage Account.";
   });
 
-  // Logout
-  document.getElementById("logoutBtn").addEventListener("click", async ()=>{
+  document.getElementById("openSheet").addEventListener("click", () => {
+    if (!sheetLink) { alert("No Google Sheet link saved in profile."); return; }
+    window.open(sheetLink, "_blank");
+  });
+
+  document.getElementById("goDuplicater").addEventListener("click", () => {
+    // you can change this to your duplicater section page
+    alert("Next: We will integrate Data Duplicater inside dashboard sidebar.");
+  });
+
+  document.getElementById("logoutBtn").addEventListener("click", async () => {
     await signOut(auth);
     window.location.href = "index.html";
-  });
-
-  // Navigation
-  document.querySelectorAll(".navBtn[data-target]").forEach(btn=>{
-    btn.addEventListener("click", ()=>{
-      document.querySelectorAll(".navBtn[data-target]").forEach(b=>b.classList.remove("active"));
-      btn.classList.add("active");
-      const target = btn.getAttribute("data-target");
-      document.querySelectorAll(".section").forEach(s=>s.classList.remove("active"));
-      document.getElementById(target).classList.add("active");
-    });
-  });
-
-  // Save Manage Account
-  const accOk = document.getElementById("accOk");
-  const accEr = document.getElementById("accEr");
-  const showAccOk = (t)=>{accOk.style.display="block";accEr.style.display="none";accOk.textContent=t;}
-  const showAccEr = (t)=>{accEr.style.display="block";accOk.style.display="none";accEr.textContent=t;}
-
-  document.getElementById("accountForm").addEventListener("submit", async (e)=>{
-    e.preventDefault();
-    try{
-      const name = document.getElementById("accName").value.trim();
-      const phone = document.getElementById("accPhone").value.trim();
-      const age = Number(document.getElementById("accAge").value);
-      const sheet = document.getElementById("accSheet").value.trim();
-
-      if(!sheet.includes("docs.google.com/spreadsheets")) throw new Error("Please paste a valid Google Sheets link.");
-
-      await updateDoc(doc(db,"users",uid), {
-        name, phone, age, googleSheetUrl: sheet
-      });
-
-      showAccOk("Saved ✅");
-    }catch(err){
-      showAccEr((err.code||"error")+" : "+(err.message||err));
-    }
-  });
-
-  // Open sheet buttons
-  function openMySheet(){
-    const link = document.getElementById("accSheet").value.trim();
-    if(!link){ alert("No sheet link saved."); return; }
-    window.open(link, "_blank");
-  }
-  document.getElementById("openSheetBtn").addEventListener("click", openMySheet);
-  document.getElementById("openSheetBig").addEventListener("click", openMySheet);
-  document.getElementById("editSheetLink").addEventListener("click", ()=>{
-    document.querySelector('[data-target="secAccount"]').click();
-  });
-
-</script>
-
-<script>
-  // ===== Data Duplicater logic =====
-  let duplicatedData = [];
-  const dupOk = document.getElementById("dupOk");
-  const dupEr = document.getElementById("dupEr");
-  const showDupOk = (t)=>{dupOk.style.display="block";dupEr.style.display="none";dupOk.textContent=t;}
-  const showDupEr = (t)=>{dupEr.style.display="block";dupOk.style.display="none";dupEr.textContent=t;}
-
-  function duplicateRows(rows){
-    duplicatedData = [];
-    rows.forEach(r=>{
-      const joined = (r||[]).join("").trim();
-      if(joined !== ""){
-        duplicatedData.push(r);
-        duplicatedData.push(r);
-      }
-    });
-    document.getElementById("output").value = duplicatedData.map(r=>(r||[]).join("\t")).join("\n");
-    showDupOk("Duplicated ✅ Now download/copy.");
-  }
-
-  document.getElementById("dupBtn").addEventListener("click", ()=>{
-    const file = document.getElementById("fileInput").files[0];
-    const pasted = document.getElementById("pasteBox").value.trim();
-
-    if(!file && !pasted){ showDupEr("Upload a file or paste data first."); return; }
-
-    if(file){
-      const ext = file.name.split(".").pop().toLowerCase();
-      if(ext === "csv" || ext === "txt"){
-        Papa.parse(file, { complete: res => duplicateRows(res.data) });
-      } else if(ext === "xlsx"){
-        const reader = new FileReader();
-        reader.onload = e=>{
-          const wb = XLSX.read(e.target.result, { type:"binary" });
-          const sheet = wb.Sheets[wb.SheetNames[0]];
-          duplicateRows(XLSX.utils.sheet_to_json(sheet, { header:1 }));
-        };
-        reader.readAsBinaryString(file);
-      } else {
-        showDupEr("Unsupported file. Use CSV, XLSX, or TXT.");
-      }
-    } else {
-      const rows = pasted.split("\n").map(line=>line.split(/\t|,/));
-      duplicateRows(rows);
-    }
-  });
-
-  function save(content, filename, type){
-    const blob = new Blob([content], { type });
-    const link = document.createElement("a");
-    link.href = URL.createObjectURL(blob);
-    link.download = filename;
-    link.click();
-  }
-
-  document.getElementById("downBtn").addEventListener("click", ()=>{
-    if(duplicatedData.length === 0){ showDupEr("Duplicate data first."); return; }
-    const format = document.getElementById("format").value;
-
-    if(format === "csv"){
-      save(Papa.unparse(duplicatedData), "duplicated.csv", "text/csv");
-      showDupOk("Downloaded CSV ✅");
-    }
-    if(format === "txt"){
-      save(duplicatedData.map(r=>r.join("\t")).join("\n"), "duplicated.txt", "text/plain");
-      showDupOk("Downloaded TXT ✅");
-    }
-    if(format === "xlsx"){
-      const ws = XLSX.utils.aoa_to_sheet(duplicatedData);
-      const wb = XLSX.utils.book_new();
-      XLSX.utils.book_append_sheet(wb, ws, "Data");
-      XLSX.writeFile(wb, "duplicated.xlsx");
-      showDupOk("Downloaded XLSX ✅");
-    }
-  });
-
-  document.getElementById("copyBtn").addEventListener("click", async ()=>{
-    const out = document.getElementById("output").value;
-    if(!out.trim()){ showDupEr("Nothing to copy."); return; }
-    try{
-      await navigator.clipboard.writeText(out);
-      showDupOk("Copied ✅");
-    }catch{
-      const el = document.getElementById("output");
-      el.select();
-      document.execCommand("copy");
-      showDupOk("Copied ✅");
-    }
-  });
-
-  document.getElementById("clearBtn").addEventListener("click", ()=>{
-    duplicatedData = [];
-    document.getElementById("fileInput").value = "";
-    document.getElementById("pasteBox").value = "";
-    document.getElementById("output").value = "";
-    dupOk.style.display="none";
-    dupEr.style.display="none";
   });
 </script>
 
