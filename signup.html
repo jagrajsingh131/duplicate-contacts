@@ -4,136 +4,124 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Signup | Buckup-Media Data Duplicater</title>
-
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
-
-  <style>
-    * { box-sizing: border-box; font-family: 'Poppins', sans-serif; }
-
-    body {
-      margin: 0;
-      min-height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      background: linear-gradient(135deg, #667eea, #764ba2);
-    }
-
-    .card {
-      background: #fff;
-      width: 100%;
-      max-width: 420px;
-      padding: 32px;
-      border-radius: 16px;
-      box-shadow: 0 20px 40px rgba(0,0,0,0.2);
-    }
-
-    h1 {
-      text-align: center;
-      margin-bottom: 6px;
-    }
-
-    p {
-      text-align: center;
-      color: #666;
-      font-size: 14px;
-      margin-bottom: 24px;
-    }
-
-    label {
-      font-size: 13px;
-      color: #444;
-    }
-
-    input {
-      width: 100%;
-      padding: 10px;
-      margin: 6px 0 14px;
-      border-radius: 8px;
-      border: 1px solid #ccc;
-    }
-
-    button {
-      width: 100%;
-      padding: 12px;
-      border: none;
-      border-radius: 10px;
-      background: linear-gradient(135deg, #667eea, #764ba2);
-      color: #fff;
-      font-size: 15px;
-      cursor: pointer;
-    }
-
-    .link {
-      text-align: center;
-      margin-top: 14px;
-      font-size: 13px;
-    }
-
-    .link a {
-      color: #667eea;
-      text-decoration: none;
-    }
-  </style>
+  <link rel="stylesheet" href="./style.css">
 </head>
-
 <body>
 
   <div class="card">
-    <h1>Create Account</h1>
-    <p>Buckup-Media Data Duplicater</p>
+    <div class="brand">Buckup-Media Data Duplicater</div>
+    <div class="sub">Create your account and verify email to use the tool.</div>
 
     <form id="signupForm">
       <label>Full Name</label>
-      <input id="name" type="text" required>
+      <input id="name" type="text" placeholder="Enter full name" required>
 
-      <label>Email (Gmail)</label>
-      <input id="email" type="email" required>
+      <div class="row">
+        <div>
+          <label>Email (Gmail)</label>
+          <input id="email" type="email" placeholder="example@gmail.com" required>
+        </div>
+        <div>
+          <label>Phone Number</label>
+          <input id="phone" type="tel" placeholder="10-digit number" required>
+        </div>
+      </div>
 
-      <label>Phone Number</label>
-      <input id="phone" type="tel" required>
+      <div class="row">
+        <div>
+          <label>Password</label>
+          <input id="password" type="password" placeholder="Create password" required>
+        </div>
+        <div>
+          <label>Confirm Password</label>
+          <input id="confirmPassword" type="password" placeholder="Re-enter password" required>
+        </div>
+      </div>
 
-      <label>Password</label>
-      <input id="password" type="password" required>
+      <div class="btnRow">
+        <button class="primary" type="submit">Create Account</button>
+        <button class="ghost" type="button" onclick="window.location.href='index.html'">Go to Login</button>
+      </div>
 
-      <label>Confirm Password</label>
-      <input id="confirmPassword" type="password" required>
-
-      <button type="submit">Create Account</button>
+      <div id="msgOk" class="msg ok"></div>
+      <div id="msgErr" class="msg err"></div>
     </form>
 
-    <div class="link">
-      Already have an account? <a href="index.html">Login</a>
-    </div>
+    <div class="footer">Client-side • Secure Firebase Auth • Buckup-Media</div>
   </div>
 
-  <!-- 🔥 SIGNUP LOGIC -->
-  <script type="module">
-    import { signupUser } from "./auth.js";
+<script type="module">
+  import { auth, db } from "./firebase.js";
+  import {
+    createUserWithEmailAndPassword,
+    sendEmailVerification,
+    signOut
+  } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
-    const form = document.getElementById("signupForm");
+  import {
+    doc,
+    setDoc,
+    serverTimestamp
+  } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-    form.addEventListener("submit", async (e) => {
-      e.preventDefault();
+  const form = document.getElementById("signupForm");
+  const ok = document.getElementById("msgOk");
+  const err = document.getElementById("msgErr");
 
-      const email = document.getElementById("email").value;
-      const password = document.getElementById("password").value;
-      const confirm = document.getElementById("confirmPassword").value;
+  function showOk(text){
+    ok.style.display="block";
+    err.style.display="none";
+    ok.textContent=text;
+  }
+  function showErr(text){
+    err.style.display="block";
+    ok.style.display="none";
+    err.textContent=text;
+  }
 
-      if (password !== confirm) {
-        alert("Passwords do not match");
-        return;
-      }
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
 
-      try {
-        await signupUser(email, password);
-        alert("Verification link sent to your email. Please verify before login.");
-        window.location.href = "index.html";
-      } catch (err) {
-        alert(err.message);
-      }
-    });
-  </script>
+    const name = document.getElementById("name").value.trim();
+    const phone = document.getElementById("phone").value.trim();
+    const email = document.getElementById("email").value.trim();
+    const pass = document.getElementById("password").value;
+    const confirm = document.getElementById("confirmPassword").value;
+
+    if (pass !== confirm) {
+      showErr("Passwords do not match.");
+      return;
+    }
+
+    try {
+      // 1) Create user
+      const userCred = await createUserWithEmailAndPassword(auth, email, pass);
+
+      // 2) Save extra info in Firestore
+      await setDoc(doc(db, "users", userCred.user.uid), {
+        name: name,
+        phone: phone,
+        email: email,
+        createdAt: serverTimestamp()
+      });
+
+      // 3) Send email verification link
+      await sendEmailVerification(userCred.user, {
+        url: "https://jagrajsingh131.github.io/duplicate-contacts/index.html"
+      });
+
+      // 4) Logout user until verified (clean UX)
+      await signOut(auth);
+
+      showOk("Account created ✅ Verification email sent. Check Inbox/Spam, then login.");
+      setTimeout(() => window.location.href = "index.html", 1300);
+
+    } catch (e2) {
+      showErr((e2.code || "error") + " : " + (e2.message || e2));
+      console.error(e2);
+    }
+  });
+</script>
 
 </body>
 </html>
