@@ -2,44 +2,137 @@
 <html>
 <head>
   <title>Profile Setup</title>
-  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="./style.css">
 </head>
 <body>
 
-<div class="card">
-  <h2>Profile Setup</h2>
+<div class="card" style="max-width:720px">
+  <div class="brand">Complete Your Profile</div>
+  <div class="sub">One-time setup</div>
 
-  <input id="name" placeholder="Full Name">
-  <input id="phone" placeholder="Phone">
-  <input id="age" type="number" placeholder="Age">
-  <input id="sheet" placeholder="Google Sheet Link">
+  <form id="profileForm">
+    <label>Name</label>
+    <input id="name" required>
 
-  <button id="save">Save Profile</button>
+    <label>Phone</label>
+    <input id="phone" required>
+
+    <label>Age</label>
+    <input id="age" type="number" required>
+
+    <label>Google Sheet Link</label>
+    <input id="sheet" required>
+
+    <label>Profile Photo</label>
+    <input id="photo" type="file" accept="image/*">
+
+    <div id="progressWrap" style="display:none;margin-top:14px;">
+      <div class="small" id="progressText">Preparing...</div>
+      <div style="height:12px;background:#e5e7eb;border-radius:999px;overflow:hidden;">
+        <div id="progressBar" style="height:12px;width:0%;background:linear-gradient(90deg,#4f46e5,#22c55e);"></div>
+      </div>
+    </div>
+
+    <div class="btnRow">
+      <button class="primary" id="saveBtn">Save & Continue</button>
+    </div>
+
+    <div id="er" class="msg err"></div>
+  </form>
 </div>
 
 <script type="module">
-  import { getUser, saveProfile, getProfile } from "./local.js";
+  import { auth, db, storage } from "./firebase.js";
+  import { getSession, saveProfileLocal, getProfileLocal } from "./cache.js";
+  import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+  import { doc, setDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+  import { ref, uploadBytesResumable, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js";
 
-  const user = getUser();
-  if (!user) location.href = "index.html";
+  const bar = document.getElementById("progressBar");
+  const txt = document.getElementById("progressText");
+  const wrap = document.getElementById("progressWrap");
+  const err = document.getElementById("er");
 
-  const existing = getProfile();
-  if (existing && existing.profileCompleted) {
-    location.href = "dashboard.html";
+  // Must have local session
+  const session = getSession();
+  if (!session) location.href = "index.html";
+
+  let uid = null;
+
+  onAuthStateChanged(auth, user => {
+    if (!user) location.href = "index.html";
+    if (!user.emailVerified) location.href = "index.html";
+
+    uid = user.uid;
+
+    // 🔥 Load cached profile instantly
+    const cached = getProfileLocal();
+    if (cached) {
+      name.value = cached.name || "";
+      phone.value = cached.phone || "";
+      age.value = cached.age || "";
+      sheet.value = cached.googleSheetUrl || "";
+    }
+  });
+
+  function showProgress(msg, pct) {
+    wrap.style.display = "block";
+    txt.textContent = msg;
+    bar.style.width = pct + "%";
   }
 
-  document.getElementById("save").onclick = () => {
-    const profile = {
-      name: name.value,
-      phone: phone.value,
-      age: age.value,
-      sheet: sheet.value,
-      profileCompleted: true
-    };
+  async function uploadWithProgress(file) {
+    return new Promise((resolve, reject) => {
+      const task = uploadBytesResumable(
+        ref(storage, `users/${uid}/profile_photo.jpg`),
+        file
+      );
 
-    saveProfile(profile);
-    location.href = "dashboard.html";
-  };
+      task.on("state_changed",
+        s => {
+          const p = Math.round((s.bytesTransferred / s.totalBytes) * 100);
+          showProgress("Uploading photo: " + p + "%", p);
+        },
+        reject,
+        async () => resolve(await getDownloadURL(task.snapshot.ref))
+      );
+    });
+  }
+
+  document.getElementById("profileForm").addEventListener("submit", async e => {
+    e.preventDefault();
+    err.style.display = "none";
+
+    try {
+      showProgress("Step 1/2: Uploading photo...", 0);
+
+      let photoURL = "";
+      const photo = document.getElementById("photo").files[0];
+      if (photo) photoURL = await uploadWithProgress(photo);
+
+      const profileData = {
+        name: name.value,
+        phone: phone.value,
+        age: Number(age.value),
+        googleSheetUrl: sheet.value,
+        photoURL,
+        profileCompleted: true
+      };
+
+      // ✅ Save locally FIRST (fast)
+      saveProfileLocal(profileData);
+
+      showProgress("Step 2/2: Saving...", 100);
+
+      // ✅ Cloud backup (non-blocking)
+      setDoc(doc(db, "users", uid), profileData, { merge: true }).catch(console.warn);
+
+      location.href = "dashboard.html";
+    } catch (e) {
+      err.style.display = "block";
+      err.textContent = e.message;
+    }
+  });
 </script>
 
 </body>
