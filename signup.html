@@ -1,58 +1,3 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Signup | Buckup-Media</title>
-  <link rel="stylesheet" href="./style.css">
-</head>
-<body>
-
-<div class="card" style="max-width:560px">
-  <div class="brand">Buckup-Media</div>
-  <div class="sub">Create your account and verify email to continue</div>
-
-  <form id="signupForm">
-    <label>Full Name</label>
-    <input id="name" required placeholder="Your full name">
-
-    <label>Email (Gmail)</label>
-    <input id="email" type="email" required placeholder="example@gmail.com">
-
-    <label>Phone</label>
-    <input id="phone" required placeholder="10-digit number">
-
-    <div class="row">
-      <div>
-        <label>Password</label>
-        <input id="password" type="password" required>
-      </div>
-      <div>
-        <label>Confirm Password</label>
-        <input id="confirmPassword" type="password" required>
-      </div>
-    </div>
-
-    <div class="btnRow">
-      <button class="primary" type="submit" id="signupBtn">Create Account</button>
-      <button class="ghost" type="button" onclick="window.location.href='index.html'">Go to Login</button>
-    </div>
-
-    <!-- extra actions -->
-    <div class="btnRow" style="margin-top:10px">
-      <button class="info" type="button" id="resendBtn">Resend Verification Email</button>
-    </div>
-
-    <div id="ok" class="msg ok"></div>
-    <div id="info" class="msg info"></div>
-    <div id="er" class="msg err"></div>
-  </form>
-
-  <div class="footer">
-    Secure signup • Email verification required • Buckup-Media
-  </div>
-</div>
-
 <script type="module">
   import { auth, db } from "./firebase.js";
   import {
@@ -64,7 +9,6 @@
   import {
     doc,
     setDoc,
-    getDoc,
     serverTimestamp
   } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
@@ -77,68 +21,84 @@
   const showEr = t => { er.style.display="block"; ok.style.display="none"; info.style.display="none"; er.textContent=t; };
 
   const emailInput = document.getElementById("email");
+  const passwordInput = document.getElementById("password");
+  const confirmPasswordInput = document.getElementById("confirmPassword");
 
   // SIGNUP
-  document.getElementById("signupForm").addEventListener("submit", async (e)=>{
+  document.getElementById("signupForm").addEventListener("submit", async (e) => {
     e.preventDefault();
 
     const name = document.getElementById("name").value.trim();
     const phone = document.getElementById("phone").value.trim();
     const email = emailInput.value.trim();
-    const pass = document.getElementById("password").value;
-    const cp = document.getElementById("confirmPassword").value;
+    const pass = passwordInput.value;
+    const cp = confirmPasswordInput.value;
 
-    if(pass !== cp){
+    if (pass !== cp) {
       showEr("Passwords do not match.");
       return;
     }
 
-    try{
+    try {
       const userCred = await createUserWithEmailAndPassword(auth, email, pass);
 
-      // create user profile (profileCompleted = false)
-      await setDoc(doc(db,"users",userCred.user.uid),{
-        name, phone, email,
-        profileCompleted:false,
+      await setDoc(doc(db, "users", userCred.user.uid), {
+        name,
+        phone,
+        email,
+        profileCompleted: false,
         createdAt: serverTimestamp()
       });
 
-      await sendEmailVerification(userCred.user,{
-        url:"https://jagrajsingh131.github.io/duplicate-contacts/index.html"
+      await sendEmailVerification(userCred.user, {
+        url: "https://jagrajsingh131.github.io/duplicate-contacts/index.html"
       });
 
       await signOut(auth);
 
       showOk("Account created ✅ Verification email sent. Please verify, then login.");
     }
-    catch(err){
-      // EMAIL ALREADY EXISTS
-      if(err.code === "auth/email-already-in-use"){
+    catch (err) {
+      if (err.code === "auth/email-already-in-use") {
         showInfo(
           "This email is already registered.\n\n" +
-          "If you have not verified your email yet, click 'Resend Verification Email'.\n" +
-          "Otherwise, go to Login."
+          "Enter your password and click 'Resend Verification Email'."
         );
         return;
       }
       showEr(err.code + " : " + err.message);
-      console.error(err);
     }
   });
 
-  // RESEND VERIFICATION (ONLY ON SIGNUP PAGE)
-  document.getElementById("resendBtn").addEventListener("click", async ()=>{
+  // ✅ CORRECT RESEND VERIFICATION
+  document.getElementById("resendBtn").addEventListener("click", async () => {
     const email = emailInput.value.trim();
-    if(!email){
-      showInfo("Enter your email first to resend verification.");
+    const password = passwordInput.value;
+
+    if (!email || !password) {
+      showInfo("Enter your email and password to resend verification.");
       return;
     }
 
-    try{
-      // temporary login to resend verification
-      const tempPassword = prompt(
-        "Enter your password to resend verification email:"
-      );
-      if(!tempPassword) return;
+    try {
+      // Login (even if unverified)
+      const userCred = await signInWithEmailAndPassword(auth, email, password);
 
-      con
+      if (userCred.user.emailVerified) {
+        showOk("Your email is already verified. You can login now.");
+        await signOut(auth);
+        return;
+      }
+
+      await sendEmailVerification(userCred.user, {
+        url: "https://jagrajsingh131.github.io/duplicate-contacts/index.html"
+      });
+
+      await signOut(auth);
+      showOk("Verification email resent ✅ Check Inbox / Spam.");
+    }
+    catch (err) {
+      showEr(err.code + " : " + err.message);
+    }
+  });
+</script>
