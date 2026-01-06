@@ -1,10 +1,196 @@
-<script type="module">
-  import { getAuth, onAuthStateChanged } from "firebase/auth";
-  const auth = getAuth();
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dashboard | Buckup-Media Data Duplicater</title>
+  <link rel="stylesheet" href="./style.css">
 
-  onAuthStateChanged(auth, user => {
-    if (!user) {
+  <!-- libs for CSV + Excel -->
+  <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+</head>
+<body>
+
+  <div class="card">
+    <div class="brand">Buckup-Media Data Duplicater</div>
+    <div class="sub">Upload or paste data → duplicate → copy or download.</div>
+
+    <div class="btnRow" style="margin-top:0;">
+      <button id="logoutBtn" class="ghost" type="button">Logout</button>
+      <button class="ghost" type="button" onclick="window.location.href='index.html'">Home</button>
+    </div>
+
+    <label>Upload File (CSV / Excel / TXT)</label>
+    <input type="file" id="fileInput">
+
+    <label>Or Paste Data Directly</label>
+    <textarea id="pasteBox" placeholder="Paste your data here… (tab/comma supported)"></textarea>
+
+    <label>Download Format</label>
+    <select id="format">
+      <option value="csv">CSV</option>
+      <option value="xlsx">Excel (.xlsx)</option>
+      <option value="txt">Text (.txt)</option>
+    </select>
+
+    <div class="btnRow">
+      <button class="primary" id="dupBtn" type="button">Duplicate Data</button>
+      <button class="success" id="downBtn" type="button">Download File</button>
+    </div>
+
+    <div class="btnRow" style="margin-top:12px;">
+      <button class="info" id="copyBtn" type="button">Copy Duplicated Data</button>
+      <button class="ghost" id="clearBtn" type="button">Clear</button>
+    </div>
+
+    <label>Output</label>
+    <textarea id="output" placeholder="Duplicated output will appear here…" readonly></textarea>
+
+    <div id="msgOk" class="msg ok"></div>
+    <div id="msgErr" class="msg err"></div>
+
+    <div class="footer">Protected dashboard • Verified users only • Buckup-Media</div>
+  </div>
+
+<script type="module">
+  import { auth } from "./firebase.js";
+  import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+
+  // Protect dashboard
+  onAuthStateChanged(auth, (user) => {
+    if (!user || !user.emailVerified) {
       window.location.href = "index.html";
     }
   });
+
+  document.getElementById("logoutBtn").addEventListener("click", async () => {
+    await signOut(auth);
+    window.location.href = "index.html";
+  });
 </script>
+
+<script>
+  let duplicatedData = [];
+
+  const ok = document.getElementById("msgOk");
+  const err = document.getElementById("msgErr");
+
+  function showOk(t){ ok.style.display="block"; err.style.display="none"; ok.textContent=t; }
+  function showErr(t){ err.style.display="block"; ok.style.display="none"; err.textContent=t; }
+
+  function duplicateRows(rows){
+    duplicatedData = [];
+    rows.forEach(r => {
+      const joined = (r || []).join("").trim();
+      if (joined !== "") {
+        duplicatedData.push(r);
+        duplicatedData.push(r);
+      }
+    });
+
+    document.getElementById("output").value = duplicatedData.map(r => (r || []).join("\t")).join("\n");
+    showOk("Data duplicated ✅ Now you can download or copy.");
+  }
+
+  document.getElementById("dupBtn").addEventListener("click", () => {
+    const file = document.getElementById("fileInput").files[0];
+    const pasted = document.getElementById("pasteBox").value.trim();
+
+    if (!file && !pasted) {
+      showErr("Upload a file or paste data first.");
+      return;
+    }
+
+    if (file) {
+      const ext = file.name.split(".").pop().toLowerCase();
+
+      if (ext === "csv" || ext === "txt") {
+        Papa.parse(file, { complete: (res) => duplicateRows(res.data) });
+      } else if (ext === "xlsx") {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          const wb = XLSX.read(e.target.result, { type: "binary" });
+          const sheet = wb.Sheets[wb.SheetNames[0]];
+          const data = XLSX.utils.sheet_to_json(sheet, { header: 1 });
+          duplicateRows(data);
+        };
+        reader.readAsBinaryString(file);
+      } else {
+        showErr("Unsupported file type. Use CSV, XLSX, or TXT.");
+      }
+    } else {
+      // pasted data
+      const rows = pasted.split("\n").map(line => line.split(/\t|,/));
+      duplicateRows(rows);
+    }
+  });
+
+  document.getElementById("downBtn").addEventListener("click", () => {
+    if (duplicatedData.length === 0) {
+      showErr("Duplicate data first.");
+      return;
+    }
+
+    const format = document.getElementById("format").value;
+
+    if (format === "csv") {
+      const csv = Papa.unparse(duplicatedData);
+      save(csv, "duplicated.csv", "text/csv");
+      showOk("Downloaded CSV ✅");
+    }
+
+    if (format === "txt") {
+      const txt = duplicatedData.map(r => r.join("\t")).join("\n");
+      save(txt, "duplicated.txt", "text/plain");
+      showOk("Downloaded TXT ✅");
+    }
+
+    if (format === "xlsx") {
+      const ws = XLSX.utils.aoa_to_sheet(duplicatedData);
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, "Data");
+      XLSX.writeFile(wb, "duplicated.xlsx");
+      showOk("Downloaded XLSX ✅");
+    }
+  });
+
+  document.getElementById("copyBtn").addEventListener("click", async () => {
+    const out = document.getElementById("output").value;
+    if (!out.trim()) {
+      showErr("Nothing to copy. Duplicate data first.");
+      return;
+    }
+
+    try {
+      await navigator.clipboard.writeText(out);
+      showOk("Copied to clipboard ✅");
+    } catch {
+      // fallback
+      const el = document.getElementById("output");
+      el.select();
+      document.execCommand("copy");
+      showOk("Copied to clipboard ✅");
+    }
+  });
+
+  document.getElementById("clearBtn").addEventListener("click", () => {
+    duplicatedData = [];
+    document.getElementById("fileInput").value = "";
+    document.getElementById("pasteBox").value = "";
+    document.getElementById("output").value = "";
+    ok.style.display="none";
+    err.style.display="none";
+  });
+
+  function save(content, filename, type){
+    const blob = new Blob([content], { type });
+    const link = document.createElement("a");
+    link.href = URL.createObjectURL(blob);
+    link.download = filename;
+    link.click();
+  }
+</script>
+
+</body>
+</html>
