@@ -1,40 +1,39 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
   <title>Signup | Buckup-Media Data Duplicater</title>
   <link rel="stylesheet" href="./style.css">
 </head>
 <body>
-
-  <div class="card">
+  <div class="card" style="max-width:560px">
     <div class="brand">Buckup-Media Data Duplicater</div>
-    <div class="sub">Create your account and verify email to use the tool.</div>
+    <div class="sub">Create account → Verify email → Complete profile → Dashboard</div>
 
     <form id="signupForm">
       <label>Full Name</label>
-      <input id="name" type="text" placeholder="Enter full name" required>
+      <input id="name" required placeholder="Your full name">
 
       <div class="row">
         <div>
           <label>Email (Gmail)</label>
-          <input id="email" type="email" placeholder="example@gmail.com" required>
+          <input id="email" type="email" required placeholder="example@gmail.com">
         </div>
         <div>
-          <label>Phone Number</label>
-          <input id="phone" type="tel" placeholder="10-digit number" required>
+          <label>Phone</label>
+          <input id="phone" required placeholder="10-digit phone">
         </div>
       </div>
 
       <div class="row">
         <div>
           <label>Password</label>
-          <input id="password" type="password" placeholder="Create password" required>
+          <input id="password" type="password" required placeholder="Create password">
         </div>
         <div>
           <label>Confirm Password</label>
-          <input id="confirmPassword" type="password" placeholder="Re-enter password" required>
+          <input id="confirmPassword" type="password" required placeholder="Confirm password">
         </div>
       </div>
 
@@ -43,85 +42,60 @@
         <button class="ghost" type="button" onclick="window.location.href='index.html'">Go to Login</button>
       </div>
 
-      <div id="msgOk" class="msg ok"></div>
-      <div id="msgErr" class="msg err"></div>
+      <div id="ok" class="msg ok"></div>
+      <div id="er" class="msg err"></div>
     </form>
 
-    <div class="footer">Client-side • Secure Firebase Auth • Buckup-Media</div>
+    <div class="footer">Buckup-Media • Secure Firebase Auth</div>
   </div>
 
 <script type="module">
   import { auth, db } from "./firebase.js";
-  import {
-    createUserWithEmailAndPassword,
-    sendEmailVerification,
-    signOut
-  } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+  import { createUserWithEmailAndPassword, sendEmailVerification, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+  import { doc, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-  import {
-    doc,
-    setDoc,
-    serverTimestamp
-  } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+  const ok = document.getElementById("ok");
+  const er = document.getElementById("er");
+  const showOk = (t)=>{ok.style.display="block";er.style.display="none";ok.textContent=t;}
+  const showEr = (t)=>{er.style.display="block";ok.style.display="none";er.textContent=t;}
 
-  const form = document.getElementById("signupForm");
-  const ok = document.getElementById("msgOk");
-  const err = document.getElementById("msgErr");
-
-  function showOk(text){
-    ok.style.display="block";
-    err.style.display="none";
-    ok.textContent=text;
-  }
-  function showErr(text){
-    err.style.display="block";
-    ok.style.display="none";
-    err.textContent=text;
-  }
-
-  form.addEventListener("submit", async (e) => {
+  document.getElementById("signupForm").addEventListener("submit", async (e)=>{
     e.preventDefault();
-
     const name = document.getElementById("name").value.trim();
     const phone = document.getElementById("phone").value.trim();
     const email = document.getElementById("email").value.trim();
     const pass = document.getElementById("password").value;
-    const confirm = document.getElementById("confirmPassword").value;
+    const cp = document.getElementById("confirmPassword").value;
 
-    if (pass !== confirm) {
-      showErr("Passwords do not match.");
-      return;
-    }
+    if(pass !== cp){ showEr("Passwords do not match."); return; }
 
-    try {
-      // 1) Create user
+    try{
       const userCred = await createUserWithEmailAndPassword(auth, email, pass);
 
-      // 2) Save extra info in Firestore
+      // Create initial user doc (profile not completed yet)
       await setDoc(doc(db, "users", userCred.user.uid), {
-        name: name,
-        phone: phone,
-        email: email,
+        name, phone, email,
+        age: null,
+        photoURL: "",
+        googleSheetUrl: "",
+        profileCompleted: false,
         createdAt: serverTimestamp()
       });
 
-      // 3) Send email verification link
       await sendEmailVerification(userCred.user, {
         url: "https://jagrajsingh131.github.io/duplicate-contacts/index.html"
       });
 
-      // 4) Logout user until verified (clean UX)
       await signOut(auth);
 
-      showOk("Account created ✅ Verification email sent. Check Inbox/Spam, then login.");
-      setTimeout(() => window.location.href = "index.html", 1300);
+      showOk("Account created ✅ Verification email sent. Verify, then login.");
+      setTimeout(()=>window.location.href="index.html", 1200);
 
-    } catch (e2) {
-      showErr((e2.code || "error") + " : " + (e2.message || e2));
-      console.error(e2);
+    } catch(err){
+      showEr((err.code||"error")+" : "+(err.message||err));
+      console.error(err);
     }
   });
 </script>
-
 </body>
 </html>
