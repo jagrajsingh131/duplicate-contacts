@@ -1,52 +1,43 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-  <meta charset="UTF-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Profile Setup | Buckup-Media</title>
+  <title>Profile Setup</title>
   <link rel="stylesheet" href="./style.css">
 </head>
 <body>
 
 <div class="card" style="max-width:720px">
   <div class="brand">Complete Your Profile</div>
-  <div class="sub">First time setup → then Dashboard</div>
+  <div class="sub">One-time setup</div>
 
   <form id="profileForm">
-    <div class="row">
-      <div>
-        <label>Name</label>
-        <input id="name" required>
-      </div>
-      <div>
-        <label>Email</label>
-        <input id="email" disabled>
-      </div>
-    </div>
+    <label>Name</label>
+    <input id="name" required>
 
-    <div class="row">
-      <div>
-        <label>Phone</label>
-        <input id="phone" required>
-      </div>
-      <div>
-        <label>Age</label>
-        <input id="age" type="number" min="1" max="120" required>
-      </div>
-    </div>
+    <label>Phone</label>
+    <input id="phone" required>
+
+    <label>Age</label>
+    <input id="age" type="number" required>
 
     <label>Google Sheet Link</label>
-    <input id="sheet" required placeholder="https://docs.google.com/spreadsheets/d/...">
+    <input id="sheet" required>
 
-    <label>Profile Photo (optional)</label>
+    <label>Profile Photo</label>
     <input id="photo" type="file" accept="image/*">
 
-    <div class="btnRow">
-      <button class="primary" type="submit" id="saveBtn">Save & Continue</button>
-      <button class="ghost" type="button" onclick="window.location.href='index.html'">Back</button>
+    <!-- PROGRESS BAR -->
+    <div id="progressWrap" style="display:none;margin-top:14px;">
+      <div class="small" id="progressText">Preparing...</div>
+      <div style="height:12px;background:#e5e7eb;border-radius:999px;overflow:hidden;">
+        <div id="progressBar" style="height:12px;width:0%;background:linear-gradient(90deg,#4f46e5,#22c55e);"></div>
+      </div>
     </div>
 
-    <div id="ok" class="msg ok"></div>
+    <div class="btnRow">
+      <button class="primary" id="saveBtn">Save & Continue</button>
+    </div>
+
     <div id="er" class="msg err"></div>
   </form>
 </div>
@@ -54,105 +45,71 @@
 <script type="module">
   import { auth, db, storage } from "./firebase.js";
   import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-  import { doc, getDoc, setDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-  import { ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js";
+  import { doc, updateDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+  import { ref, uploadBytesResumable, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js";
 
-  const ok = document.getElementById("ok");
-  const er = document.getElementById("er");
-  const showOk = (t)=>{ ok.style.display="block"; er.style.display="none"; ok.textContent=t; };
-  const showEr = (t)=>{ er.style.display="block"; ok.style.display="none"; er.textContent=t; };
+  const bar = document.getElementById("progressBar");
+  const txt = document.getElementById("progressText");
+  const wrap = document.getElementById("progressWrap");
+  const err = document.getElementById("er");
 
   let uid = null;
 
-  onAuthStateChanged(auth, async (user) => {
-    if (!user) { window.location.href = "index.html"; return; }
-    if (!user.emailVerified) { window.location.href = "index.html"; return; }
-
+  onAuthStateChanged(auth, user => {
+    if (!user) location.href = "index.html";
     uid = user.uid;
-    document.getElementById("email").value = user.email || "";
-
-    try {
-      const refDoc = doc(db, "users", uid);
-      const snap = await getDoc(refDoc);
-
-      if (!snap.exists()) {
-        // Create doc if missing
-        await setDoc(refDoc, {
-          name: "",
-          phone: "",
-          email: user.email || "",
-          age: null,
-          photoURL: "",
-          googleSheetUrl: "",
-          profileCompleted: false
-        });
-      } else {
-        const d = snap.data();
-
-        // ✅ If profile already completed → go dashboard instantly
-        if (d.profileCompleted === true) {
-          window.location.href = "dashboard.html";
-          return;
-        }
-
-        document.getElementById("name").value = d.name || "";
-        document.getElementById("phone").value = d.phone || "";
-        document.getElementById("age").value = d.age || "";
-        document.getElementById("sheet").value = d.googleSheetUrl || "";
-      }
-
-    } catch (e) {
-      showEr("Firestore error: " + (e.code || "") + " | " + (e.message || e));
-      console.error(e);
-    }
   });
 
-  document.getElementById("profileForm").addEventListener("submit", async (e) => {
-    e.preventDefault();
-    if (!uid) return;
+  function showProgress(msg, pct) {
+    wrap.style.display = "block";
+    txt.textContent = msg;
+    bar.style.width = pct + "%";
+  }
 
-    const saveBtn = document.getElementById("saveBtn");
-    saveBtn.disabled = true;
-    saveBtn.textContent = "Saving...";
+  async function uploadWithProgress(file) {
+    return new Promise((resolve, reject) => {
+      const task = uploadBytesResumable(
+        ref(storage, `users/${uid}/profile_photo.jpg`),
+        file
+      );
+
+      task.on("state_changed",
+        s => {
+          const p = Math.round((s.bytesTransferred / s.totalBytes) * 100);
+          showProgress("Uploading photo: " + p + "%", p);
+        },
+        reject,
+        async () => resolve(await getDownloadURL(task.snapshot.ref))
+      );
+    });
+  }
+
+  document.getElementById("profileForm").addEventListener("submit", async e => {
+    e.preventDefault();
+    err.style.display = "none";
 
     try {
-      const name = document.getElementById("name").value.trim();
-      const phone = document.getElementById("phone").value.trim();
-      const age = Number(document.getElementById("age").value);
-      const sheet = document.getElementById("sheet").value.trim();
-      const photoFile = document.getElementById("photo").files[0];
-
-      if (!sheet.includes("docs.google.com/spreadsheets")) {
-        throw new Error("Please enter a valid Google Sheet link.");
-      }
+      showProgress("Step 1/2: Uploading photo...", 0);
 
       let photoURL = "";
-      if (photoFile) {
-        const storageRef = ref(storage, `profile_photos/${uid}/photo_${Date.now()}`);
-        await uploadBytes(storageRef, photoFile);
-        photoURL = await getDownloadURL(storageRef);
-      }
+      const photo = document.getElementById("photo").files[0];
+      if (photo) photoURL = await uploadWithProgress(photo);
 
-      const payload = {
-        name,
-        phone,
-        age,
-        googleSheetUrl: sheet,
+      showProgress("Step 2/2: Saving profile...", 100);
+
+      await updateDoc(doc(db, "users", uid), {
+        name: name.value,
+        phone: phone.value,
+        age: Number(age.value),
+        googleSheetUrl: sheet.value,
+        photoURL,
         profileCompleted: true
-      };
-      if (photoURL) payload.photoURL = photoURL;
+      });
 
-      await updateDoc(doc(db, "users", uid), payload);
-
-      showOk("Profile saved ✅ Redirecting to dashboard...");
-      setTimeout(() => window.location.href = "dashboard.html", 700);
-
-    } catch (e2) {
-      showEr((e2.code || "error") + " : " + (e2.message || e2));
-      console.error(e2);
-    } finally {
-      saveBtn.disabled = false;
-      saveBtn.textContent = "Save & Continue";
+      location.href = "dashboard.html";
+    } catch (e) {
+      err.style.display = "block";
+      err.textContent = e.message;
     }
   });
 </script>
