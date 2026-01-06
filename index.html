@@ -4,111 +4,110 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Login | Buckup-Media Data Duplicater</title>
-
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500&display=swap" rel="stylesheet">
-
-  <style>
-    * { box-sizing: border-box; font-family: 'Poppins', sans-serif; }
-
-    body {
-      margin: 0;
-      min-height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      background: linear-gradient(135deg, #667eea, #764ba2);
-    }
-
-    .card {
-      background: #fff;
-      width: 100%;
-      max-width: 380px;
-      padding: 30px;
-      border-radius: 16px;
-      box-shadow: 0 20px 40px rgba(0,0,0,0.2);
-    }
-
-    h1 {
-      text-align: center;
-      margin-bottom: 10px;
-    }
-
-    input {
-      width: 100%;
-      padding: 10px;
-      margin: 10px 0;
-      border-radius: 8px;
-      border: 1px solid #ccc;
-    }
-
-    button {
-      width: 100%;
-      padding: 12px;
-      margin-top: 10px;
-      border: none;
-      border-radius: 10px;
-      background: linear-gradient(135deg, #667eea, #764ba2);
-      color: #fff;
-      font-size: 15px;
-      cursor: pointer;
-    }
-
-    .link {
-      text-align: center;
-      margin-top: 14px;
-      font-size: 13px;
-    }
-
-    .link a {
-      color: #667eea;
-      text-decoration: none;
-    }
-  </style>
+  <link rel="stylesheet" href="./style.css">
 </head>
-
 <body>
 
   <div class="card">
-    <h1>Login</h1>
+    <div class="brand">Buckup-Media Data Duplicater</div>
+    <div class="sub">Login to access the dashboard. Verified email required.</div>
 
     <form id="loginForm">
-      <input id="email" type="email" placeholder="Email" required>
-      <input id="password" type="password" placeholder="Password" required>
-      <button type="submit">Login</button>
+      <label>Email</label>
+      <input id="email" type="email" placeholder="example@gmail.com" required>
+
+      <label>Password</label>
+      <input id="password" type="password" placeholder="Your password" required>
+
+      <div class="btnRow">
+        <button class="primary" type="submit">Login</button>
+        <button class="ghost" type="button" onclick="window.location.href='signup.html'">Create Account</button>
+      </div>
+
+      <div class="btnRow" style="margin-top:12px;">
+        <button id="resendBtn" class="info" type="button">Resend Verification Email</button>
+        <button id="logoutBtn" class="ghost" type="button">Logout</button>
+      </div>
+
+      <div id="msgOk" class="msg ok"></div>
+      <div id="msgInfo" class="msg info"></div>
+      <div id="msgErr" class="msg err"></div>
     </form>
 
-    <div class="link">
-      New user? <a href="signup.html">Create account</a>
-    </div>
+    <div class="footer">Tip: Check Spam/Promotions for verification email.</div>
   </div>
 
-  <!-- 🔐 LOGIN LOGIC -->
-  <script type="module">
-    import { auth } from "./firebase.js";
-    import { signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+<script type="module">
+  import { auth } from "./firebase.js";
+  import {
+    signInWithEmailAndPassword,
+    sendEmailVerification,
+    signOut,
+    onAuthStateChanged
+  } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
-    const form = document.getElementById("loginForm");
+  const form = document.getElementById("loginForm");
+  const ok = document.getElementById("msgOk");
+  const info = document.getElementById("msgInfo");
+  const err = document.getElementById("msgErr");
+  const resendBtn = document.getElementById("resendBtn");
+  const logoutBtn = document.getElementById("logoutBtn");
 
-    form.addEventListener("submit", async (e) => {
-      e.preventDefault();
+  function showOk(text){ ok.style.display="block"; info.style.display="none"; err.style.display="none"; ok.textContent=text; }
+  function showInfo(text){ info.style.display="block"; ok.style.display="none"; err.style.display="none"; info.textContent=text; }
+  function showErr(text){ err.style.display="block"; ok.style.display="none"; info.style.display="none"; err.textContent=text; }
 
-      const email = document.getElementById("email").value;
-      const password = document.getElementById("password").value;
+  // optional: show info if already logged in
+  onAuthStateChanged(auth, (user) => {
+    if (user && user.emailVerified) {
+      showOk("You are already logged in ✅ Redirecting...");
+      setTimeout(() => window.location.href = "dashboard.html", 700);
+    }
+  });
 
-      try {
-        const userCred = await signInWithEmailAndPassword(auth, email, password);
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
 
-        if (!userCred.user.emailVerified) {
-          alert("Please verify your email before logging in.");
-          return;
-        }
+    const email = document.getElementById("email").value.trim();
+    const pass = document.getElementById("password").value;
 
-        window.location.href = "dashboard.html";
-      } catch (err) {
-        alert(err.message);
+    try {
+      const userCred = await signInWithEmailAndPassword(auth, email, pass);
+
+      if (!userCred.user.emailVerified) {
+        showInfo("Email not verified. Click 'Resend Verification Email' then verify from Gmail.");
+        return;
       }
-    });
-  </script>
+
+      showOk("Login successful ✅ Redirecting...");
+      setTimeout(() => window.location.href = "dashboard.html", 700);
+
+    } catch (e2) {
+      showErr((e2.code || "error") + " : " + (e2.message || e2));
+      console.error(e2);
+    }
+  });
+
+  resendBtn.addEventListener("click", async () => {
+    try {
+      if (!auth.currentUser) {
+        showInfo("Login once first (unverified) then you can resend verification.");
+        return;
+      }
+      await sendEmailVerification(auth.currentUser, {
+        url: "https://jagrajsingh131.github.io/duplicate-contacts/index.html"
+      });
+      showOk("Verification email resent ✅ Check Inbox/Spam.");
+    } catch (e2) {
+      showErr((e2.code || "error") + " : " + (e2.message || e2));
+    }
+  });
+
+  logoutBtn.addEventListener("click", async () => {
+    await signOut(auth);
+    showOk("Logged out ✅");
+  });
+</script>
 
 </body>
 </html>
