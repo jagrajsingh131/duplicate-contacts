@@ -10,7 +10,7 @@
 
 <div class="card" style="max-width:600px">
   <div class="brand">Buckup-Media Data Duplicater</div>
-  <div class="sub">Create account. If already registered, resend verification from here.</div>
+  <div class="sub">Create account. Verify email. First time → complete profile.</div>
 
   <form id="signupForm">
     <label>Full Name</label>
@@ -39,13 +39,22 @@
     </div>
 
     <div class="btnRow">
-      <button class="primary" type="submit">Create Account</button>
+      <button class="primary" type="submit" id="createBtn">Create Account</button>
       <button class="ghost" type="button" onclick="window.location.href='index.html'">Go to Login</button>
     </div>
 
-    <!-- Resend verification is HERE -->
-    <div class="btnRow" style="margin-top:10px">
-      <button class="info" type="button" id="resendBtn">Resend Verification Email</button>
+    <!-- Resend block: hidden by default -->
+    <div id="resendWrap" style="display:none;">
+      <div class="hr"></div>
+      <div class="sub" style="margin:0 0 6px;">
+        Already registered or not verified? Resend verification from here.
+      </div>
+      <div class="btnRow" style="margin-top:10px">
+        <button class="info" type="button" id="resendBtn">Resend Verification Email</button>
+      </div>
+      <div class="small" style="margin-top:8px;color:#64748b;">
+        Note: For resend, enter your <b>email + password</b> above.
+      </div>
     </div>
 
     <div id="ok" class="msg ok"></div>
@@ -53,7 +62,7 @@
     <div id="er" class="msg err"></div>
   </form>
 
-  <div class="footer">Tip: For resend, enter email + password then click resend.</div>
+  <div class="footer">Tip: Check Inbox/Spam/Promotions for verification email.</div>
 </div>
 
 <script type="module">
@@ -78,7 +87,46 @@
   const showIn = (t)=>{ inf.style.display="block"; ok.style.display="none"; er.style.display="none"; inf.textContent=t; };
   const showEr = (t)=>{ er.style.display="block"; ok.style.display="none"; inf.style.display="none"; er.textContent=t; };
 
+  const resendWrap = document.getElementById("resendWrap");
+  const resendBtn = document.getElementById("resendBtn");
+  const createBtn = document.getElementById("createBtn");
+
+  const emailEl = document.getElementById("email");
+  const passEl = document.getElementById("password");
+
   const CONTINUE_URL = "https://jagrajsingh131.github.io/duplicate-contacts/index.html";
+
+  // Cooldown state
+  let cooldownTimer = null;
+  let cooldownLeft = 0;
+
+  function showResendUI(message) {
+    resendWrap.style.display = "block";
+    if (message) showIn(message);
+  }
+
+  function startCooldown(seconds) {
+    cooldownLeft = seconds;
+    resendBtn.disabled = true;
+    resendBtn.textContent = `Resend in ${cooldownLeft}s`;
+
+    if (cooldownTimer) clearInterval(cooldownTimer);
+    cooldownTimer = setInterval(() => {
+      cooldownLeft -= 1;
+      if (cooldownLeft <= 0) {
+        clearInterval(cooldownTimer);
+        cooldownTimer = null;
+        resendBtn.disabled = false;
+        resendBtn.textContent = "Resend Verification Email";
+      } else {
+        resendBtn.textContent = `Resend in ${cooldownLeft}s`;
+      }
+    }, 1000);
+  }
+
+  // If user types in email, we keep resend hidden until needed.
+  // But if they came here because login says "not verified", you can optionally show it automatically.
+  // For now: only show when email already exists or user uses resend button once.
 
   // SIGNUP
   document.getElementById("signupForm").addEventListener("submit", async (e) => {
@@ -86,8 +134,8 @@
 
     const name = document.getElementById("name").value.trim();
     const phone = document.getElementById("phone").value.trim();
-    const email = document.getElementById("email").value.trim();
-    const pass = document.getElementById("password").value;
+    const email = emailEl.value.trim();
+    const pass = passEl.value;
     const cp = document.getElementById("confirmPassword").value;
 
     if (pass !== cp) {
@@ -96,9 +144,12 @@
     }
 
     try {
+      createBtn.disabled = true;
+      createBtn.textContent = "Creating...";
+
       const userCred = await createUserWithEmailAndPassword(auth, email, pass);
 
-      // create initial doc (profile step later)
+      // Create initial user doc (profile step later)
       await setDoc(doc(db, "users", userCred.user.uid), {
         name,
         phone,
@@ -114,46 +165,70 @@
       await signOut(auth);
 
       showOk("Account created ✅ Verification email sent. Verify then login.");
+      showResendUI("Didn’t receive email? You can resend below (email + password required).");
+
+      // Start cooldown because Firebase can rate-limit
+      startCooldown(60);
+
     } catch (err) {
       if (err.code === "auth/email-already-in-use") {
-        showIn("Email already registered. To resend verification: enter email + password then click Resend.");
+        // Show resend UI and guide user
+        showResendUI("Email already registered. Enter your password and click resend.");
         return;
       }
       showEr(err.code + " : " + err.message);
       console.error(err);
+    } finally {
+      createBtn.disabled = false;
+      createBtn.textContent = "Create Account";
     }
   });
 
-  // RESEND VERIFICATION (requires login)
-  document.getElementById("resendBtn").addEventListener("click", async () => {
-    const email = document.getElementById("email").value.trim();
-    const pass = document.getElementById("password").value;
+  // RESEND VERIFICATION
+  resendBtn.addEventListener("click", async () => {
+    const email = emailEl.value.trim();
+    const pass = passEl.value;
 
     if (!email || !pass) {
-      showIn("Enter email + password, then click Resend Verification Email.");
+      showIn("Enter your email + password above to resend verification.");
       return;
     }
 
     try {
+      resendBtn.disabled = true;
+      resendBtn.textContent = "Sending...";
+
       const userCred = await signInWithEmailAndPassword(auth, email, pass);
 
       if (userCred.user.emailVerified) {
         showOk("Email already verified ✅ You can login now.");
         await signOut(auth);
+        resendBtn.disabled = false;
+        resendBtn.textContent = "Resend Verification Email";
         return;
       }
 
       await sendEmailVerification(userCred.user, { url: CONTINUE_URL });
       await signOut(auth);
 
-      showOk("Verification email resent ✅ Check Inbox/Spam.");
+      showOk("Verification email resent ✅ Check Inbox/Spam/Promotions.");
+
+      // Cooldown
+      startCooldown(60);
+
     } catch (err) {
       if (err.code === "auth/invalid-credential") {
-        showEr("Wrong email or password. Use Login page → Forgot Password if needed.");
+        showEr("Wrong email or password. If forgotten, use Login page → Forgot Password.");
+        // keep resend UI visible
+        showResendUI();
+        resendBtn.disabled = false;
+        resendBtn.textContent = "Resend Verification Email";
         return;
       }
       showEr(err.code + " : " + err.message);
       console.error(err);
+      resendBtn.disabled = false;
+      resendBtn.textContent = "Resend Verification Email";
     }
   });
 </script>
