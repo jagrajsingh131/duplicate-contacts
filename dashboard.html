@@ -9,8 +9,8 @@
 <div class="card">
   <h2>Data Duplicater</h2>
 
-  <textarea id="input" rows="6" placeholder="Paste data here"></textarea>
-  <textarea id="output" rows="6" placeholder="Duplicated output"></textarea>
+  <textarea id="input" rows="6" placeholder="Paste data"></textarea>
+  <textarea id="output" rows="6"></textarea>
 
   <button id="dup">Duplicate</button>
   <button id="copy">Copy</button>
@@ -19,42 +19,35 @@
 </div>
 
 <script type="module">
-  import { getUser, logoutLocal, saveDuplicatedData, getDuplicatedData } from "./local.js";
+import { getDuplicateLocal, saveDuplicateLocal, clearSession } from "./cache.js";
 
-  if (!getUser()) location.href = "index.html";
+output.value = getDuplicateLocal();
 
-  output.value = getDuplicatedData();
+dup.onclick = () => {
+  const lines = input.value.split("\n").filter(l => l.trim());
+  const out = [];
+  lines.forEach(l => { out.push(l); out.push(l); });
+  output.value = out.join("\n");
+  saveDuplicateLocal(output.value);
+};
 
-  document.getElementById("dup").onclick = () => {
-    const lines = input.value.split("\n").filter(l => l.trim());
-    const result = [];
+copy.onclick = () => {
+  navigator.clipboard.writeText(output.value);
+  alert("Copied");
+};
 
-    lines.forEach(l => {
-      result.push(l);
-      result.push(l);
-    });
+download.onclick = () => {
+  const blob = new Blob([output.value], { type: "text/csv" });
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = "duplicated.csv";
+  a.click();
+};
 
-    output.value = result.join("\n");
-    saveDuplicatedData(output.value);
-  };
-
-  document.getElementById("copy").onclick = () => {
-    navigator.clipboard.writeText(output.value);
-    alert("Copied ✅");
-  };
-
-  document.getElementById("download").onclick = () => {
-    const blob = new Blob([output.value], { type: "text/csv" });
-    const a = document.createElement("a");
-    a.href = URL.createObjectURL(blob);
-    a.download = "duplicated.csv";
-    a.click();
-  };
-
-  document.getElementById("logout").onclick = () => {
-    logoutLocal();
-    location.href = "index.html";
-  };
+logout.onclick = () => {
+  clearSession();
+  location.href = "index.html";
+};
 </script>
 
 </body>
