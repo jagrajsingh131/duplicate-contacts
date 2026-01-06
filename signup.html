@@ -1,33 +1,188 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>Signup</title>
-  <link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Signup | Buckup-Media Data Duplicater</title>
+  <link rel="stylesheet" href="./style.css">
 </head>
 <body>
 
-<div class="card">
-  <h2>Create Account</h2>
-  <input id="email" placeholder="Email">
-  <input id="password" type="password" placeholder="Password">
-  <button id="signup">Signup</button>
-  <div id="msg"></div>
+<div class="card" style="max-width:600px">
+  <div class="brand">Buckup-Media Data Duplicater</div>
+  <div class="sub">Create account + verify email</div>
+
+  <form id="signupForm">
+    <label>Full Name</label>
+    <input id="name" required placeholder="Your full name">
+
+    <div class="row">
+      <div>
+        <label>Email</label>
+        <input id="email" type="email" required placeholder="example@gmail.com">
+      </div>
+      <div>
+        <label>Phone</label>
+        <input id="phone" required placeholder="Phone number">
+      </div>
+    </div>
+
+    <div class="row">
+      <div>
+        <label>Password</label>
+        <input id="password" type="password" required placeholder="Create password">
+      </div>
+      <div>
+        <label>Confirm Password</label>
+        <input id="confirmPassword" type="password" required placeholder="Confirm password">
+      </div>
+    </div>
+
+    <div class="btnRow">
+      <button class="primary" type="submit" id="createBtn">Create Account</button>
+      <button class="ghost" type="button" onclick="window.location.href='index.html'">Go to Login</button>
+    </div>
+
+    <div id="resendWrap" style="display:none;">
+      <div class="hr"></div>
+      <div class="sub" style="margin:0 0 6px;">Already registered / not verified? Resend verification.</div>
+      <div class="btnRow" style="margin-top:10px">
+        <button class="info" type="button" id="resendBtn">Resend Verification Email</button>
+      </div>
+      <div class="small" style="margin-top:8px;color:#64748b;">
+        Enter <b>email + password</b> above for resend.
+      </div>
+    </div>
+
+    <div id="ok" class="msg ok"></div>
+    <div id="in" class="msg info"></div>
+    <div id="er" class="msg err"></div>
+  </form>
 </div>
 
 <script type="module">
-import { auth } from "./firebase.js";
-import { createUserWithEmailAndPassword, sendEmailVerification } 
-from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+  import { auth } from "./firebase.js";
+  import {
+    createUserWithEmailAndPassword,
+    sendEmailVerification,
+    signInWithEmailAndPassword,
+    signOut
+  } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
-signup.onclick = async () => {
-  try {
-    const res = await createUserWithEmailAndPassword(auth, email.value, password.value);
-    await sendEmailVerification(res.user);
-    msg.textContent = "Verification email sent.";
-  } catch (e) {
-    msg.textContent = e.message;
+  const ok = document.getElementById("ok");
+  const inf = document.getElementById("in");
+  const er = document.getElementById("er");
+
+  const resendWrap = document.getElementById("resendWrap");
+  const resendBtn = document.getElementById("resendBtn");
+  const createBtn = document.getElementById("createBtn");
+
+  const showOk = (t)=>{ ok.style.display="block"; inf.style.display="none"; er.style.display="none"; ok.textContent=t; };
+  const showIn = (t)=>{ inf.style.display="block"; ok.style.display="none"; er.style.display="none"; inf.textContent=t; };
+  const showEr = (t)=>{ er.style.display="block"; ok.style.display="none"; inf.style.display="none"; er.textContent=t; };
+
+  const CONTINUE_URL = "https://jagrajsingh131.github.io/duplicate-contacts/index.html";
+
+  let cooldownTimer = null;
+  function startCooldown(sec) {
+    let left = sec;
+    resendBtn.disabled = true;
+    resendBtn.textContent = `Resend in ${left}s`;
+    if (cooldownTimer) clearInterval(cooldownTimer);
+    cooldownTimer = setInterval(() => {
+      left -= 1;
+      if (left <= 0) {
+        clearInterval(cooldownTimer);
+        cooldownTimer = null;
+        resendBtn.disabled = false;
+        resendBtn.textContent = "Resend Verification Email";
+      } else {
+        resendBtn.textContent = `Resend in ${left}s`;
+      }
+    }, 1000);
   }
-};
+
+  document.getElementById("signupForm").addEventListener("submit", async (e) => {
+    e.preventDefault();
+
+    const name = document.getElementById("name").value.trim();
+    const phone = document.getElementById("phone").value.trim();
+    const email = document.getElementById("email").value.trim();
+    const pass = document.getElementById("password").value;
+    const cp = document.getElementById("confirmPassword").value;
+
+    if (pass !== cp) {
+      showEr("Passwords do not match.");
+      return;
+    }
+
+    try {
+      createBtn.disabled = true;
+      createBtn.textContent = "Creating...";
+
+      const userCred = await createUserWithEmailAndPassword(auth, email, pass);
+
+      await sendEmailVerification(userCred.user, { url: CONTINUE_URL });
+      await signOut(auth);
+
+      showOk("Account created ✅ Verification email sent. Verify then login.");
+      resendWrap.style.display = "block";
+      startCooldown(60);
+
+    } catch (err) {
+      if (err.code === "auth/email-already-in-use") {
+        resendWrap.style.display = "block";
+        showIn("Email already registered. Enter password then click resend.");
+        return;
+      }
+      showEr(err.code + " : " + err.message);
+      console.error(err);
+    } finally {
+      createBtn.disabled = false;
+      createBtn.textContent = "Create Account";
+    }
+  });
+
+  resendBtn.addEventListener("click", async () => {
+    const email = document.getElementById("email").value.trim();
+    const pass = document.getElementById("password").value;
+
+    if (!email || !pass) {
+      showIn("Enter email + password, then click resend.");
+      return;
+    }
+
+    try {
+      resendBtn.disabled = true;
+      resendBtn.textContent = "Sending...";
+
+      const userCred = await signInWithEmailAndPassword(auth, email, pass);
+
+      if (userCred.user.emailVerified) {
+        showOk("Email already verified ✅ You can login now.");
+        await signOut(auth);
+        resendBtn.disabled = false;
+        resendBtn.textContent = "Resend Verification Email";
+        return;
+      }
+
+      await sendEmailVerification(userCred.user, { url: CONTINUE_URL });
+      await signOut(auth);
+
+      showOk("Verification email resent ✅ Check Inbox/Spam.");
+      startCooldown(60);
+
+    } catch (err) {
+      resendBtn.disabled = false;
+      resendBtn.textContent = "Resend Verification Email";
+
+      if (err.code === "auth/invalid-credential") {
+        showEr("Wrong email or password. Use Forgot Password from Login page.");
+        return;
+      }
+      showEr(err.code + " : " + err.message);
+    }
+  });
 </script>
 
 </body>
