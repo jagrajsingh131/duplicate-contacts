@@ -2,100 +2,143 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8"/>
-  <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
-  <title>Signup | Buckup-Media Data Duplicater</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Signup | Buckup-Media</title>
   <link rel="stylesheet" href="./style.css">
 </head>
 <body>
-  <div class="card" style="max-width:560px">
-    <div class="brand">Buckup-Media Data Duplicater</div>
-    <div class="sub">Create account → Verify email → Complete profile → Dashboard</div>
 
-    <form id="signupForm">
-      <label>Full Name</label>
-      <input id="name" required placeholder="Your full name">
+<div class="card" style="max-width:560px">
+  <div class="brand">Buckup-Media</div>
+  <div class="sub">Create your account and verify email to continue</div>
 
-      <div class="row">
-        <div>
-          <label>Email (Gmail)</label>
-          <input id="email" type="email" required placeholder="example@gmail.com">
-        </div>
-        <div>
-          <label>Phone</label>
-          <input id="phone" required placeholder="10-digit phone">
-        </div>
+  <form id="signupForm">
+    <label>Full Name</label>
+    <input id="name" required placeholder="Your full name">
+
+    <label>Email (Gmail)</label>
+    <input id="email" type="email" required placeholder="example@gmail.com">
+
+    <label>Phone</label>
+    <input id="phone" required placeholder="10-digit number">
+
+    <div class="row">
+      <div>
+        <label>Password</label>
+        <input id="password" type="password" required>
       </div>
-
-      <div class="row">
-        <div>
-          <label>Password</label>
-          <input id="password" type="password" required placeholder="Create password">
-        </div>
-        <div>
-          <label>Confirm Password</label>
-          <input id="confirmPassword" type="password" required placeholder="Confirm password">
-        </div>
+      <div>
+        <label>Confirm Password</label>
+        <input id="confirmPassword" type="password" required>
       </div>
+    </div>
 
-      <div class="btnRow">
-        <button class="primary" type="submit">Create Account</button>
-        <button class="ghost" type="button" onclick="window.location.href='index.html'">Go to Login</button>
-      </div>
+    <div class="btnRow">
+      <button class="primary" type="submit" id="signupBtn">Create Account</button>
+      <button class="ghost" type="button" onclick="window.location.href='index.html'">Go to Login</button>
+    </div>
 
-      <div id="ok" class="msg ok"></div>
-      <div id="er" class="msg err"></div>
-    </form>
+    <!-- extra actions -->
+    <div class="btnRow" style="margin-top:10px">
+      <button class="info" type="button" id="resendBtn">Resend Verification Email</button>
+    </div>
 
-    <div class="footer">Buckup-Media • Secure Firebase Auth</div>
+    <div id="ok" class="msg ok"></div>
+    <div id="info" class="msg info"></div>
+    <div id="er" class="msg err"></div>
+  </form>
+
+  <div class="footer">
+    Secure signup • Email verification required • Buckup-Media
   </div>
+</div>
 
 <script type="module">
   import { auth, db } from "./firebase.js";
-  import { createUserWithEmailAndPassword, sendEmailVerification, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-  import { doc, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+  import {
+    createUserWithEmailAndPassword,
+    sendEmailVerification,
+    signInWithEmailAndPassword,
+    signOut
+  } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+  import {
+    doc,
+    setDoc,
+    getDoc,
+    serverTimestamp
+  } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
   const ok = document.getElementById("ok");
+  const info = document.getElementById("info");
   const er = document.getElementById("er");
-  const showOk = (t)=>{ok.style.display="block";er.style.display="none";ok.textContent=t;}
-  const showEr = (t)=>{er.style.display="block";ok.style.display="none";er.textContent=t;}
 
+  const showOk = t => { ok.style.display="block"; info.style.display="none"; er.style.display="none"; ok.textContent=t; };
+  const showInfo = t => { info.style.display="block"; ok.style.display="none"; er.style.display="none"; info.textContent=t; };
+  const showEr = t => { er.style.display="block"; ok.style.display="none"; info.style.display="none"; er.textContent=t; };
+
+  const emailInput = document.getElementById("email");
+
+  // SIGNUP
   document.getElementById("signupForm").addEventListener("submit", async (e)=>{
     e.preventDefault();
+
     const name = document.getElementById("name").value.trim();
     const phone = document.getElementById("phone").value.trim();
-    const email = document.getElementById("email").value.trim();
+    const email = emailInput.value.trim();
     const pass = document.getElementById("password").value;
     const cp = document.getElementById("confirmPassword").value;
 
-    if(pass !== cp){ showEr("Passwords do not match."); return; }
+    if(pass !== cp){
+      showEr("Passwords do not match.");
+      return;
+    }
 
     try{
       const userCred = await createUserWithEmailAndPassword(auth, email, pass);
 
-      // Create initial user doc (profile not completed yet)
-      await setDoc(doc(db, "users", userCred.user.uid), {
+      // create user profile (profileCompleted = false)
+      await setDoc(doc(db,"users",userCred.user.uid),{
         name, phone, email,
-        age: null,
-        photoURL: "",
-        googleSheetUrl: "",
-        profileCompleted: false,
+        profileCompleted:false,
         createdAt: serverTimestamp()
       });
 
-      await sendEmailVerification(userCred.user, {
-        url: "https://jagrajsingh131.github.io/duplicate-contacts/index.html"
+      await sendEmailVerification(userCred.user,{
+        url:"https://jagrajsingh131.github.io/duplicate-contacts/index.html"
       });
 
       await signOut(auth);
 
-      showOk("Account created ✅ Verification email sent. Verify, then login.");
-      setTimeout(()=>window.location.href="index.html", 1200);
-
-    } catch(err){
-      showEr((err.code||"error")+" : "+(err.message||err));
+      showOk("Account created ✅ Verification email sent. Please verify, then login.");
+    }
+    catch(err){
+      // EMAIL ALREADY EXISTS
+      if(err.code === "auth/email-already-in-use"){
+        showInfo(
+          "This email is already registered.\n\n" +
+          "If you have not verified your email yet, click 'Resend Verification Email'.\n" +
+          "Otherwise, go to Login."
+        );
+        return;
+      }
+      showEr(err.code + " : " + err.message);
       console.error(err);
     }
   });
-</script>
-</body>
-</html>
+
+  // RESEND VERIFICATION (ONLY ON SIGNUP PAGE)
+  document.getElementById("resendBtn").addEventListener("click", async ()=>{
+    const email = emailInput.value.trim();
+    if(!email){
+      showInfo("Enter your email first to resend verification.");
+      return;
+    }
+
+    try{
+      // temporary login to resend verification
+      const tempPassword = prompt(
+        "Enter your password to resend verification email:"
+      );
+      if(!tempPassword) return;
+
+      con
