@@ -1,53 +1,136 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Dashboard</title>
-  <link rel="stylesheet" href="style.css">
+  <title>Dashboard | Buckup-Media</title>
+  <link rel="stylesheet" href="./style.css">
 </head>
 <body>
 
-<div class="card">
-  <h2>Data Duplicater</h2>
+<div class="card" style="max-width:900px">
+  <div class="brand">Buckup-Media Data Duplicater</div>
+  <div class="sub">Paste data OR upload file → duplicate → copy/download</div>
 
-  <textarea id="input" rows="6" placeholder="Paste data"></textarea>
-  <textarea id="output" rows="6"></textarea>
+  <div class="row">
+    <div>
+      <label>Upload File (CSV/TXT)</label>
+      <input type="file" id="fileInput" accept=".csv,.txt">
+    </div>
+    <div style="display:flex;align-items:end;gap:10px;">
+      <button class="primary" id="duplicateBtn" type="button">Duplicate</button>
+      <button class="ghost" id="clearBtn" type="button">Clear</button>
+      <button class="ghost" id="logoutBtn" type="button">Logout</button>
+    </div>
+  </div>
 
-  <button id="dup">Duplicate</button>
-  <button id="copy">Copy</button>
-  <button id="download">Download CSV</button>
-  <button id="logout">Logout</button>
+  <div class="row">
+    <div>
+      <label>Paste Input</label>
+      <textarea id="inputBox" rows="10" placeholder="Paste your data here..."></textarea>
+    </div>
+    <div>
+      <label>Duplicated Output</label>
+      <textarea id="outputBox" rows="10" placeholder="Output will appear here..."></textarea>
+    </div>
+  </div>
+
+  <div class="btnRow">
+    <button class="success" id="copyBtn" type="button">Copy Output</button>
+    <button class="info" id="downloadCsvBtn" type="button">Download CSV</button>
+  </div>
+
+  <div id="ok" class="msg ok"></div>
+  <div id="er" class="msg err"></div>
 </div>
 
 <script type="module">
-import { getDuplicateLocal, saveDuplicateLocal, clearSession } from "./cache.js";
+  import { auth } from "./firebase.js";
+  import { signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+  import { getSession, clearSession, getProfileLocal, getDuplicatedLocal, saveDuplicatedLocal } from "./cache.js";
 
-output.value = getDuplicateLocal();
+  const ok = document.getElementById("ok");
+  const er = document.getElementById("er");
+  const showOk = (t)=>{ ok.style.display="block"; er.style.display="none"; ok.textContent=t; };
+  const showEr = (t)=>{ er.style.display="block"; ok.style.display="none"; er.textContent=t; };
 
-dup.onclick = () => {
-  const lines = input.value.split("\n").filter(l => l.trim());
-  const out = [];
-  lines.forEach(l => { out.push(l); out.push(l); });
-  output.value = out.join("\n");
-  saveDuplicateLocal(output.value);
-};
+  const inputBox = document.getElementById("inputBox");
+  const outputBox = document.getElementById("outputBox");
+  const fileInput = document.getElementById("fileInput");
 
-copy.onclick = () => {
-  navigator.clipboard.writeText(output.value);
-  alert("Copied");
-};
+  // Security + session
+  const session = getSession();
+  if (!session) location.href = "index.html";
 
-download.onclick = () => {
-  const blob = new Blob([output.value], { type: "text/csv" });
-  const a = document.createElement("a");
-  a.href = URL.createObjectURL(blob);
-  a.download = "duplicated.csv";
-  a.click();
-};
+  onAuthStateChanged(auth, (user) => {
+    if (!user) location.href = "index.html";
+    if (!user.emailVerified) location.href = "index.html";
+  });
 
-logout.onclick = () => {
-  clearSession();
-  location.href = "index.html";
-};
+  // Load last output instantly
+  outputBox.value = getDuplicatedLocal();
+
+  // If user has profile, you can use googleSheetUrl later
+  const profile = getProfileLocal();
+
+  function duplicateLines(rawText) {
+    const lines = rawText.split(/\r?\n/).map(x => x.trim()).filter(Boolean);
+    const out = [];
+    for (const line of lines) {
+      out.push(line);
+      out.push(line);
+    }
+    return out.join("\n");
+  }
+
+  // Upload → fill input box
+  fileInput.addEventListener("change", async () => {
+    const f = fileInput.files[0];
+    if (!f) return;
+
+    try {
+      const text = await f.text();
+      inputBox.value = text;
+      showOk("File loaded ✅ Now click Duplicate.");
+    } catch (e) {
+      showEr("Cannot read file.");
+    }
+  });
+
+  document.getElementById("duplicateBtn").addEventListener("click", () => {
+    const result = duplicateLines(inputBox.value);
+    outputBox.value = result;
+    saveDuplicatedLocal(result);
+    showOk("Duplicated ✅");
+  });
+
+  document.getElementById("copyBtn").addEventListener("click", async () => {
+    try {
+      await navigator.clipboard.writeText(outputBox.value);
+      showOk("Copied ✅");
+    } catch (e) {
+      showEr("Copy failed. Please copy manually.");
+    }
+  });
+
+  document.getElementById("downloadCsvBtn").addEventListener("click", () => {
+    const blob = new Blob([outputBox.value], { type: "text/csv" });
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = "duplicated.csv";
+    a.click();
+  });
+
+  document.getElementById("clearBtn").addEventListener("click", () => {
+    inputBox.value = "";
+    outputBox.value = "";
+    saveDuplicatedLocal("");
+    showOk("Cleared ✅");
+  });
+
+  document.getElementById("logoutBtn").addEventListener("click", async () => {
+    clearSession();
+    await signOut(auth);
+    location.href = "index.html";
+  });
 </script>
 
 </body>
