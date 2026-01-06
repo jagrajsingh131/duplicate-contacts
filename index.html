@@ -1,113 +1,104 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
   <title>Login | Buckup-Media Data Duplicater</title>
   <link rel="stylesheet" href="./style.css">
 </head>
 <body>
-
-  <div class="card">
+  <div class="card" style="max-width:520px">
     <div class="brand">Buckup-Media Data Duplicater</div>
-    <div class="sub">Login to access the dashboard. Verified email required.</div>
+    <div class="sub">Login (Verified email required)</div>
 
     <form id="loginForm">
       <label>Email</label>
-      <input id="email" type="email" placeholder="example@gmail.com" required>
+      <input id="email" type="email" required placeholder="example@gmail.com">
 
       <label>Password</label>
-      <input id="password" type="password" placeholder="Your password" required>
+      <input id="password" type="password" required placeholder="Your password">
 
       <div class="btnRow">
         <button class="primary" type="submit">Login</button>
         <button class="ghost" type="button" onclick="window.location.href='signup.html'">Create Account</button>
       </div>
 
-      <div class="btnRow" style="margin-top:12px;">
+      <div class="btnRow">
         <button id="resendBtn" class="info" type="button">Resend Verification Email</button>
         <button id="logoutBtn" class="ghost" type="button">Logout</button>
       </div>
 
-      <div id="msgOk" class="msg ok"></div>
-      <div id="msgInfo" class="msg info"></div>
-      <div id="msgErr" class="msg err"></div>
+      <div id="ok" class="msg ok"></div>
+      <div id="in" class="msg info"></div>
+      <div id="er" class="msg err"></div>
     </form>
 
     <div class="footer">Tip: Check Spam/Promotions for verification email.</div>
   </div>
 
 <script type="module">
-  import { auth } from "./firebase.js";
-  import {
-    signInWithEmailAndPassword,
-    sendEmailVerification,
-    signOut,
-    onAuthStateChanged
-  } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+  import { auth, db } from "./firebase.js";
+  import { signInWithEmailAndPassword, sendEmailVerification, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+  import { doc, getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-  const form = document.getElementById("loginForm");
-  const ok = document.getElementById("msgOk");
-  const info = document.getElementById("msgInfo");
-  const err = document.getElementById("msgErr");
-  const resendBtn = document.getElementById("resendBtn");
-  const logoutBtn = document.getElementById("logoutBtn");
+  const ok = document.getElementById("ok");
+  const inf = document.getElementById("in");
+  const er = document.getElementById("er");
+  const showOk = (t)=>{ok.style.display="block";inf.style.display="none";er.style.display="none";ok.textContent=t;}
+  const showIn = (t)=>{inf.style.display="block";ok.style.display="none";er.style.display="none";inf.textContent=t;}
+  const showEr = (t)=>{er.style.display="block";ok.style.display="none";inf.style.display="none";er.textContent=t;}
 
-  function showOk(text){ ok.style.display="block"; info.style.display="none"; err.style.display="none"; ok.textContent=text; }
-  function showInfo(text){ info.style.display="block"; ok.style.display="none"; err.style.display="none"; info.textContent=text; }
-  function showErr(text){ err.style.display="block"; ok.style.display="none"; info.style.display="none"; err.textContent=text; }
-
-  // optional: show info if already logged in
-  onAuthStateChanged(auth, (user) => {
-    if (user && user.emailVerified) {
-      showOk("You are already logged in ✅ Redirecting...");
-      setTimeout(() => window.location.href = "dashboard.html", 700);
+  onAuthStateChanged(auth, async (user)=>{
+    if(user && user.emailVerified){
+      // auto redirect if already logged in
+      const snap = await getDoc(doc(db,"users",user.uid));
+      const profDone = snap.exists() && snap.data().profileCompleted === true;
+      window.location.href = profDone ? "dashboard.html" : "profile.html";
     }
   });
 
-  form.addEventListener("submit", async (e) => {
+  document.getElementById("loginForm").addEventListener("submit", async (e)=>{
     e.preventDefault();
-
     const email = document.getElementById("email").value.trim();
     const pass = document.getElementById("password").value;
 
-    try {
+    try{
       const userCred = await signInWithEmailAndPassword(auth, email, pass);
 
-      if (!userCred.user.emailVerified) {
-        showInfo("Email not verified. Click 'Resend Verification Email' then verify from Gmail.");
+      if(!userCred.user.emailVerified){
+        showIn("Email not verified. Verify from Gmail (Inbox/Spam). Then login again.");
         return;
       }
+
+      const snap = await getDoc(doc(db,"users",userCred.user.uid));
+      const profDone = snap.exists() && snap.data().profileCompleted === true;
 
       showOk("Login successful ✅ Redirecting...");
-      setTimeout(() => window.location.href = "dashboard.html", 700);
+      setTimeout(()=>window.location.href = profDone ? "dashboard.html" : "profile.html", 700);
 
-    } catch (e2) {
-      showErr((e2.code || "error") + " : " + (e2.message || e2));
-      console.error(e2);
+    }catch(err){
+      showEr((err.code||"error")+" : "+(err.message||err));
+      console.error(err);
     }
   });
 
-  resendBtn.addEventListener("click", async () => {
-    try {
-      if (!auth.currentUser) {
-        showInfo("Login once first (unverified) then you can resend verification.");
+  document.getElementById("resendBtn").addEventListener("click", async ()=>{
+    try{
+      if(!auth.currentUser){
+        showIn("Login once (even if unverified) then click resend.");
         return;
       }
-      await sendEmailVerification(auth.currentUser, {
-        url: "https://jagrajsingh131.github.io/duplicate-contacts/index.html"
-      });
+      await sendEmailVerification(auth.currentUser, { url: "https://jagrajsingh131.github.io/duplicate-contacts/index.html" });
       showOk("Verification email resent ✅ Check Inbox/Spam.");
-    } catch (e2) {
-      showErr((e2.code || "error") + " : " + (e2.message || e2));
+    }catch(err){
+      showEr((err.code||"error")+" : "+(err.message||err));
     }
   });
 
-  logoutBtn.addEventListener("click", async () => {
+  document.getElementById("logoutBtn").addEventListener("click", async ()=>{
     await signOut(auth);
     showOk("Logged out ✅");
   });
 </script>
-
 </body>
 </html>
