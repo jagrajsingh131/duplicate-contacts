@@ -1,74 +1,73 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-  <meta charset="UTF-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Dashboard | Buckup-Media</title>
+  <title>Dashboard</title>
   <link rel="stylesheet" href="./style.css">
+  <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
 </head>
 <body>
 
-<div class="card" style="max-width:720px">
-  <div class="brand">Dashboard</div>
-  <div class="sub" id="welcome">Loading...</div>
+<div class="card">
+  <div class="brand">Data Duplicater</div>
 
-  <div class="btnRow">
-    <button class="success" id="openSheet">Open Worksheet (Google Sheet)</button>
-    <button class="ghost" id="goDuplicater">Go to Data Duplicater Page</button>
-    <button class="ghost" id="logoutBtn">Logout</button>
+  <input type="file" id="file">
+
+  <div id="progressWrap" style="display:none;margin-top:10px;">
+    <div class="small" id="progressText">Processing...</div>
+    <div style="height:12px;background:#e5e7eb;border-radius:999px;">
+      <div id="progressBar" style="height:12px;width:0%;background:#4f46e5;"></div>
+    </div>
   </div>
 
-  <div id="er" class="msg err"></div>
+  <textarea id="out" rows="8" style="margin-top:12px"></textarea>
+
+  <div class="btnRow">
+    <button class="primary" id="dup">Duplicate</button>
+    <button class="success" id="down">Download CSV</button>
+  </div>
 </div>
 
-<script type="module">
-  import { auth, db } from "./firebase.js";
-  import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-  import { doc, getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+<script>
+  const bar = document.getElementById("progressBar");
+  const txt = document.getElementById("progressText");
+  const wrap = document.getElementById("progressWrap");
+  let data = [];
 
-  const er = document.getElementById("er");
-  const showEr = (t)=>{ er.style.display="block"; er.textContent=t; };
+  function show(msg, pct) {
+    wrap.style.display = "block";
+    txt.textContent = msg;
+    bar.style.width = pct + "%";
+  }
 
-  let sheetLink = "";
+  document.getElementById("dup").onclick = () => {
+    const f = file.files[0];
+    if (!f) return alert("Upload file");
 
-  onAuthStateChanged(auth, async (user) => {
-    if (!user) { window.location.href = "index.html"; return; }
-    if (!user.emailVerified) { window.location.href = "index.html"; return; }
+    show("Reading file...", 10);
 
-    try {
-      const snap = await getDoc(doc(db, "users", user.uid));
-
-      if (!snap.exists() || snap.data().profileCompleted !== true) {
-        window.location.href = "profile.html";
-        return;
+    Papa.parse(f, {
+      complete: res => {
+        show("Duplicating rows...", 60);
+        data = [];
+        res.data.forEach(r => {
+          if (r.join("").trim()) {
+            data.push(r);
+            data.push(r);
+          }
+        });
+        out.value = data.map(r => r.join(",")).join("\n");
+        show("Done ✅", 100);
       }
+    });
+  };
 
-      const d = snap.data();
-      sheetLink = d.googleSheetUrl || "";
-
-      document.getElementById("welcome").textContent =
-        "Welcome, " + (d.name || "User") + " ✅";
-
-    } catch (e) {
-      showEr("Firestore error: " + (e.code || "") + " | " + (e.message || e));
-      console.error(e);
-    }
-  });
-
-  document.getElementById("openSheet").addEventListener("click", () => {
-    if (!sheetLink) { alert("No Google Sheet link saved in profile."); return; }
-    window.open(sheetLink, "_blank");
-  });
-
-  document.getElementById("goDuplicater").addEventListener("click", () => {
-    // you can change this to your duplicater section page
-    alert("Next: We will integrate Data Duplicater inside dashboard sidebar.");
-  });
-
-  document.getElementById("logoutBtn").addEventListener("click", async () => {
-    await signOut(auth);
-    window.location.href = "index.html";
-  });
+  document.getElementById("down").onclick = () => {
+    const blob = new Blob([out.value], { type: "text/csv" });
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = "duplicated.csv";
+    a.click();
+  };
 </script>
 
 </body>
