@@ -3,129 +3,137 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Login | Buckup-Media Data Duplicater</title>
+  <title>Login | Buckup-Media</title>
   <link rel="stylesheet" href="./style.css">
 </head>
 <body>
 
-  <div class="card" style="max-width:560px">
-    <div class="brand">Buckup-Media Data Duplicater</div>
-    <div class="sub">Login (Verified email required). If password forgotten, reset it.</div>
+<div class="card" style="max-width:560px">
+  <div class="brand">Buckup-Media Data Duplicater</div>
+  <div class="sub">Login (Email must be verified)</div>
 
-    <form id="loginForm">
-      <label>Email</label>
-      <input id="email" type="email" placeholder="example@gmail.com" required>
+  <form id="loginForm">
+    <label>Email</label>
+    <input id="email" type="email" placeholder="example@gmail.com" required>
 
-      <label>Password</label>
-      <input id="password" type="password" placeholder="Your password" required>
+    <label>Password</label>
+    <input id="password" type="password" placeholder="Your password" required>
 
-      <div class="btnRow">
-        <button class="primary" type="submit" id="loginBtn">Login</button>
-        <button class="ghost" type="button" onclick="window.location.href='signup.html'">Create Account</button>
-      </div>
+    <div class="btnRow">
+      <button class="primary" type="submit" id="loginBtn">Login</button>
+      <button class="ghost" type="button" onclick="window.location.href='signup.html'">Create Account</button>
+    </div>
 
-      <div class="btnRow" style="margin-top:10px">
-        <button class="info" id="forgotBtn" type="button">Forgot Password</button>
-        <button class="ghost" id="logoutBtn" type="button">Logout</button>
-      </div>
+    <div class="btnRow" style="margin-top:10px">
+      <button class="info" id="forgotBtn" type="button">Forgot Password</button>
+      <button class="ghost" id="logoutBtn" type="button">Logout</button>
+    </div>
 
-      <div id="ok" class="msg ok"></div>
-      <div id="in" class="msg info"></div>
-      <div id="er" class="msg err"></div>
-    </form>
+    <div id="ok" class="msg ok"></div>
+    <div id="in" class="msg info"></div>
+    <div id="er" class="msg err"></div>
+  </form>
 
-    <div class="footer">Tip: Verification email can be resent from Signup page.</div>
-  </div>
+  <div class="footer">Verification resend is available on Signup page.</div>
+</div>
 
-  <script type="module">
-    import { auth, db } from "./firebase.js";
-    import {
-      signInWithEmailAndPassword,
-      sendPasswordResetEmail,
-      signOut,
-      onAuthStateChanged
-    } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-    import {
-      doc,
-      getDoc
-    } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+<script type="module">
+  import { auth, db } from "./firebase.js";
+  import {
+    signInWithEmailAndPassword,
+    sendPasswordResetEmail,
+    signOut,
+    onAuthStateChanged
+  } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
-    const ok = document.getElementById("ok");
-    const inf = document.getElementById("in");
-    const er = document.getElementById("er");
+  import {
+    doc,
+    getDoc
+  } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-    const showOk = (t)=>{ ok.style.display="block"; inf.style.display="none"; er.style.display="none"; ok.textContent=t; };
-    const showIn = (t)=>{ inf.style.display="block"; ok.style.display="none"; er.style.display="none"; inf.textContent=t; };
-    const showEr = (t)=>{ er.style.display="block"; ok.style.display="none"; inf.style.display="none"; er.textContent=t; };
+  const ok = document.getElementById("ok");
+  const inf = document.getElementById("in");
+  const er = document.getElementById("er");
 
-    // If already logged in and verified → redirect (profile or dashboard)
-    onAuthStateChanged(auth, async (user) => {
-      if (user && user.emailVerified) {
-        const snap = await getDoc(doc(db, "users", user.uid));
-        const profDone = snap.exists() && snap.data().profileCompleted === true;
-        window.location.href = profDone ? "dashboard.html" : "profile.html";
-      }
-    });
+  const showOk = (t)=>{ ok.style.display="block"; inf.style.display="none"; er.style.display="none"; ok.textContent=t; };
+  const showIn = (t)=>{ inf.style.display="block"; ok.style.display="none"; er.style.display="none"; inf.textContent=t; };
+  const showEr = (t)=>{ er.style.display="block"; ok.style.display="none"; inf.style.display="none"; er.textContent=t; };
 
-    // LOGIN
-    document.getElementById("loginForm").addEventListener("submit", async (e) => {
-      e.preventDefault();
+  // ✅ IMPORTANT: redirect logic ONLY here (not inside login submit)
+  onAuthStateChanged(auth, async (user) => {
+    if (!user) return;
 
-      const email = document.getElementById("email").value.trim();
-      const password = document.getElementById("password").value;
+    if (!user.emailVerified) {
+      showIn("Email not verified. Verify first, then login again.");
+      return;
+    }
 
-      try {
-        const userCred = await signInWithEmailAndPassword(auth, email, password);
+    try {
+      const snap = await getDoc(doc(db, "users", user.uid));
 
-        if (!userCred.user.emailVerified) {
-          showIn("Email not verified. Go to Signup page and use 'Resend Verification Email'.");
-          return;
-        }
-
-        const snap = await getDoc(doc(db, "users", userCred.user.uid));
-        const profDone = snap.exists() && snap.data().profileCompleted === true;
-
-        showOk("Login success ✅ Redirecting...");
-        setTimeout(() => {
-          window.location.href = profDone ? "dashboard.html" : "profile.html";
-        }, 700);
-
-      } catch (err) {
-        // Better message for invalid credential
-        if (err.code === "auth/invalid-credential") {
-          showEr("Invalid email or password. Use Forgot Password if you don’t remember it.");
-          return;
-        }
-        showEr(err.code + " : " + err.message);
-        console.error(err);
-      }
-    });
-
-    // FORGOT PASSWORD
-    document.getElementById("forgotBtn").addEventListener("click", async () => {
-      const email = document.getElementById("email").value.trim();
-
-      if (!email) {
-        showIn("Enter your email first, then click Forgot Password.");
+      // If doc missing, send to profile creation
+      if (!snap.exists()) {
+        window.location.href = "profile.html";
         return;
       }
 
-      try {
-        await sendPasswordResetEmail(auth, email, {
-          url: "https://jagrajsingh131.github.io/duplicate-contacts/index.html"
-        });
-        showOk("Password reset link sent ✅ Check Inbox/Spam.");
-      } catch (err) {
-        showEr(err.code + " : " + err.message);
-      }
-    });
+      const profileDone = snap.data().profileCompleted === true;
+      window.location.href = profileDone ? "dashboard.html" : "profile.html";
 
-    // LOGOUT
-    document.getElementById("logoutBtn").addEventListener("click", async () => {
-      await signOut(auth);
-      showOk("Logged out ✅");
-    });
-  </script>
+    } catch (e) {
+      showEr("Firestore error: " + (e.code || "") + " | " + (e.message || e));
+      console.error(e);
+    }
+  });
+
+  // LOGIN: only sign in (no Firestore here)
+  document.getElementById("loginForm").addEventListener("submit", async (e) => {
+    e.preventDefault();
+
+    const email = document.getElementById("email").value.trim();
+    const pass = document.getElementById("password").value;
+
+    try {
+      document.getElementById("loginBtn").disabled = true;
+      document.getElementById("loginBtn").textContent = "Logging in...";
+
+      await signInWithEmailAndPassword(auth, email, pass);
+      showOk("Login success ✅ Loading profile...");
+
+    } catch (e2) {
+      if (e2.code === "auth/invalid-credential") {
+        showEr("Invalid email or password. Use Forgot Password if needed.");
+      } else {
+        showEr((e2.code || "error") + " : " + (e2.message || e2));
+      }
+      console.error(e2);
+    } finally {
+      document.getElementById("loginBtn").disabled = false;
+      document.getElementById("loginBtn").textContent = "Login";
+    }
+  });
+
+  // FORGOT PASSWORD
+  document.getElementById("forgotBtn").addEventListener("click", async () => {
+    const email = document.getElementById("email").value.trim();
+    if (!email) { showIn("Enter email first then click Forgot Password."); return; }
+
+    try {
+      await sendPasswordResetEmail(auth, email, {
+        url: "https://jagrajsingh131.github.io/duplicate-contacts/index.html"
+      });
+      showOk("Password reset link sent ✅ Check Inbox/Spam.");
+    } catch (e3) {
+      showEr((e3.code || "error") + " : " + (e3.message || e3));
+    }
+  });
+
+  // LOGOUT
+  document.getElementById("logoutBtn").addEventListener("click", async () => {
+    await signOut(auth);
+    showOk("Logged out ✅");
+  });
+</script>
 
 </body>
 </html>
