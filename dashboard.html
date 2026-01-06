@@ -2,71 +2,58 @@
 <html>
 <head>
   <title>Dashboard</title>
-  <link rel="stylesheet" href="./style.css">
-  <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
 <div class="card">
-  <div class="brand">Data Duplicater</div>
+  <h2>Data Duplicater</h2>
 
-  <input type="file" id="file">
+  <textarea id="input" rows="6" placeholder="Paste data here"></textarea>
+  <textarea id="output" rows="6" placeholder="Duplicated output"></textarea>
 
-  <div id="progressWrap" style="display:none;margin-top:10px;">
-    <div class="small" id="progressText">Processing...</div>
-    <div style="height:12px;background:#e5e7eb;border-radius:999px;">
-      <div id="progressBar" style="height:12px;width:0%;background:#4f46e5;"></div>
-    </div>
-  </div>
-
-  <textarea id="out" rows="8" style="margin-top:12px"></textarea>
-
-  <div class="btnRow">
-    <button class="primary" id="dup">Duplicate</button>
-    <button class="success" id="down">Download CSV</button>
-  </div>
+  <button id="dup">Duplicate</button>
+  <button id="copy">Copy</button>
+  <button id="download">Download CSV</button>
+  <button id="logout">Logout</button>
 </div>
 
-<script>
-  const bar = document.getElementById("progressBar");
-  const txt = document.getElementById("progressText");
-  const wrap = document.getElementById("progressWrap");
-  let data = [];
+<script type="module">
+  import { getUser, logoutLocal, saveDuplicatedData, getDuplicatedData } from "./local.js";
 
-  function show(msg, pct) {
-    wrap.style.display = "block";
-    txt.textContent = msg;
-    bar.style.width = pct + "%";
-  }
+  if (!getUser()) location.href = "index.html";
+
+  output.value = getDuplicatedData();
 
   document.getElementById("dup").onclick = () => {
-    const f = file.files[0];
-    if (!f) return alert("Upload file");
+    const lines = input.value.split("\n").filter(l => l.trim());
+    const result = [];
 
-    show("Reading file...", 10);
-
-    Papa.parse(f, {
-      complete: res => {
-        show("Duplicating rows...", 60);
-        data = [];
-        res.data.forEach(r => {
-          if (r.join("").trim()) {
-            data.push(r);
-            data.push(r);
-          }
-        });
-        out.value = data.map(r => r.join(",")).join("\n");
-        show("Done ✅", 100);
-      }
+    lines.forEach(l => {
+      result.push(l);
+      result.push(l);
     });
+
+    output.value = result.join("\n");
+    saveDuplicatedData(output.value);
   };
 
-  document.getElementById("down").onclick = () => {
-    const blob = new Blob([out.value], { type: "text/csv" });
+  document.getElementById("copy").onclick = () => {
+    navigator.clipboard.writeText(output.value);
+    alert("Copied ✅");
+  };
+
+  document.getElementById("download").onclick = () => {
+    const blob = new Blob([output.value], { type: "text/csv" });
     const a = document.createElement("a");
     a.href = URL.createObjectURL(blob);
     a.download = "duplicated.csv";
     a.click();
+  };
+
+  document.getElementById("logout").onclick = () => {
+    logoutLocal();
+    location.href = "index.html";
   };
 </script>
 
