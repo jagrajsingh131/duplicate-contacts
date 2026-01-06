@@ -72,10 +72,24 @@
     document.getElementById("email").value = user.email || "";
 
     try {
-      const snap = await getDoc(doc(db, "users", uid));
-      if (snap.exists()) {
+      const refDoc = doc(db, "users", uid);
+      const snap = await getDoc(refDoc);
+
+      if (!snap.exists()) {
+        // Create doc if missing
+        await setDoc(refDoc, {
+          name: "",
+          phone: "",
+          email: user.email || "",
+          age: null,
+          photoURL: "",
+          googleSheetUrl: "",
+          profileCompleted: false
+        });
+      } else {
         const d = snap.data();
 
+        // ✅ If profile already completed → go dashboard instantly
         if (d.profileCompleted === true) {
           window.location.href = "dashboard.html";
           return;
@@ -85,15 +99,8 @@
         document.getElementById("phone").value = d.phone || "";
         document.getElementById("age").value = d.age || "";
         document.getElementById("sheet").value = d.googleSheetUrl || "";
-      } else {
-        // if doc missing, create basic doc now
-        await setDoc(doc(db, "users", uid), {
-          name: "",
-          phone: "",
-          email: user.email || "",
-          profileCompleted: false
-        });
       }
+
     } catch (e) {
       showEr("Firestore error: " + (e.code || "") + " | " + (e.message || e));
       console.error(e);
@@ -137,7 +144,7 @@
 
       await updateDoc(doc(db, "users", uid), payload);
 
-      showOk("Profile saved ✅ Redirecting...");
+      showOk("Profile saved ✅ Redirecting to dashboard...");
       setTimeout(() => window.location.href = "dashboard.html", 700);
 
     } catch (e2) {
