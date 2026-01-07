@@ -104,3 +104,19 @@ button{
 @media(max-width:800px){
   .row{grid-template-columns:1fr}
 }
+
+.card-md { max-width: 560px; }
+.card-lg { max-width: 720px; }
+.card-xl { max-width: 1000px; }
+
+.tile{
+  background:#fff;
+  border:1px solid #e2e8f0;
+  border-radius:14px;
+  padding:14px;
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+}
+.tileTitle{ font-weight:800; font-size:16px; }
+.tileSub{ color:#64748b; font-size:13px; margin-bottom:6px; }
