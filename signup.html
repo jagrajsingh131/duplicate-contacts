@@ -3,62 +3,94 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Signup | Buckup-Media Data Duplicater</title>
+  <title>Signup | Buckup-Media</title>
   <link rel="stylesheet" href="./style.css?v=3">
 </head>
-<body>
+<body class="authBody">
 
-<div class="card card-lg">
-  <div class="brand">Buckup-Media Data Duplicater</div>
-  <div class="sub">Create account + verify email</div>
-
-  <form id="signupForm">
-    <label>Full Name</label>
-    <input id="name" required placeholder="Your full name">
-
-    <div class="row">
-      <div>
-        <label>Email</label>
-        <input id="email" type="email" required placeholder="example@gmail.com">
+  <div class="authShell">
+    <!-- Left panel -->
+    <section class="authLeft">
+      <div class="authBrand">
+        <div class="authLogo">BM</div>
+        <div>
+          <div class="authBrandName">Buckup-Media</div>
+          <div class="authBrandSub">Create your portal account</div>
+        </div>
       </div>
-      <div>
-        <label>Phone</label>
-        <input id="phone" required placeholder="Phone number">
-      </div>
-    </div>
 
-    <div class="row">
-      <div>
-        <label>Password</label>
-        <input id="password" type="password" required placeholder="Create password">
-      </div>
-      <div>
-        <label>Confirm Password</label>
-        <input id="confirmPassword" type="password" required placeholder="Confirm password">
-      </div>
-    </div>
+      <div class="authHero">
+        <div class="authTag">One account • Full access</div>
+        <h1>Create your portal access</h1>
+        <p>
+          Signup to access your dashboard. After creating account, verify your email using the link sent to your inbox.
+        </p>
 
-    <div class="btnRow">
-      <button class="primary" type="submit" id="createBtn">Create Account</button>
-      <button class="ghost" type="button" onclick="window.location.href='index.html'">Go to Login</button>
-    </div>
-
-    <div id="resendWrap" style="display:none;">
-      <div class="hr"></div>
-      <div class="sub" style="margin:0 0 6px;">Not verified? Resend verification.</div>
-      <div class="btnRow" style="margin-top:10px">
-        <button class="info" type="button" id="resendBtn">Resend Verification Email</button>
+        <div class="authPoints">
+          <div class="point"><span class="dot"></span> Secure email verification</div>
+          <div class="point"><span class="dot"></span> Profile & Payment sections</div>
+          <div class="point"><span class="dot"></span> Fast local storage experience</div>
+        </div>
       </div>
-      <div class="small" style="margin-top:8px;color:#64748b;">
-        Enter <b>email + password</b> above for resend.
-      </div>
-    </div>
 
-    <div id="ok" class="msg ok"></div>
-    <div id="in" class="msg info"></div>
-    <div id="er" class="msg err"></div>
-  </form>
-</div>
+      <div class="authFoot">© Buckup-Media • Professional Portal</div>
+    </section>
+
+    <!-- Right signup card -->
+    <section class="authRight">
+      <div class="authCard">
+        <div class="authCardTop">
+          <div class="authCardTitle">Create account</div>
+          <div class="authCardSub">Verify email after signup</div>
+        </div>
+
+        <form id="signupForm" class="authForm">
+
+          <label>Full Name</label>
+          <input id="name" required placeholder="Your full name">
+
+          <div class="auth2col">
+            <div>
+              <label>Email</label>
+              <input id="email" type="email" required placeholder="example@gmail.com">
+            </div>
+            <div>
+              <label>Phone</label>
+              <input id="phone" required placeholder="Phone number">
+            </div>
+          </div>
+
+          <div class="auth2col">
+            <div>
+              <label>Password</label>
+              <input id="password" type="password" required placeholder="Create password">
+            </div>
+            <div>
+              <label>Confirm</label>
+              <input id="confirmPassword" type="password" required placeholder="Confirm password">
+            </div>
+          </div>
+
+          <button class="authPrimary" type="submit" id="createBtn">Create Account</button>
+
+          <div class="authRow">
+            <button class="authLink" type="button" id="goLoginBtn">Already have account? Login</button>
+          </div>
+
+          <div id="resendWrap" class="resendWrap">
+            <div class="resendTop">Not verified? Resend verification</div>
+            <button class="authGhost" type="button" id="resendBtn">Resend Verification Email</button>
+            <div class="authHint">Enter email + password above for resend.</div>
+          </div>
+
+          <div id="ok" class="authMsg ok"></div>
+          <div id="in" class="authMsg info"></div>
+          <div id="er" class="authMsg err"></div>
+
+        </form>
+      </div>
+    </section>
+  </div>
 
 <script type="module">
   import { auth } from "./firebase.js";
@@ -87,6 +119,7 @@
     let left = sec;
     resendBtn.disabled = true;
     resendBtn.textContent = `Resend in ${left}s`;
+
     if (cooldownTimer) clearInterval(cooldownTimer);
     cooldownTimer = setInterval(() => {
       left -= 1;
@@ -100,6 +133,10 @@
       }
     }, 1000);
   }
+
+  document.getElementById("goLoginBtn").addEventListener("click", () => {
+    window.location.href = "index.html";
+  });
 
   document.getElementById("signupForm").addEventListener("submit", async (e) => {
     e.preventDefault();
@@ -125,14 +162,14 @@
       resendWrap.style.display = "block";
       startCooldown(60);
 
-    } catch (err) {
-      if (err.code === "auth/email-already-in-use") {
+    } catch (err2) {
+      if (err2.code === "auth/email-already-in-use") {
         resendWrap.style.display = "block";
         showIn("Email already registered. Enter password then click resend.");
         return;
       }
-      showEr(err.code + " : " + err.message);
-      console.error(err);
+      showEr(err2.code + " : " + err2.message);
+      console.error(err2);
     } finally {
       createBtn.disabled = false;
       createBtn.textContent = "Create Account";
@@ -168,10 +205,10 @@
       showOk("Verification email resent ✅ Check Inbox/Spam.");
       startCooldown(60);
 
-    } catch (err) {
+    } catch (err3) {
       resendBtn.disabled = false;
       resendBtn.textContent = "Resend Verification Email";
-      showEr((err.code || "error") + " : " + (err.message || err));
+      showEr((err3.code || "error") + " : " + (err3.message || err3));
     }
   });
 </script>
