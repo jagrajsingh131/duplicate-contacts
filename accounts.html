@@ -38,38 +38,30 @@
       </div>
     </div>
 
-    <!-- ✅ FILTER BAR -->
-    <div class="accFilters">
-      <div class="accFilt">
-        <label class="toolLabel">Tag</label>
-        <select id="tagFilter" class="toolInput">
-          <option value="">All</option>
-          <option value="locked">locked</option>
-          <option value="cod issue">cod issue</option>
-          <option value="incorrect password">incorrect password</option>
-          <option value="__none__">No tag</option>
-        </select>
-      </div>
+    <!-- ✅ BIG COMPANY FILTER BAR -->
+    <div class="filtersBar">
+      <div class="filtersLeft">
+        <div class="pillGroup" id="tagPills">
+          <button class="pill active" data-tag="">All</button>
+          <button class="pill" data-tag="locked">Locked</button>
+          <button class="pill" data-tag="cod issue">COD Issue</button>
+          <button class="pill" data-tag="incorrect password">Incorrect Password</button>
+          <button class="pill" data-tag="__none__">No Tag</button>
+        </div>
 
-      <div class="accFilt">
-        <label class="toolLabel">Created By</label>
-        <select id="userFilter" class="toolInput">
+        <select id="userFilter" class="toolInput compact">
           <option value="">All users</option>
         </select>
+
+        <div class="datePack">
+          <input id="fromDate" type="date" class="toolInput compact">
+          <span class="dateSep">→</span>
+          <input id="toDate" type="date" class="toolInput compact">
+        </div>
       </div>
 
-      <div class="accFilt">
-        <label class="toolLabel">From</label>
-        <input id="fromDate" type="date" class="toolInput">
-      </div>
-
-      <div class="accFilt">
-        <label class="toolLabel">To</label>
-        <input id="toDate" type="date" class="toolInput">
-      </div>
-
-      <div class="accFilt accFiltBtns">
-        <button class="toolBtn ghost" id="clearFilters">Clear Filters</button>
+      <div class="filtersRight">
+        <button class="toolBtn ghost" id="clearFilters">Clear</button>
       </div>
     </div>
 
@@ -83,12 +75,10 @@
             <th>Name</th>
             <th>Phone</th>
             <th>Tag</th>
-            <th>Created By</th>
-            <th>Added</th>
           </tr>
         </thead>
         <tbody id="rows">
-          <tr><td colspan="5" style="padding:14px;color:#64748b;">Loading…</td></tr>
+          <tr><td colspan="3" style="padding:14px;color:#64748b;">Loading…</td></tr>
         </tbody>
       </table>
     </div>
@@ -116,8 +106,7 @@ Dhananjay Butala	9884155629
 Kajal Shenoy	8438525192"></textarea>
 
     <div class="toolHint">
-      ✅ Supports TAB or spaces. <b>Phone must be last digits</b> in the line.
-      Names can contain double spaces and will stay correct.
+      ✅ Phone must be the last digits in each line. Names can contain double spaces.
     </div>
 
     <div class="btnRow" style="margin-top:12px; display:flex; gap:10px; flex-wrap:wrap;">
@@ -142,10 +131,26 @@ Kajal Shenoy	8438525192"></textarea>
     </div>
 
     <div class="detailBox">
-      <div class="dRow"><span>Name</span><b id="dName">—</b></div>
-      <div class="dRow"><span>Phone</span><b id="dPhone">—</b></div>
+      <div class="dRow">
+        <span>Name</span>
+        <div class="dRight">
+          <b id="dName">—</b>
+          <button class="copyMini" id="copyNameBtn">Copy</button>
+        </div>
+      </div>
+
+      <div class="dRow">
+        <span>Phone</span>
+        <div class="dRight">
+          <b id="dPhone">—</b>
+          <button class="copyMini" id="copyPhoneBtn">Copy</button>
+        </div>
+      </div>
+
+      <!-- ✅ ONLY HERE we show created by and time -->
       <div class="dRow"><span>Created At</span><b id="dCreated">—</b></div>
-      <div class="dRow"><span>Added By</span><b id="dBy">—</b></div>
+      <div class="dRow"><span>Created By</span><b id="dBy">—</b></div>
+
       <div class="dRow"><span>Current Tag</span><b id="dTag">—</b></div>
 
       <hr style="border:none;border-top:1px solid #e2e8f0;margin:12px 0;">
@@ -160,7 +165,6 @@ Kajal Shenoy	8438525192"></textarea>
 
       <div class="btnRow" style="margin-top:12px; display:flex; gap:10px; flex-wrap:wrap;">
         <button class="toolBtn primary" id="saveTag">Save Tag</button>
-        <button class="toolBtn info" id="copyPhone">Copy Phone</button>
       </div>
 
       <div id="detailOk" class="toolMsg ok"></div>
@@ -178,6 +182,14 @@ Kajal Shenoy	8438525192"></textarea>
     serverTimestamp
   } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
+  // session check
+  const sess = getSession();
+  if (!sess) location.href = "index.html";
+
+  onAuthStateChanged(auth, (user) => {
+    if (!user || !user.emailVerified) location.href = "index.html";
+  });
+
   // UI messages
   const ok = document.getElementById("ok");
   const er = document.getElementById("er");
@@ -188,18 +200,10 @@ Kajal Shenoy	8438525192"></textarea>
   const search = document.getElementById("search");
 
   // filters
-  const tagFilter = document.getElementById("tagFilter");
   const userFilter = document.getElementById("userFilter");
   const fromDate = document.getElementById("fromDate");
   const toDate = document.getElementById("toDate");
-
-  // session check
-  const sess = getSession();
-  if (!sess) location.href = "index.html";
-
-  onAuthStateChanged(auth, (user) => {
-    if (!user || !user.emailVerified) location.href = "index.html";
-  });
+  let selectedTag = "";
 
   document.getElementById("homeBtn").onclick = () => location.href = "home.html";
 
@@ -236,21 +240,44 @@ Kajal Shenoy	8438525192"></textarea>
 
   function render(list){
     if (!list.length){
-      rows.innerHTML = `<tr><td colspan="5" style="padding:14px;color:#64748b;">No accounts match.</td></tr>`;
+      rows.innerHTML = `<tr><td colspan="3" style="padding:14px;color:#64748b;">No accounts match.</td></tr>`;
       return;
     }
+
     rows.innerHTML = list.map(a => `
       <tr class="accRow" data-id="${a.id}">
-        <td>${(a.name || "—")}</td>
-        <td class="mono">${a.phone || a.id}</td>
+        <td>
+          <div class="cellCopy">
+            <span>${(a.name || "—")}</span>
+            <button class="copyMini" data-copy="${(a.name || "")}">Copy</button>
+          </div>
+        </td>
+
+        <td class="mono">
+          <div class="cellCopy">
+            <span>${a.phone || a.id}</span>
+            <button class="copyMini" data-copy="${a.phone || a.id}">Copy</button>
+          </div>
+        </td>
+
         <td>${badge(a.tag)}</td>
-        <td>${(a.createdByName || "—")}</td>
-        <td>${fmtTime(a.createdAt)}</td>
       </tr>
     `).join("");
 
+    // row click opens details
     document.querySelectorAll(".accRow").forEach(tr=>{
       tr.onclick = ()=> openDetails(tr.dataset.id);
+    });
+
+    // copy buttons do NOT open details
+    document.querySelectorAll(".copyMini").forEach(btn=>{
+      btn.onclick = async (e)=>{
+        e.stopPropagation();
+        const val = btn.dataset.copy || "";
+        if (!val) return;
+        await navigator.clipboard.writeText(val);
+        showOk("Copied ✅");
+      };
     });
   }
 
@@ -264,14 +291,13 @@ Kajal Shenoy	8438525192"></textarea>
     userFilter.innerHTML = `<option value="">All users</option>` +
       Array.from(names).sort().map(n => `<option value="${n}">${n}</option>`).join("");
 
-    userFilter.value = current; // keep selection if possible
+    userFilter.value = current;
   }
 
   function applyFilters(){
     const q = search.value.trim().toLowerCase();
-    const t = tagFilter.value;
+    const t = selectedTag;
     const u = userFilter.value;
-
     const from = fromDate.value || "";
     const to = toDate.value || "";
 
@@ -284,7 +310,7 @@ Kajal Shenoy	8438525192"></textarea>
       // search
       if (q && !(name.includes(q) || phone.includes(q) || tag.includes(q))) return false;
 
-      // tag filter
+      // tag pill
       if (t === "__none__") {
         if ((a.tag || "").trim() !== "") return false;
       } else if (t) {
@@ -294,12 +320,11 @@ Kajal Shenoy	8438525192"></textarea>
       // user filter
       if (u && by !== u) return false;
 
-      // date filter
+      // date range
       const d = dateOnly(a.createdAt);
-      if (from && d && d < from) return false;
-      if (to && d && d > to) return false;
-      // if createdAt missing, keep it unless date filters are strict:
       if ((from || to) && !d) return false;
+      if (from && d < from) return false;
+      if (to && d > to) return false;
 
       return true;
     });
@@ -321,29 +346,40 @@ Kajal Shenoy	8438525192"></textarea>
 
   startListener();
 
+  // pills
+  document.querySelectorAll("#tagPills .pill").forEach(p=>{
+    p.onclick = ()=>{
+      document.querySelectorAll("#tagPills .pill").forEach(x=>x.classList.remove("active"));
+      p.classList.add("active");
+      selectedTag = p.dataset.tag || "";
+      applyFilters();
+    };
+  });
+
+  // inputs
   search.addEventListener("input", applyFilters);
-  tagFilter.addEventListener("change", applyFilters);
   userFilter.addEventListener("change", applyFilters);
   fromDate.addEventListener("change", applyFilters);
   toDate.addEventListener("change", applyFilters);
 
   document.getElementById("clearFilters").onclick = () => {
     search.value = "";
-    tagFilter.value = "";
     userFilter.value = "";
     fromDate.value = "";
     toDate.value = "";
+    selectedTag = "";
+    document.querySelectorAll("#tagPills .pill").forEach(x=>x.classList.remove("active"));
+    document.querySelector('#tagPills .pill[data-tag=""]').classList.add("active");
     applyFilters();
   };
 
   document.getElementById("refreshBtn").onclick = () => { showOk("Refreshed ✅"); startListener(); };
 
-  // Add Modal
+  // ADD MODAL
   const addModal = document.getElementById("addModal");
   const pasteBox = document.getElementById("pasteBox");
   const addMsg = document.getElementById("addMsg");
   const addErr = document.getElementById("addErr");
-
   const showAddOk = (t)=>{ addMsg.style.display="block"; addErr.style.display="none"; addMsg.textContent=t; };
   const showAddEr = (t)=>{ addErr.style.display="block"; addMsg.style.display="none"; addErr.textContent=t; };
 
@@ -355,22 +391,18 @@ Kajal Shenoy	8438525192"></textarea>
   document.getElementById("closeAdd").onclick = ()=> addModal.style.display="none";
   document.getElementById("clearPaste").onclick = ()=> pasteBox.value = "";
 
-  // ✅ NEW parser: phone is LAST digits, name is everything before it (keeps spaces)
+  // ✅ parser: phone is last digits, name is everything before it
   function parseAccounts(text){
     const lines = text.split(/\r?\n/).filter(l => l.trim().length > 0);
     const out = [];
-
     for (const raw of lines){
-      const line = raw.replace(/\r/g,""); // safe
-      const m = line.match(/(\d{6,})\s*$/); // last digits at end
+      const line = raw.replace(/\r/g,"");
+      const m = line.match(/(\d{6,})\s*$/);
       if (!m) continue;
-
       const phone = m[1].replace(/\D/g,"");
       if (!phone) continue;
-
-      const name = line.slice(0, m.index).trim(); // keep inner spacing
+      const name = line.slice(0, m.index).trim();
       if (!name) continue;
-
       out.push({ name, phone });
     }
     return out;
@@ -381,7 +413,7 @@ Kajal Shenoy	8438525192"></textarea>
     addErr.style.display="none";
 
     const items = parseAccounts(pasteBox.value);
-    if (!items.length) return showAddEr("No valid accounts found. Make sure phone is last digits in each line.");
+    if (!items.length) return showAddEr("No valid accounts found. Phone must be at end of each line.");
 
     const prof = getProfileLocal() || {};
     const createdByName = prof.name || "—";
@@ -390,7 +422,7 @@ Kajal Shenoy	8438525192"></textarea>
     let added = 0, skipped = 0;
 
     for (const it of items){
-      const id = it.phone; // shared unique key by phone
+      const id = it.phone;
       const ref = doc(db, "accounts", id);
 
       try{
@@ -419,15 +451,14 @@ Kajal Shenoy	8438525192"></textarea>
       }
     }
 
-    showAddOk(`Saved ✅ Added: ${added} | Skipped (already exists): ${skipped}`);
+    showAddOk(`Saved ✅ Added: ${added} | Skipped: ${skipped}`);
     pasteBox.value = "";
   };
 
-  // Details + Tag update
+  // DETAILS MODAL
   const detailModal = document.getElementById("detailModal");
   const detailOk = document.getElementById("detailOk");
   const detailEr = document.getElementById("detailEr");
-
   const showDetOk = (t)=>{ detailOk.style.display="block"; detailEr.style.display="none"; detailOk.textContent=t; };
   const showDetEr = (t)=>{ detailEr.style.display="block"; detailOk.style.display="none"; detailEr.textContent=t; };
 
@@ -461,8 +492,8 @@ Kajal Shenoy	8438525192"></textarea>
 
   document.getElementById("saveTag").onclick = async ()=>{
     if (!currentId) return;
-
     const tag = document.getElementById("tagSelect").value;
+
     try{
       await updateDoc(doc(db, "accounts", currentId), {
         tag,
@@ -476,13 +507,16 @@ Kajal Shenoy	8438525192"></textarea>
     }
   };
 
-  document.getElementById("copyPhone").onclick = async ()=>{
-    try{
-      await navigator.clipboard.writeText(currentId || "");
-      showDetOk("Phone copied ✅");
-    }catch{
-      showDetEr("Copy failed.");
-    }
+  document.getElementById("copyNameBtn").onclick = async ()=>{
+    const v = document.getElementById("dName").textContent || "";
+    await navigator.clipboard.writeText(v);
+    showDetOk("Name copied ✅");
+  };
+
+  document.getElementById("copyPhoneBtn").onclick = async ()=>{
+    const v = document.getElementById("dPhone").textContent || "";
+    await navigator.clipboard.writeText(v);
+    showDetOk("Phone copied ✅");
   };
 </script>
 
