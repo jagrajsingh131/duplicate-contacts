@@ -1,9 +1,9 @@
 const K_SESSION = "bm_session";
 const K_PROFILE = "bm_profile";
-const K_DUP = "bm_duplicate_last";
+const K_DUP_LAST = "bm_dup_last";
 
 export function saveSession(session) {
-  localStorage.setItem(K_SESSION, JSON.stringify(session));
+  localStorage.setItem(K_SESSION, JSON.stringify(session)); // {uid,email}
 }
 export function getSession() {
   const s = localStorage.getItem(K_SESSION);
@@ -25,8 +25,11 @@ export function clearProfileLocal() {
 }
 
 export function saveDuplicatedLocal(text) {
-  localStorage.setItem(K_DUP, text);
+  localStorage.setItem(K_DUP_LAST, text);
 }
 export function getDuplicatedLocal() {
-  return localStorage.getItem(K_DUP) || "";
+  return localStorage.getItem(K_DUP_LAST) || "";
+}
+export function clearDuplicatedLocal() {
+  localStorage.removeItem(K_DUP_LAST);
 }
