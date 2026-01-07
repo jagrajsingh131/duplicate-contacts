@@ -4,7 +4,7 @@
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Wallet | Buckup-Media</title>
-  <link rel="stylesheet" href="./style.css?v=3">
+  <link rel="stylesheet" href="./style.css?v=99">
 </head>
 
 <body class="adminShell">
@@ -39,6 +39,15 @@
       </div>
 
       <div class="topRight">
+        <!-- Theme switch -->
+        <div class="themeSwitch">
+          <span class="themeLabel">Theme</span>
+          <label class="switch">
+            <input type="checkbox" id="themeToggle">
+            <span class="slider"></span>
+          </label>
+        </div>
+
         <span class="chip" id="verChip">Verified</span>
         <button class="toolBtn ghost" id="refreshBtn">Refresh</button>
       </div>
@@ -48,11 +57,14 @@
       <section class="page show">
 
         <div class="walletGrid">
-          <div class="walletHeroCard">
+          <div class="walletHeroCard hoverParallax" data-tilt>
             <div class="wHead">
               <div>
                 <div class="wLabel">Available Balance</div>
-                <div class="wBal" id="bal">₹ 0</div>
+
+                <!-- Animated gradient balance -->
+                <div class="wBal wBalGlow" id="bal">₹ —</div>
+
                 <div class="wMetaLine" id="rateLine">Rate: ₹ — / account</div>
               </div>
               <div class="wBadge">₹</div>
@@ -61,15 +73,15 @@
             <div class="wMiniStats">
               <div class="wStat">
                 <div class="wStatLabel">Credits</div>
-                <div class="wStatVal" id="credits">₹ 0</div>
+                <div class="wStatVal" id="credits">₹ —</div>
               </div>
               <div class="wStat">
                 <div class="wStatLabel">Deductions</div>
-                <div class="wStatVal" id="debits">₹ 0</div>
+                <div class="wStatVal" id="debits">₹ —</div>
               </div>
               <div class="wStat">
                 <div class="wStatLabel">Net</div>
-                <div class="wStatVal" id="net">₹ 0</div>
+                <div class="wStatVal" id="net">₹ —</div>
               </div>
             </div>
 
@@ -78,7 +90,7 @@
             </div>
           </div>
 
-          <div class="walletHeroCard soft">
+          <div class="walletHeroCard soft hoverParallax" data-tilt>
             <div class="wHead">
               <div>
                 <div class="wLabel">Statement Filters</div>
@@ -112,7 +124,7 @@
           </div>
         </div>
 
-        <div class="cardX" style="margin-top:16px;">
+        <div class="cardX hoverParallax" data-tilt style="margin-top:16px;">
           <div class="cardXTop">
             <div>
               <div class="cardXTitle">Statement</div>
@@ -138,7 +150,12 @@
                 </tr>
               </thead>
               <tbody id="rows">
-                <tr><td colspan="5" style="padding:14px;color:#64748b;">Loading…</td></tr>
+                <!-- Skeleton loading -->
+                <tr class="skRow"><td colspan="5">
+                  <div class="skLine"></div>
+                  <div class="skLine w80"></div>
+                  <div class="skLine w60"></div>
+                </td></tr>
               </tbody>
             </table>
           </div>
@@ -156,7 +173,23 @@
     doc, getDoc, collection, query, orderBy, onSnapshot
   } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-  // Coin sound (no file) — only if user clicked Wallet
+  // Require login
+  const sess = getSession();
+  if (!sess) location.href = "index.html";
+
+  onAuthStateChanged(auth, (user) => {
+    if (!user) location.href = "index.html";
+    if (!user.emailVerified) location.href = "index.html";
+  });
+
+  // NAV
+  document.getElementById("goHome").onclick = ()=> location.href = "home.html";
+  document.getElementById("goAccounts").onclick = ()=> location.href = "accounts.html";
+  document.getElementById("goTool").onclick = ()=> location.href = "dashboard.html";
+  document.getElementById("goAdmin").onclick = ()=> location.href = "admin.html";
+  document.getElementById("refreshBtn").onclick = ()=> location.reload();
+
+  // Coin sound (no file)
   function playCoin(){
     try{
       const AudioCtx = window.AudioContext || window.webkitAudioContext;
@@ -187,26 +220,26 @@
     }catch{}
   }
 
+  // Play coin sound only if coming from Home/Wallet click
   if (sessionStorage.getItem("bm_wallet_sound") === "1") {
     sessionStorage.removeItem("bm_wallet_sound");
     setTimeout(playCoin, 120);
   }
 
-  const sess = getSession();
-  if (!sess) location.href = "index.html";
+  // THEME TOGGLE
+  const themeToggle = document.getElementById("themeToggle");
+  (function initTheme(){
+    const saved = localStorage.getItem("bm_theme") || "dark";
+    document.documentElement.setAttribute("data-theme", saved);
+    themeToggle.checked = saved === "light";
+    themeToggle.addEventListener("change", () => {
+      const mode = themeToggle.checked ? "light" : "dark";
+      document.documentElement.setAttribute("data-theme", mode);
+      localStorage.setItem("bm_theme", mode);
+    });
+  })();
 
-  onAuthStateChanged(auth, (user) => {
-    if (!user) location.href = "index.html";
-    if (!user.emailVerified) location.href = "index.html";
-  });
-
-  // nav
-  document.getElementById("goHome").onclick = ()=> location.href = "home.html";
-  document.getElementById("goAccounts").onclick = ()=> location.href = "accounts.html";
-  document.getElementById("goTool").onclick = ()=> location.href = "dashboard.html";
-  document.getElementById("goAdmin").onclick = ()=> location.href = "admin.html";
-  document.getElementById("refreshBtn").onclick = ()=> location.reload();
-
+  // UI refs
   const er = document.getElementById("er");
   const rows = document.getElementById("rows");
   const miniSearch = document.getElementById("miniSearch");
@@ -221,8 +254,8 @@
   const toDate = document.getElementById("toDate");
 
   let allRuns = [];
-  let selectedRange = "3m";
 
+  // Helpers
   function fmtMoney(n){
     const x = Number(n || 0);
     return "₹ " + x.toLocaleString("en-IN");
@@ -243,31 +276,14 @@
     er.textContent = "";
   }
 
-  function setPresetRange(range){
-    selectedRange = range;
-    const now = new Date();
-    const start = new Date(now);
-
-    if (range === "3m") start.setMonth(start.getMonth() - 3);
-    if (range === "6m") start.setMonth(start.getMonth() - 6);
-
-    if (range === "all"){
-      fromDate.value = "";
-      toDate.value = "";
-      render();
-      return;
-    }
-
-    const yyyy = start.getFullYear();
-    const mm = String(start.getMonth()+1).padStart(2,"0");
-    const dd = String(start.getDate()).padStart(2,"0");
-    fromDate.value = `${yyyy}-${mm}-${dd}`;
-
-    const y2 = now.getFullYear();
-    const m2 = String(now.getMonth()+1).padStart(2,"0");
-    const d2 = String(now.getDate()).padStart(2,"0");
-    toDate.value = `${y2}-${m2}-${d2}`;
-    render();
+  function setSkeleton(){
+    rows.innerHTML = `
+      <tr class="skRow"><td colspan="5">
+        <div class="skLine"></div>
+        <div class="skLine w80"></div>
+        <div class="skLine w60"></div>
+      </td></tr>
+    `;
   }
 
   function withinRange(ts){
@@ -307,7 +323,6 @@
 
   function render(){
     clearErr();
-
     const list = allRuns
       .filter(r => withinRange(r.createdAt))
       .filter(r => matchesSearch(r));
@@ -328,12 +343,36 @@
     `).join("");
   }
 
-  // Pills
+  // Range pills
   document.querySelectorAll("#rangePills .pill").forEach(p=>{
     p.onclick = ()=>{
       document.querySelectorAll("#rangePills .pill").forEach(x=>x.classList.remove("active"));
       p.classList.add("active");
-      setPresetRange(p.dataset.range);
+
+      const range = p.dataset.range;
+      const now = new Date();
+      const start = new Date(now);
+
+      if (range === "3m") start.setMonth(start.getMonth() - 3);
+      if (range === "6m") start.setMonth(start.getMonth() - 6);
+
+      if (range === "all"){
+        fromDate.value = "";
+        toDate.value = "";
+        render();
+        return;
+      }
+
+      const yyyy = start.getFullYear();
+      const mm = String(start.getMonth()+1).padStart(2,"0");
+      const dd = String(start.getDate()).padStart(2,"0");
+      fromDate.value = `${yyyy}-${mm}-${dd}`;
+
+      const y2 = now.getFullYear();
+      const m2 = String(now.getMonth()+1).padStart(2,"0");
+      const d2 = String(now.getDate()).padStart(2,"0");
+      toDate.value = `${y2}-${m2}-${d2}`;
+      render();
     };
   });
 
@@ -344,6 +383,13 @@
   // Load wallet header
   async function loadHeader(){
     try{
+      // skeleton-like values
+      balEl.textContent = "₹ —";
+      creditsEl.textContent = "₹ —";
+      debitsEl.textContent = "₹ —";
+      netEl.textContent = "₹ —";
+      rateLine.textContent = "Rate: ₹ — / account";
+
       const w = await getDoc(doc(db, "wallets", sess.uid));
       const wallet = w.exists() ? w.data() : { balance:0, creditsTotal:0, debitsTotal:0 };
 
@@ -360,8 +406,10 @@
     }
   }
 
-  // Listen statement (wallets/{uid}/runs)
+  // Listen statement
   function listenRuns(){
+    setSkeleton();
+
     const qy = query(collection(db, "wallets", sess.uid, "runs"), orderBy("createdAt", "desc"));
     onSnapshot(qy, (snap)=>{
       allRuns = snap.docs.map(d => ({ id:d.id, ...d.data() }));
@@ -417,10 +465,26 @@
     downloadFile("wallet_statement.txt", lines.join("\n"));
   };
 
+  // ===== Hover parallax (subtle) =====
+  function initTilt(){
+    const cards = document.querySelectorAll("[data-tilt]");
+    cards.forEach(card=>{
+      card.addEventListener("mousemove", (e)=>{
+        const r = card.getBoundingClientRect();
+        const x = (e.clientX - r.left) / r.width - 0.5;
+        const y = (e.clientY - r.top) / r.height - 0.5;
+        card.style.transform = `perspective(900px) rotateX(${(-y*3).toFixed(2)}deg) rotateY(${(x*3).toFixed(2)}deg) translateY(-2px)`;
+      });
+      card.addEventListener("mouseleave", ()=>{
+        card.style.transform = `perspective(900px) rotateX(0deg) rotateY(0deg) translateY(0px)`;
+      });
+    });
+  }
+
   // Init
-  setPresetRange("3m");
   loadHeader();
   listenRuns();
+  initTilt();
 </script>
 
 </body>
