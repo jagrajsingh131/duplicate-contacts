@@ -4,11 +4,11 @@
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Signup | Buckup-Media Data Duplicater</title>
-  <link rel="stylesheet" href="./style.css">
+  <link rel="stylesheet" href="./style.css?v=3">
 </head>
 <body>
 
-<div class="card" style="max-width:600px">
+<div class="card card-lg">
   <div class="brand">Buckup-Media Data Duplicater</div>
   <div class="sub">Create account + verify email</div>
 
@@ -45,7 +45,7 @@
 
     <div id="resendWrap" style="display:none;">
       <div class="hr"></div>
-      <div class="sub" style="margin:0 0 6px;">Already registered / not verified? Resend verification.</div>
+      <div class="sub" style="margin:0 0 6px;">Not verified? Resend verification.</div>
       <div class="btnRow" style="margin-top:10px">
         <button class="info" type="button" id="resendBtn">Resend Verification Email</button>
       </div>
@@ -72,7 +72,6 @@
   const ok = document.getElementById("ok");
   const inf = document.getElementById("in");
   const er = document.getElementById("er");
-
   const resendWrap = document.getElementById("resendWrap");
   const resendBtn = document.getElementById("resendBtn");
   const createBtn = document.getElementById("createBtn");
@@ -105,8 +104,6 @@
   document.getElementById("signupForm").addEventListener("submit", async (e) => {
     e.preventDefault();
 
-    const name = document.getElementById("name").value.trim();
-    const phone = document.getElementById("phone").value.trim();
     const email = document.getElementById("email").value.trim();
     const pass = document.getElementById("password").value;
     const cp = document.getElementById("confirmPassword").value;
@@ -121,7 +118,6 @@
       createBtn.textContent = "Creating...";
 
       const userCred = await createUserWithEmailAndPassword(auth, email, pass);
-
       await sendEmailVerification(userCred.user, { url: CONTINUE_URL });
       await signOut(auth);
 
@@ -175,12 +171,7 @@
     } catch (err) {
       resendBtn.disabled = false;
       resendBtn.textContent = "Resend Verification Email";
-
-      if (err.code === "auth/invalid-credential") {
-        showEr("Wrong email or password. Use Forgot Password from Login page.");
-        return;
-      }
-      showEr(err.code + " : " + err.message);
+      showEr((err.code || "error") + " : " + (err.message || err));
     }
   });
 </script>
