@@ -2,11 +2,11 @@
 <html>
 <head>
   <title>Profile Setup</title>
-  <link rel="stylesheet" href="./style.css">
+  <link rel="stylesheet" href="./style.css?v=3">
 </head>
 <body>
 
-<div class="card" style="max-width:720px">
+<div class="card card-lg">
   <div class="brand">Complete Your Profile</div>
   <div class="sub">One-time setup</div>
 
@@ -26,6 +26,7 @@
     <label>Profile Photo</label>
     <input id="photo" type="file" accept="image/*">
 
+    <!-- PROGRESS BAR -->
     <div id="progressWrap" style="display:none;margin-top:14px;">
       <div class="small" id="progressText">Preparing...</div>
       <div style="height:12px;background:#e5e7eb;border-radius:999px;overflow:hidden;">
@@ -43,7 +44,7 @@
 
 <script type="module">
   import { auth, db, storage } from "./firebase.js";
-  import { getSession, saveProfileLocal, getProfileLocal } from "./cache.js";
+  import { getSession, getProfileLocal, saveProfileLocal } from "./cache.js";
   import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
   import { doc, setDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
   import { ref, uploadBytesResumable, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js";
@@ -53,19 +54,18 @@
   const wrap = document.getElementById("progressWrap");
   const err = document.getElementById("er");
 
-  // Must have local session
-  const session = getSession();
-  if (!session) location.href = "index.html";
+  // ensure logged in
+  const sess = getSession();
+  if (!sess) location.href = "index.html";
 
   let uid = null;
 
   onAuthStateChanged(auth, user => {
     if (!user) location.href = "index.html";
     if (!user.emailVerified) location.href = "index.html";
-
     uid = user.uid;
 
-    // 🔥 Load cached profile instantly
+    // ✅ instant fill from local
     const cached = getProfileLocal();
     if (cached) {
       name.value = cached.name || "";
@@ -119,12 +119,12 @@
         profileCompleted: true
       };
 
-      // ✅ Save locally FIRST (fast)
+      // ✅ local first (FAST)
       saveProfileLocal(profileData);
 
-      showProgress("Step 2/2: Saving...", 100);
+      showProgress("Step 2/2: Saving profile...", 100);
 
-      // ✅ Cloud backup (non-blocking)
+      // ✅ cloud backup, but not blocking
       setDoc(doc(db, "users", uid), profileData, { merge: true }).catch(console.warn);
 
       location.href = "dashboard.html";
