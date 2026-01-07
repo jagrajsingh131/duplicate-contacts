@@ -8,7 +8,7 @@
 
 <div class="card card-lg">
   <div class="brand">Payment Details</div>
-  <div class="sub">You can edit anytime</div>
+  <div class="sub">Fill once. After saving, edits are locked.</div>
 
   <form id="payForm">
     <label>Account Holder Name</label>
@@ -30,8 +30,9 @@
     <input id="upi" required placeholder="example@upi">
 
     <div class="btnRow">
-      <button class="primary" type="submit">Save</button>
+      <button class="primary" type="submit" id="saveBtn">Save</button>
       <button class="ghost" type="button" id="back">Back</button>
+      <button class="info" type="button" id="reqBtn" style="display:none;">Request details change</button>
     </div>
 
     <div id="ok" class="msg ok"></div>
@@ -52,6 +53,23 @@
   const sess = getSession();
   if (!sess) location.href = "index.html";
 
+  const reqBtn = document.getElementById("reqBtn");
+  const saveBtn = document.getElementById("saveBtn");
+
+  function setLocked(locked) {
+    ["holder","accno","bank","ifsc","branch","upi"].forEach(id => {
+      document.getElementById(id).disabled = locked;
+    });
+    saveBtn.style.display = locked ? "none" : "inline-block";
+    reqBtn.style.display = locked ? "inline-block" : "none";
+  }
+
+  function adminAllowedEdit() {
+    // local unlock flag set by admin page
+    const v = localStorage.getItem(`bm_${sess.uid}_payment_edit_allowed`);
+    return v === "1";
+  }
+
   onAuthStateChanged(auth, user => {
     if (!user || !user.emailVerified) location.href = "index.html";
 
@@ -64,6 +82,13 @@
       branch.value = p.branch || "";
       upi.value = p.upi || "";
     }
+
+    // Lock if already saved once AND admin not allowed
+    if (p?.locked === true && !adminAllowedEdit()) {
+      setLocked(true);
+    } else {
+      setLocked(false);
+    }
   });
 
   document.getElementById("payForm").addEventListener("submit", (e) => {
@@ -75,12 +100,22 @@
       bank: bank.value.trim(),
       ifsc: ifsc.value.trim(),
       branch: branch.value.trim(),
-      upi: upi.value.trim()
+      upi: upi.value.trim(),
+      locked: true, // lock after first save
+      requestedChange: false
     };
 
     savePaymentLocal(payment);
-    showOk("Saved locally ✅");
+    showOk("Saved ✅ Payment locked now.");
+    setLocked(true);
   });
+
+  reqBtn.onclick = () => {
+    const p = getPaymentLocal() || {};
+    p.requestedChange = true;
+    savePaymentLocal(p);
+    showOk("Request sent ✅ Admin will review.");
+  };
 
   document.getElementById("back").onclick = () => location.href = "home.html";
 </script>
