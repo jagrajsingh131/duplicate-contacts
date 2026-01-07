@@ -20,6 +20,7 @@
 
     <nav class="sideMenu">
       <button class="navItem active" data-page="overview">Overview</button>
+      <button class="navItem" data-page="accounts">Accounts</button>
       <button class="navItem" data-page="profile">Profile</button>
       <button class="navItem" data-page="work">My Work</button>
       <button class="navItem" data-page="tool">Data Duplicater</button>
@@ -71,7 +72,7 @@
           <div>
             <div class="heroTag">Welcome</div>
             <div class="heroH1" id="welcomeLine">Welcome back</div>
-            <div class="heroP">Manage account, payment, open sheet, and use duplicater from one dashboard.</div>
+            <div class="heroP">Manage accounts, profile, payment, open sheet, and use duplicater — all in one dashboard.</div>
           </div>
           <div class="heroStats">
             <div class="miniCard">
@@ -109,7 +110,7 @@
             <div class="cardXSub">One click access</div>
 
             <div class="quickBtns">
-              <button class="btnP" id="goProfileSetup">Edit Profile</button>
+              <button class="btnP" id="goAccounts">Open Accounts</button>
               <button class="btnI" id="goPaymentPage">Payment</button>
               <button class="btnS" id="goTool">Open Duplicater</button>
               <button class="btnG" id="goSheet">Open Sheet</button>
@@ -118,7 +119,7 @@
         </div>
       </section>
 
-      <!-- PROFILE (contains profile + payment like amazon) -->
+      <!-- PROFILE -->
       <section class="page" id="page_profile">
         <div class="grid2">
           <div class="cardX">
@@ -156,7 +157,7 @@
             </div>
 
             <div class="small muted" style="margin-top:10px;">
-              Admin unlock page (local): <b>admin.html</b>
+              Admin unlock (local): <b>admin.html</b>
             </div>
           </div>
         </div>
@@ -184,7 +185,7 @@
       <section class="page" id="page_tool">
         <div class="cardX">
           <div class="cardXTitle">Data Duplicater</div>
-          <div class="cardXSub">Open your existing tool page</div>
+          <div class="cardXSub">Open your duplicater tool page</div>
 
           <div class="quickBtns">
             <button class="btnS" id="openToolBtn">Open Duplicater Tool</button>
@@ -215,41 +216,32 @@
     if (!user || !user.emailVerified) location.href = "index.html";
   });
 
-  // ---- Load local data fast ----
   const profile = getProfileLocal();
   const payment = getPaymentLocal();
 
-  // If profile not completed, go profile setup ONCE
-  if (!profile?.profileCompleted) {
-    location.href = "profile.html";
-  }
+  // profile must be completed
+  if (!profile?.profileCompleted) location.href = "profile.html";
 
-  // Header user
   const nm = profile?.name || "User";
   document.getElementById("avatarName").textContent = nm;
   document.getElementById("avatarEmail").textContent = sess.email || "—";
   document.getElementById("welcomeLine").textContent = `Welcome, ${nm}`;
 
-  // Avatar circle initials
   const initials = (nm.trim().split(" ").filter(Boolean).slice(0,2).map(x=>x[0].toUpperCase()).join("")) || "U";
   document.getElementById("avatarCircle").textContent = initials;
 
-  // Profile avatar image (dicebear)
   const av = profile?.avatarUrl || `https://api.dicebear.com/9.x/bottts/svg?seed=${encodeURIComponent(nm)}`;
   document.getElementById("profileAvatar").src = av;
 
-  // Overview minis
   document.getElementById("miniProfile").textContent = profile?.profileCompleted ? "Completed ✅" : "Pending";
   document.getElementById("miniPayment").textContent = payment?.locked ? "Saved ✅" : "Not added";
   document.getElementById("miniSheet").textContent = profile?.googleSheetUrl ? "Linked ✅" : "Not linked";
 
-  // Profile page content
   document.getElementById("pName").textContent = profile?.name || "—";
   document.getElementById("pPhone").textContent = "Phone: " + (profile?.phone || "—");
   document.getElementById("pAge").textContent = "Age: " + (profile?.age ?? "—");
   document.getElementById("pEmail").textContent = sess.email || "—";
 
-  // Payment status
   const payStatus = document.getElementById("payStatus");
   const payReq = document.getElementById("payReq");
   if (payment?.locked) {
@@ -260,21 +252,28 @@
     payReq.textContent = "Add payment details once.";
   }
 
-  // Work page link
   document.getElementById("sheetLinkText").textContent = profile?.googleSheetUrl || "Not available";
 
-  // ---- Sidebar Navigation ----
+  // navigation (accounts opens a new page)
   const navBtns = document.querySelectorAll(".navItem");
-  const pages = {
-    overview: document.getElementById("page_overview"),
-    profile: document.getElementById("page_profile"),
-    work: document.getElementById("page_work"),
-    tool: document.getElementById("page_tool"),
-  };
 
   function setPage(key){
     navBtns.forEach(b => b.classList.remove("active"));
-    document.querySelector(`.navItem[data-page="${key}"]`).classList.add("active");
+    document.querySelector(`.navItem[data-page="${key}"]`)?.classList.add("active");
+
+    // accounts is separate page
+    if (key === "accounts"){
+      location.href = "accounts.html";
+      return;
+    }
+
+    const pages = {
+      overview: document.getElementById("page_overview"),
+      profile: document.getElementById("page_profile"),
+      work: document.getElementById("page_work"),
+      tool: document.getElementById("page_tool"),
+    };
+
     Object.values(pages).forEach(p => p.classList.remove("show"));
     pages[key].classList.add("show");
 
@@ -290,30 +289,27 @@
 
   navBtns.forEach(btn => btn.onclick = ()=> setPage(btn.dataset.page));
 
-  // ---- Dropdown ----
+  // dropdown
   const avatarWrap = document.getElementById("avatarWrap");
   const dropdown = document.getElementById("dropdown");
-  avatarWrap.addEventListener("click", () => {
-    dropdown.classList.toggle("show");
-  });
+  avatarWrap.addEventListener("click", () => dropdown.classList.toggle("show"));
   document.addEventListener("click", (e)=>{
     if (!avatarWrap.contains(e.target)) dropdown.classList.remove("show");
   });
 
-  // ---- Actions ----
   const openSheet = () => {
     const link = getProfileLocal()?.googleSheetUrl;
     if (!link) return showErr("Google Sheet link not found. Update profile.");
     window.open(link, "_blank");
   };
 
+  document.getElementById("goAccounts").onclick = () => location.href = "accounts.html";
   document.getElementById("goSheet").onclick = openSheet;
   document.getElementById("openSheetBtn").onclick = openSheet;
 
   document.getElementById("goTool").onclick = () => location.href = "dashboard.html";
   document.getElementById("openToolBtn").onclick = () => location.href = "dashboard.html";
 
-  document.getElementById("goProfileSetup").onclick = () => location.href = "account.html";
   document.getElementById("editProfileBtn").onclick = () => location.href = "account.html";
   document.getElementById("updateSheetBtn").onclick = () => location.href = "account.html";
 
@@ -326,7 +322,6 @@
     p.requestedChange = true;
     savePaymentLocal(p);
     showErr("Request submitted ✅ Admin will review.");
-    // refresh text
     payReq.textContent = "Change request: Pending ✅";
   };
 
@@ -339,24 +334,7 @@
   document.getElementById("ddEditProfile").onclick = () => location.href = "account.html";
   document.getElementById("ddPayment").onclick = () => location.href = "payment.html";
   document.getElementById("ddLogout").onclick = doLogout;
-
   document.getElementById("logoutBtn2").onclick = doLogout;
-  document.getElementById("logoutBtn2").onclick = doLogout;
-  document.getElementById("logoutBtn2").onclick = doLogout;
-
-  document.getElementById("logoutBtn2").onclick = doLogout;
-  document.getElementById("logoutBtn2").onclick = doLogout;
-
-  document.getElementById("logoutBtn2").onclick = doLogout;
-
-  document.getElementById("logoutBtn2").onclick = doLogout;
-
-  document.getElementById("logoutBtn2").onclick = doLogout;
-
-  document.getElementById("logoutBtn2").onclick = doLogout;
-  document.getElementById("logoutBtn2").onclick = doLogout;
-
-  // (keep also top dropdown logout)
 </script>
 
 </body>
