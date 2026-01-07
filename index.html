@@ -3,44 +3,82 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Login | Buckup-Media Data Duplicater</title>
+  <title>Login | Buckup-Media</title>
   <link rel="stylesheet" href="./style.css?v=3">
 </head>
-<body>
+<body class="authBody">
 
-<div class="card card-md">
-  <div class="brand">Buckup-Media Data Duplicater</div>
-  <div class="sub">Login (Verified email required)</div>
+  <div class="authShell">
+    <!-- Left marketing panel -->
+    <section class="authLeft">
+      <div class="authBrand">
+        <div class="authLogo">BM</div>
+        <div>
+          <div class="authBrandName">Buckup-Media</div>
+          <div class="authBrandSub">Data Duplicater Portal</div>
+        </div>
+      </div>
 
-  <form id="loginForm">
-    <label>Email</label>
-    <input id="email" type="email" placeholder="example@gmail.com" required>
+      <div class="authHero">
+        <div class="authTag">Secure • Fast • Simple</div>
+        <h1>Welcome back to your dashboard</h1>
+        <p>
+          Login to manage profile, payment details, open your Google Sheet, and use the data duplicater tool.
+          Built for speed with local storage.
+        </p>
 
-    <label>Password</label>
-    <input id="password" type="password" placeholder="Your password" required>
+        <div class="authPoints">
+          <div class="point"><span class="dot"></span> Verified email authentication</div>
+          <div class="point"><span class="dot"></span> Profile + Payment sections</div>
+          <div class="point"><span class="dot"></span> Quick access to “My Work” sheet</div>
+        </div>
+      </div>
 
-    <div class="btnRow">
-      <button class="primary" type="submit" id="loginBtn">Login</button>
-      <button class="ghost" type="button" id="goSignupBtn">Create Account</button>
-    </div>
+      <div class="authFoot">
+        © Buckup-Media • Professional Portal
+      </div>
+    </section>
 
-    <div class="btnRow" style="margin-top:10px">
-      <button class="info" id="forgotBtn" type="button">Forgot Password</button>
-      <button class="ghost" id="logoutBtn" type="button">Logout</button>
-    </div>
+    <!-- Right login card -->
+    <section class="authRight">
+      <div class="authCard">
+        <div class="authCardTop">
+          <div class="authCardTitle">Sign in</div>
+          <div class="authCardSub">Verified email required</div>
+        </div>
 
-    <div id="ok" class="msg ok"></div>
-    <div id="in" class="msg info"></div>
-    <div id="er" class="msg err"></div>
-  </form>
+        <form id="loginForm" class="authForm">
+          <label>Email</label>
+          <input id="email" type="email" placeholder="example@gmail.com" required>
 
-  <div class="footer">Verification resend is available on Signup page.</div>
-</div>
+          <label>Password</label>
+          <div class="passWrap">
+            <input id="password" type="password" placeholder="Your password" required>
+            <button class="eyeBtn" type="button" id="togglePass">Show</button>
+          </div>
+
+          <button class="authPrimary" type="submit" id="loginBtn">Login</button>
+
+          <div class="authRow">
+            <button class="authLink" type="button" id="forgotBtn">Forgot password?</button>
+            <button class="authLink" type="button" id="goSignupBtn">Create account</button>
+          </div>
+
+          <button class="authGhost" id="logoutBtn" type="button">Logout</button>
+
+          <div id="ok" class="authMsg ok"></div>
+          <div id="in" class="authMsg info"></div>
+          <div id="er" class="authMsg err"></div>
+
+          <div class="authHint">Resend verification email is on Signup page.</div>
+        </form>
+      </div>
+    </section>
+  </div>
 
 <script type="module">
   import { auth } from "./firebase.js";
   import { saveSession, getProfileLocal } from "./cache.js";
-
   import {
     signInWithEmailAndPassword,
     sendPasswordResetEmail,
@@ -60,12 +98,19 @@
     window.location.href = "signup.html";
   });
 
+  // show/hide password
+  document.getElementById("togglePass").addEventListener("click", () => {
+    const p = document.getElementById("password");
+    const btn = document.getElementById("togglePass");
+    const isPass = p.type === "password";
+    p.type = isPass ? "text" : "password";
+    btn.textContent = isPass ? "Hide" : "Show";
+  });
+
   // If user already logged in + verified → route instantly
   onAuthStateChanged(auth, (user) => {
     if (user && user.emailVerified) {
       saveSession({ uid: user.uid, email: user.email });
-
-      // ✅ Decide where to go based on local profile completion
       const p = getProfileLocal();
       if (p?.profileCompleted === true) {
         window.location.href = "home.html";
@@ -89,14 +134,12 @@
       const userCred = await signInWithEmailAndPassword(auth, email, pass);
 
       if (!userCred.user.emailVerified) {
-        showIn("Email not verified. Please verify your email from inbox (or resend from Signup page).");
+        showIn("Email not verified. Please verify email (or resend from Signup page).");
         return;
       }
 
-      // ✅ Save session locally (per user)
       saveSession({ uid: userCred.user.uid, email: userCred.user.email });
 
-      // ✅ Decide route based on local profile completion
       const p = getProfileLocal();
       if (p?.profileCompleted === true) {
         showOk("Login successful ✅ Redirecting to Home...");
@@ -121,10 +164,7 @@
 
   document.getElementById("forgotBtn").addEventListener("click", async () => {
     const email = document.getElementById("email").value.trim();
-    if (!email) {
-      showIn("Enter your email first, then click Forgot Password.");
-      return;
-    }
+    if (!email) { showIn("Enter your email first, then click Forgot password."); return; }
 
     try {
       await sendPasswordResetEmail(auth, email, {
