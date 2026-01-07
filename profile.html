@@ -23,7 +23,6 @@
     <label>Google Sheet Link</label>
     <input id="sheet" required>
 
-    <!-- PROGRESS BAR -->
     <div id="progressWrap" style="display:none;margin-top:14px;">
       <div class="small" id="progressText">Preparing...</div>
       <div style="height:12px;background:#e5e7eb;border-radius:999px;overflow:hidden;">
@@ -50,26 +49,15 @@
   const wrap = document.getElementById("progressWrap");
   const err = document.getElementById("er");
 
-  // ensure logged in
+  const nameEl = document.getElementById("name");
+  const phoneEl = document.getElementById("phone");
+  const ageEl = document.getElementById("age");
+  const sheetEl = document.getElementById("sheet");
+
   const sess = getSession();
   if (!sess) location.href = "index.html";
 
   let uid = null;
-
-  onAuthStateChanged(auth, user => {
-    if (!user) location.href = "index.html";
-    if (!user.emailVerified) location.href = "index.html";
-    uid = user.uid;
-
-    // ✅ instant fill from local
-    const cached = getProfileLocal();
-    if (cached) {
-      name.value = cached.name || "";
-      phone.value = cached.phone || "";
-      age.value = cached.age || "";
-      sheet.value = cached.googleSheetUrl || "";
-    }
-  });
 
   function showProgress(msg, pct) {
     wrap.style.display = "block";
@@ -77,35 +65,59 @@
     bar.style.width = pct + "%";
   }
 
+  // Remove undefined fields before sending to Firestore
+  function sanitize(obj) {
+    const clean = {};
+    for (const k in obj) {
+      if (obj[k] !== undefined) clean[k] = obj[k];
+    }
+    return clean;
+  }
+
+  onAuthStateChanged(auth, user => {
+    if (!user) location.href = "index.html";
+    if (!user.emailVerified) location.href = "index.html";
+    uid = user.uid;
+
+    const cached = getProfileLocal();
+    if (cached) {
+      nameEl.value = cached.name || "";
+      phoneEl.value = cached.phone || "";
+      ageEl.value = cached.age ?? "";
+      sheetEl.value = cached.googleSheetUrl || "";
+    }
+  });
+
   document.getElementById("profileForm").addEventListener("submit", async e => {
     e.preventDefault();
     err.style.display = "none";
 
     try {
-      showProgress("Saving profile...", 50);
+      showProgress("Saving locally...", 50);
 
       const profileData = {
-        name: name.value,
-        phone: phone.value,
-        age: Number(age.value),
-        googleSheetUrl: sheet.value,
+        name: nameEl.value.trim(),
+        phone: phoneEl.value.trim(),
+        age: Number(ageEl.value),
+        googleSheetUrl: sheetEl.value.trim(),
         profileCompleted: true
       };
 
-      // ✅ local first (FAST)
+      // ✅ local first
       saveProfileLocal(profileData);
 
       showProgress("Finalizing...", 100);
 
-      // ✅ cloud backup (non-blocking)
-      setDoc(doc(db, "users", uid), profileData, { merge: true })
+      // ✅ cloud backup (non-blocking + sanitized)
+      setDoc(doc(db, "users", uid), sanitize(profileData), { merge: true })
         .catch(console.warn);
 
-      location.href = "dashboard.html";
+      // ✅ go to HOME now
+      location.href = "home.html";
 
-    } catch (e) {
+    } catch (e2) {
       err.style.display = "block";
-      err.textContent = e.message;
+      err.textContent = e2.message;
     }
   });
 </script>
