@@ -2,11 +2,11 @@
 <html>
 <head>
   <title>Dashboard | Buckup-Media</title>
-  <link rel="stylesheet" href="./style.css">
+  <link rel="stylesheet" href="./style.css?v=3">
 </head>
 <body>
 
-<div class="card" style="max-width:900px">
+<div class="card card-xl">
   <div class="brand">Buckup-Media Data Duplicater</div>
   <div class="sub">Paste data OR upload file → duplicate → copy/download</div>
 
@@ -45,7 +45,7 @@
 <script type="module">
   import { auth } from "./firebase.js";
   import { signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-  import { getSession, clearSession, getProfileLocal, getDuplicatedLocal, saveDuplicatedLocal } from "./cache.js";
+  import { getSession, clearSession, getDuplicatedLocal, saveDuplicatedLocal, getProfileLocal } from "./cache.js";
 
   const ok = document.getElementById("ok");
   const er = document.getElementById("er");
@@ -56,7 +56,6 @@
   const outputBox = document.getElementById("outputBox");
   const fileInput = document.getElementById("fileInput");
 
-  // Security + session
   const session = getSession();
   if (!session) location.href = "index.html";
 
@@ -65,11 +64,11 @@
     if (!user.emailVerified) location.href = "index.html";
   });
 
-  // Load last output instantly
-  outputBox.value = getDuplicatedLocal();
-
-  // If user has profile, you can use googleSheetUrl later
+  // optional profile use (sheet link etc.)
   const profile = getProfileLocal();
+
+  // load last output instantly
+  outputBox.value = getDuplicatedLocal();
 
   function duplicateLines(rawText) {
     const lines = rawText.split(/\r?\n/).map(x => x.trim()).filter(Boolean);
@@ -81,11 +80,9 @@
     return out.join("\n");
   }
 
-  // Upload → fill input box
   fileInput.addEventListener("change", async () => {
     const f = fileInput.files[0];
     if (!f) return;
-
     try {
       const text = await f.text();
       inputBox.value = text;
