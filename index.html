@@ -4,11 +4,11 @@
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Login | Buckup-Media Data Duplicater</title>
-  <link rel="stylesheet" href="./style.css">
+  <link rel="stylesheet" href="./style.css?v=3">
 </head>
 <body>
 
-<div class="card" style="max-width:560px">
+<div class="card card-md">
   <div class="brand">Buckup-Media Data Duplicater</div>
   <div class="sub">Login (Email verification required)</div>
 
@@ -55,11 +55,8 @@
   const showIn = (t)=>{ inf.style.display="block"; ok.style.display="none"; er.style.display="none"; inf.textContent=t; };
   const showEr = (t)=>{ er.style.display="block"; ok.style.display="none"; inf.style.display="none"; er.textContent=t; };
 
-  // If local session exists, let auth state decide; if verified, go profile/dashboard
   const localSession = getSession();
-  if (localSession && localSession.uid) {
-    showOk("Session found ✅ Checking...");
-  }
+  if (localSession && localSession.uid) showOk("Session found ✅ Checking...");
 
   onAuthStateChanged(auth, (user) => {
     if (user && user.emailVerified) {
