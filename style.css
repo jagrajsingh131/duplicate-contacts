@@ -822,3 +822,149 @@ button{
   .auth2col{grid-template-columns:1fr;}
 }
 
+
+/* =========================
+   DATA DUPLICATER TOOL THEME
+   ========================= */
+
+.toolBody{
+  margin:0;
+  font-family: Arial, Helvetica, sans-serif;
+  background: radial-gradient(900px 420px at 20% 0%, #eef2ff 0%, transparent 60%),
+              radial-gradient(900px 420px at 95% 0%, #e8fff4 0%, transparent 55%),
+              #f6f8fc;
+  color:#0f172a;
+}
+
+.toolTop{
+  position:sticky;
+  top:0;
+  z-index:10;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:16px 18px;
+  background: rgba(255,255,255,.82);
+  border-bottom:1px solid #e2e8f0;
+  backdrop-filter: blur(10px);
+}
+
+.toolBrand{display:flex;align-items:center;gap:12px;}
+.toolLogo{
+  width:44px;height:44px;border-radius:16px;
+  display:grid;place-items:center;
+  font-weight:900;color:#fff;
+  background: linear-gradient(135deg,#4f46e5,#22c55e);
+  box-shadow:0 14px 26px rgba(79,70,229,.18);
+}
+.toolTitle{font-weight:900;font-size:16px;}
+.toolSub{color:#64748b;font-size:12px;margin-top:2px;}
+
+.toolActions{display:flex;gap:10px;flex-wrap:wrap;}
+
+.toolBtn{
+  border:0;
+  border-radius:14px;
+  padding:10px 14px;
+  font-weight:900;
+  cursor:pointer;
+  transition: transform .08s ease, box-shadow .12s ease;
+}
+.toolBtn:hover{transform: translateY(-1px); box-shadow:0 14px 26px rgba(15,23,42,.12);}
+.toolBtn.primary{background:#4f46e5;color:#fff;}
+.toolBtn.success{background:#16a34a;color:#fff;}
+.toolBtn.info{background:#0ea5e9;color:#fff;}
+.toolBtn.ghost{background:#eef2ff;color:#0f172a;border:1px solid #e2e8f0;}
+
+.toolMain{
+  max-width:1200px;
+  margin: 16px auto;
+  padding: 0 16px 24px;
+}
+
+.toolCard{
+  background: rgba(255,255,255,.90);
+  border:1px solid #e2e8f0;
+  border-radius:20px;
+  padding:16px;
+  box-shadow:0 14px 30px rgba(15,23,42,.07);
+}
+
+.toolCardHead{
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  gap:12px;
+}
+
+.toolCardTitle{font-weight:900;font-size:14px;}
+.toolCardSub{color:#64748b;font-size:12px;margin-top:4px;}
+
+.toolRow{
+  margin-top:14px;
+  display:grid;
+  grid-template-columns: 1fr 1fr;
+  gap:14px;
+}
+
+.toolField{display:flex;flex-direction:column;gap:8px;}
+.toolLabel{font-weight:900;font-size:12px;color:#0f172a;}
+.toolInput{
+  padding:10px 12px;
+  border-radius:14px;
+  border:1px solid #e2e8f0;
+  background:#fff;
+}
+.toolHint{color:#64748b;font-size:12px;}
+
+.toolBtnsRow{display:flex;gap:10px;flex-wrap:wrap;}
+
+.toolGrid{
+  margin-top:14px;
+  display:grid;
+  grid-template-columns: 1fr 1fr;
+  gap:14px;
+}
+
+.toolArea{
+  margin-top:12px;
+  width:100%;
+  padding:12px;
+  border-radius:16px;
+  border:1px solid #e2e8f0;
+  background:#fff;
+  outline:none;
+  font-size:13px;
+  resize: vertical;
+}
+.toolArea:focus{
+  border-color:#4f46e5;
+  box-shadow:0 0 0 4px rgba(79,70,229,.12);
+}
+
+.toolMsg{
+  display:none;
+  margin-top:14px;
+  padding:12px 14px;
+  border-radius:16px;
+  font-weight:900;
+  font-size:12px;
+}
+.toolMsg.ok{background:#dcfce7;border:1px solid #bbf7d0;color:#14532d;}
+.toolMsg.err{background:#fee2e2;border:1px solid #fecaca;color:#7f1d1d;}
+
+.toolFoot{
+  margin-top:14px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  color:#64748b;
+  font-size:12px;
+  padding: 8px 2px;
+}
+.toolMuted{color:#94a3b8;}
+
+@media(max-width: 980px){
+  .toolRow{grid-template-columns:1fr;}
+  .toolGrid{grid-template-columns:1fr;}
+}
