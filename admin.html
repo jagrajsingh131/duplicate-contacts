@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Admin | Buckup-Media</title>
+  <link rel="stylesheet" href="./style.css?v=3">
+</head>
+<body>
+
+<div class="card card-md">
+  <div class="brand">Admin Portal (Local)</div>
+  <div class="sub">Unlock payment edit on this device</div>
+
+  <label>User UID</label>
+  <input id="uid" placeholder="paste uid">
+
+  <div class="btnRow">
+    <button class="primary" id="allow">Allow Payment Edit</button>
+    <button class="ghost" id="deny">Lock Payment Edit</button>
+  </div>
+
+  <div class="msg ok" id="ok"></div>
+</div>
+
+<script>
+  const ok = document.getElementById("ok");
+  const showOk = (t)=>{ ok.style.display="block"; ok.textContent=t; };
+
+  document.getElementById("allow").onclick = () => {
+    const u = document.getElementById("uid").value.trim();
+    if (!u) return;
+    localStorage.setItem(`bm_${u}_payment_edit_allowed`, "1");
+    showOk("Allowed ✅");
+  };
+
+  document.getElementById("deny").onclick = () => {
+    const u = document.getElementById("uid").value.trim();
+    if (!u) return;
+    localStorage.removeItem(`bm_${u}_payment_edit_allowed`);
+    showOk("Locked ✅");
+  };
+</script>
+
+</body>
+</html>
