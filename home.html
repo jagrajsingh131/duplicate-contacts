@@ -1,77 +1,204 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Home | Buckup-Media</title>
   <link rel="stylesheet" href="./style.css?v=3">
 </head>
-<body>
+<body class="dashBody">
 
-<div class="card card-xl">
-  <div class="brand">Buckup-Media Portal</div>
-  <div class="sub">Choose what you want to do</div>
-
-  <div class="row">
-    <div class="tile">
-      <div class="tileTitle">My Account</div>
-      <div class="tileSub">View/Edit your profile details</div>
-      <button class="primary" id="goAccount">Open</button>
+  <!-- Top Nav -->
+  <header class="dashTop">
+    <div class="dashBrand">
+      <div class="dashLogo">BM</div>
+      <div>
+        <div class="dashTitle">Buckup-Media Portal</div>
+        <div class="dashSubtitle">Professional dashboard</div>
+      </div>
     </div>
 
-    <div class="tile">
-      <div class="tileTitle">Payment</div>
-      <div class="tileSub">Add/Edit bank & UPI details</div>
-      <button class="primary" id="goPayment">Open</button>
+    <div class="dashActions">
+      <button class="dashBtn ghost" id="openSheetTop">My Work</button>
+      <button class="dashBtn ghost" id="editProfileTop">Edit Profile</button>
+      <button class="dashBtn danger" id="logoutBtn">Logout</button>
     </div>
-  </div>
+  </header>
 
-  <div class="row" style="margin-top:12px;">
-    <div class="tile">
-      <div class="tileTitle">My Work</div>
-      <div class="tileSub">Open your saved Google Sheet</div>
-      <button class="info" id="openSheet">Open Sheet</button>
-    </div>
+  <!-- Main -->
+  <main class="dashMain">
 
-    <div class="tile">
-      <div class="tileTitle">Data Duplicater</div>
-      <div class="tileSub">Upload/Paste data and duplicate</div>
-      <button class="success" id="goDup">Open</button>
-    </div>
-  </div>
+    <!-- Welcome + Status -->
+    <section class="dashHero">
+      <div class="heroLeft">
+        <div class="heroTag">Welcome</div>
+        <h1 class="heroHeading" id="welcomeName">Your workspace is ready</h1>
+        <p class="heroText">
+          Manage your profile, payment details, open your work sheet, and use the data duplicater — all from one place.
+        </p>
 
-  <div class="btnRow" style="margin-top:16px;">
-    <button class="ghost" id="goProfile">Edit Profile</button>
-    <button class="ghost" id="logoutBtn">Logout</button>
-  </div>
+        <div class="heroQuick">
+          <div class="quickCard">
+            <div class="quickLabel">Account</div>
+            <div class="quickValue" id="quickEmail">—</div>
+          </div>
+          <div class="quickCard">
+            <div class="quickLabel">Profile Status</div>
+            <div class="quickValue" id="quickStatus">—</div>
+          </div>
+          <div class="quickCard">
+            <div class="quickLabel">Saved Sheet</div>
+            <div class="quickValue" id="quickSheet">—</div>
+          </div>
+        </div>
+      </div>
 
-  <div id="er" class="msg err"></div>
-</div>
+      <div class="heroRight">
+        <div class="statBox">
+          <div class="statIcon">⚡</div>
+          <div>
+            <div class="statTitle">Fast Mode Enabled</div>
+            <div class="statSub">Your data loads instantly from local storage.</div>
+          </div>
+        </div>
+
+        <div class="statBox">
+          <div class="statIcon">🔒</div>
+          <div>
+            <div class="statTitle">Secure Login</div>
+            <div class="statSub">Email verified authentication is active.</div>
+          </div>
+        </div>
+
+        <div class="statBox">
+          <div class="statIcon">📦</div>
+          <div>
+            <div class="statTitle">Tools</div>
+            <div class="statSub">Account • Payment • Work • Data Duplicater</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Apps Grid -->
+    <section class="dashGrid">
+      <article class="appCard">
+        <div class="appHead">
+          <div class="appIcon blue">👤</div>
+          <div>
+            <div class="appTitle">My Account</div>
+            <div class="appSub">View and edit your profile details</div>
+          </div>
+        </div>
+        <div class="appFooter">
+          <button class="dashBtn primary" id="goAccount">Open</button>
+        </div>
+      </article>
+
+      <article class="appCard">
+        <div class="appHead">
+          <div class="appIcon green">💳</div>
+          <div>
+            <div class="appTitle">Payment</div>
+            <div class="appSub">Add or update bank + UPI details</div>
+          </div>
+        </div>
+        <div class="appFooter">
+          <button class="dashBtn primary" id="goPayment">Open</button>
+        </div>
+      </article>
+
+      <article class="appCard appCardWide">
+        <div class="appHead">
+          <div class="appIcon purple">📄</div>
+          <div>
+            <div class="appTitle">My Work</div>
+            <div class="appSub">Open your Google Sheet directly</div>
+          </div>
+        </div>
+        <div class="appFooter">
+          <button class="dashBtn info" id="openSheet">Open Sheet</button>
+          <button class="dashBtn ghost" id="editProfile">Update Sheet Link</button>
+        </div>
+      </article>
+
+      <article class="appCard appCardWide">
+        <div class="appHead">
+          <div class="appIcon orange">🧩</div>
+          <div>
+            <div class="appTitle">Data Duplicater</div>
+            <div class="appSub">Upload or paste data • duplicate • copy • download</div>
+          </div>
+        </div>
+        <div class="appFooter">
+          <button class="dashBtn success" id="goDup">Open Tool</button>
+        </div>
+      </article>
+    </section>
+
+    <!-- Error toast -->
+    <div class="dashToast err" id="toastErr"></div>
+
+    <!-- Footer -->
+    <footer class="dashFoot">
+      <div>© Buckup-Media Data Duplicater</div>
+      <div class="mutedSmall">Built for speed • Local storage enabled</div>
+    </footer>
+
+  </main>
 
 <script type="module">
   import { auth } from "./firebase.js";
   import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
   import { getSession, clearSession, getProfileLocal } from "./cache.js";
 
-  const er = document.getElementById("er");
-  const showEr = (t)=>{ er.style.display="block"; er.textContent=t; };
+  const toastErr = document.getElementById("toastErr");
+  function showErr(msg){
+    toastErr.style.display = "block";
+    toastErr.textContent = msg;
+    setTimeout(() => toastErr.style.display = "none", 3500);
+  }
 
   const sess = getSession();
   if (!sess) location.href = "index.html";
+
+  // Fill top quick stats from local (fast)
+  const profile = getProfileLocal();
+
+  const welcomeName = document.getElementById("welcomeName");
+  const quickEmail = document.getElementById("quickEmail");
+  const quickStatus = document.getElementById("quickStatus");
+  const quickSheet = document.getElementById("quickSheet");
+
+  quickEmail.textContent = sess.email || "—";
+  quickStatus.textContent = profile?.profileCompleted ? "Completed ✅" : "Pending";
+  quickSheet.textContent = profile?.googleSheetUrl ? "Linked ✅" : "Not added";
+
+  if (profile?.name) {
+    welcomeName.textContent = `Welcome, ${profile.name}`;
+  }
 
   onAuthStateChanged(auth, (user) => {
     if (!user || !user.emailVerified) location.href = "index.html";
   });
 
+  // Buttons
   document.getElementById("goAccount").onclick = () => location.href = "account.html";
   document.getElementById("goPayment").onclick = () => location.href = "payment.html";
   document.getElementById("goDup").onclick = () => location.href = "dashboard.html";
-  document.getElementById("goProfile").onclick = () => location.href = "profile.html";
 
-  document.getElementById("openSheet").onclick = () => {
+  document.getElementById("editProfile").onclick = () => location.href = "profile.html";
+  document.getElementById("editProfileTop").onclick = () => location.href = "profile.html";
+  document.getElementById("openSheetTop").onclick = () => document.getElementById("openSheet").click();
+
+  function openSheetNow(){
     const p = getProfileLocal();
     const link = p?.googleSheetUrl;
-    if (!link) { showEr("Google Sheet link not found. Please update profile."); return; }
+    if (!link) { showErr("Google Sheet link not found. Please update profile."); return; }
     window.open(link, "_blank");
-  };
+  }
+
+  document.getElementById("openSheet").onclick = openSheetNow;
 
   document.getElementById("logoutBtn").onclick = async () => {
     clearSession();
