@@ -6,8 +6,8 @@
   <title>Wallet | Buckup-Media</title>
   <link rel="stylesheet" href="./style.css?v=3">
 </head>
-<body class="adminShell">
 
+<body class="adminShell">
   <aside class="sideNav">
     <div class="sideTop">
       <div class="sideLogo">BM</div>
@@ -19,13 +19,14 @@
 
     <nav class="sideMenu">
       <button class="navItem" id="goHome">Home</button>
-      <button class="navItem active">Wallet</button>
       <button class="navItem" id="goAccounts">Accounts</button>
       <button class="navItem" id="goTool">Data Duplicater</button>
+      <button class="navItem active">Wallet</button>
+      <button class="navItem" id="goAdmin">Admin</button>
     </nav>
 
     <div class="sideBottom">
-      <div class="sideHint">Secure ledger (server)</div>
+      <div class="sideHint">Secure ledger</div>
       <div class="sideSmall">© Buckup-Media</div>
     </div>
   </aside>
@@ -38,39 +39,55 @@
       </div>
 
       <div class="topRight">
-        <div class="chip">Verified</div>
+        <span class="chip" id="verChip">Verified</span>
+        <button class="toolBtn ghost" id="refreshBtn">Refresh</button>
       </div>
     </header>
 
     <main class="content">
       <section class="page show">
 
-        <div class="walletHero">
-          <div class="walletCard">
-            <div class="wTop">
+        <div class="walletGrid">
+          <div class="walletHeroCard">
+            <div class="wHead">
               <div>
                 <div class="wLabel">Available Balance</div>
-                <div class="wBal" id="bal">—</div>
-                <div class="wSmall" id="rateLine">Rate: —</div>
+                <div class="wBal" id="bal">₹ 0</div>
+                <div class="wMetaLine" id="rateLine">Rate: ₹ — / account</div>
               </div>
-              <div class="wIcon">₹</div>
+              <div class="wBadge">₹</div>
             </div>
-            <div class="wMeta">
-              <div class="wMetaItem"><span>Credits</span><b id="credits">—</b></div>
-              <div class="wMetaItem"><span>Deductions</span><b id="debits">—</b></div>
-              <div class="wMetaItem"><span>Net</span><b id="net">—</b></div>
+
+            <div class="wMiniStats">
+              <div class="wStat">
+                <div class="wStatLabel">Credits</div>
+                <div class="wStatVal" id="credits">₹ 0</div>
+              </div>
+              <div class="wStat">
+                <div class="wStatLabel">Deductions</div>
+                <div class="wStatVal" id="debits">₹ 0</div>
+              </div>
+              <div class="wStat">
+                <div class="wStatLabel">Net</div>
+                <div class="wStatVal" id="net">₹ 0</div>
+              </div>
+            </div>
+
+            <div class="wNotice">
+              <b>Rule:</b> deduction is <b>ONCE per account</b> if tagged locked / incorrect password. (30-minute slot system handled server-side).
             </div>
           </div>
 
-          <div class="walletCard soft">
-            <div class="wTop">
+          <div class="walletHeroCard soft">
+            <div class="wHead">
               <div>
                 <div class="wLabel">Statement Filters</div>
-                <div class="wSmall">Download CSV/TXT for selected range</div>
+                <div class="wMetaLine">Pick range then export</div>
               </div>
+              <div class="wBadge alt">S</div>
             </div>
 
-            <div class="filtersRow">
+            <div class="wControls">
               <div class="pillGroup" id="rangePills">
                 <button class="pill active" data-range="3m">Last 3 months</button>
                 <button class="pill" data-range="6m">Last 6 months</button>
@@ -82,27 +99,34 @@
                 <span class="dateSep">→</span>
                 <input id="toDate" type="date" class="toolInput compact">
               </div>
-            </div>
 
-            <div class="btnRow" style="display:flex; gap:10px; flex-wrap:wrap; margin-top:12px;">
-              <button class="toolBtn primary" id="downloadCSV">Download CSV</button>
-              <button class="toolBtn ghost" id="downloadTXT">Download TXT</button>
-              <button class="toolBtn ghost" id="refresh">Refresh</button>
-            </div>
+              <div class="wBtns">
+                <button class="toolBtn primary" id="downloadCSV">Download CSV</button>
+                <button class="toolBtn ghost" id="downloadTXT">Download TXT</button>
+              </div>
 
-            <div class="toolHint" style="margin-top:10px;">
-              Credits happen when you add accounts. Deductions happen every 30 minutes for accounts later tagged <b>locked</b> or <b>incorrect password</b>. Each account deducts only once.
+              <div class="toolHint">
+                Using manual dates overrides pills.
+              </div>
             </div>
           </div>
         </div>
 
         <div class="cardX" style="margin-top:16px;">
-          <div class="cardXTitle">Statement</div>
-          <div class="cardXSub">Bank-style ledger</div>
+          <div class="cardXTop">
+            <div>
+              <div class="cardXTitle">Statement</div>
+              <div class="cardXSub">Credits / Debits ledger</div>
+            </div>
+
+            <div class="searchMiniWrap">
+              <input id="miniSearch" class="toolInput compact" placeholder="Search (reason / amount / count)">
+            </div>
+          </div>
 
           <div id="er" class="toolMsg err"></div>
 
-          <div class="accTableWrap" style="margin-top:14px;">
+          <div class="accTableWrap" style="margin-top:12px;">
             <table class="accTable">
               <thead>
                 <tr>
@@ -128,21 +152,64 @@
   import { auth, db } from "./firebase.js";
   import { getSession } from "./cache.js";
   import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-  import { doc, getDoc, collection, query, orderBy, onSnapshot } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+  import {
+    doc, getDoc, collection, query, orderBy, onSnapshot
+  } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+  // Coin sound (no file) — only if user clicked Wallet
+  function playCoin(){
+    try{
+      const AudioCtx = window.AudioContext || window.webkitAudioContext;
+      const ctx = new AudioCtx();
+      const now = ctx.currentTime;
+
+      const o1 = ctx.createOscillator(), g1 = ctx.createGain();
+      o1.type = "triangle";
+      o1.frequency.setValueAtTime(880, now);
+      o1.frequency.exponentialRampToValueAtTime(1320, now + 0.06);
+      g1.gain.setValueAtTime(0.0001, now);
+      g1.gain.exponentialRampToValueAtTime(0.18, now + 0.01);
+      g1.gain.exponentialRampToValueAtTime(0.0001, now + 0.12);
+      o1.connect(g1); g1.connect(ctx.destination);
+
+      const o2 = ctx.createOscillator(), g2 = ctx.createGain();
+      o2.type = "sine";
+      o2.frequency.setValueAtTime(660, now);
+      o2.frequency.exponentialRampToValueAtTime(990, now + 0.05);
+      g2.gain.setValueAtTime(0.0001, now);
+      g2.gain.exponentialRampToValueAtTime(0.12, now + 0.01);
+      g2.gain.exponentialRampToValueAtTime(0.0001, now + 0.10);
+      o2.connect(g2); g2.connect(ctx.destination);
+
+      o1.start(now); o2.start(now);
+      o1.stop(now + 0.13); o2.stop(now + 0.11);
+      setTimeout(()=>ctx.close().catch(()=>{}), 220);
+    }catch{}
+  }
+
+  if (sessionStorage.getItem("bm_wallet_sound") === "1") {
+    sessionStorage.removeItem("bm_wallet_sound");
+    setTimeout(playCoin, 120);
+  }
 
   const sess = getSession();
   if (!sess) location.href = "index.html";
 
   onAuthStateChanged(auth, (user) => {
-    if (!user || !user.emailVerified) location.href = "index.html";
+    if (!user) location.href = "index.html";
+    if (!user.emailVerified) location.href = "index.html";
   });
 
+  // nav
   document.getElementById("goHome").onclick = ()=> location.href = "home.html";
   document.getElementById("goAccounts").onclick = ()=> location.href = "accounts.html";
   document.getElementById("goTool").onclick = ()=> location.href = "dashboard.html";
+  document.getElementById("goAdmin").onclick = ()=> location.href = "admin.html";
+  document.getElementById("refreshBtn").onclick = ()=> location.reload();
 
   const er = document.getElementById("er");
   const rows = document.getElementById("rows");
+  const miniSearch = document.getElementById("miniSearch");
 
   const balEl = document.getElementById("bal");
   const rateLine = document.getElementById("rateLine");
@@ -160,7 +227,6 @@
     const x = Number(n || 0);
     return "₹ " + x.toLocaleString("en-IN");
   }
-
   function fmtTime(ts){
     try{
       if (!ts) return "—";
@@ -168,15 +234,13 @@
       return d.toLocaleString();
     }catch{ return "—"; }
   }
-
-  function withinRange(ts){
-    if (!ts) return false;
-    const d = ts.toDate ? ts.toDate() : new Date(ts);
-    const f = fromDate.value ? new Date(fromDate.value + "T00:00:00") : null;
-    const t = toDate.value ? new Date(toDate.value + "T23:59:59") : null;
-    if (f && d < f) return false;
-    if (t && d > t) return false;
-    return true;
+  function showErr(t){
+    er.style.display = "block";
+    er.textContent = t;
+  }
+  function clearErr(){
+    er.style.display = "none";
+    er.textContent = "";
   }
 
   function setPresetRange(range){
@@ -186,7 +250,8 @@
 
     if (range === "3m") start.setMonth(start.getMonth() - 3);
     if (range === "6m") start.setMonth(start.getMonth() - 6);
-    if (range === "all") {
+
+    if (range === "all"){
       fromDate.value = "";
       toDate.value = "";
       render();
@@ -202,10 +267,68 @@
     const m2 = String(now.getMonth()+1).padStart(2,"0");
     const d2 = String(now.getDate()).padStart(2,"0");
     toDate.value = `${y2}-${m2}-${d2}`;
-
     render();
   }
 
+  function withinRange(ts){
+    if (!ts) return false;
+    const d = ts.toDate ? ts.toDate() : new Date(ts);
+    const f = fromDate.value ? new Date(fromDate.value + "T00:00:00") : null;
+    const t = toDate.value ? new Date(toDate.value + "T23:59:59") : null;
+    if (f && d < f) return false;
+    if (t && d > t) return false;
+    return true;
+  }
+
+  function matchesSearch(run){
+    const q = (miniSearch.value || "").trim().toLowerCase();
+    if (!q) return true;
+    const reason = (run.reason || "").toLowerCase();
+    const desc = (run.description || "").toLowerCase();
+    const amt = String(run.amount || "").toLowerCase();
+    const cnt = String(run.accountsCount || "").toLowerCase();
+    return reason.includes(q) || desc.includes(q) || amt.includes(q) || cnt.includes(q);
+  }
+
+  function typePill(run){
+    const t = (run.type || "").toLowerCase();
+    if (t === "credit") return `<span class="typePill good">Credit</span>`;
+    if (t === "debit") return `<span class="typePill bad">Debit</span>`;
+    return `<span class="typePill">—</span>`;
+  }
+
+  function amountCell(run){
+    const t = (run.type || "").toLowerCase();
+    const amt = Number(run.amount || 0);
+    const sign = (t === "debit") ? "-" : "+";
+    const cls = (t === "debit") ? "amtBad" : "amtGood";
+    return `<span class="${cls}">${sign} ${fmtMoney(Math.abs(amt))}</span>`;
+  }
+
+  function render(){
+    clearErr();
+
+    const list = allRuns
+      .filter(r => withinRange(r.createdAt))
+      .filter(r => matchesSearch(r));
+
+    if (!list.length){
+      rows.innerHTML = `<tr><td colspan="5" style="padding:14px;color:#64748b;">No statement entries for selected range.</td></tr>`;
+      return;
+    }
+
+    rows.innerHTML = list.map(r => `
+      <tr>
+        <td>${fmtTime(r.createdAt)}</td>
+        <td>${typePill(r)}</td>
+        <td>${r.description || r.reason || "—"}</td>
+        <td class="mono">${r.accountsCount ?? "—"}</td>
+        <td>${amountCell(r)}</td>
+      </tr>
+    `).join("");
+  }
+
+  // Pills
   document.querySelectorAll("#rangePills .pill").forEach(p=>{
     p.onclick = ()=>{
       document.querySelectorAll("#rangePills .pill").forEach(x=>x.classList.remove("active"));
@@ -216,11 +339,13 @@
 
   fromDate.onchange = render;
   toDate.onchange = render;
+  miniSearch.oninput = render;
 
-  async function loadWalletHeader(){
+  // Load wallet header
+  async function loadHeader(){
     try{
       const w = await getDoc(doc(db, "wallets", sess.uid));
-      const wallet = w.exists() ? w.data() : { balance: 0, creditsTotal: 0, debitsTotal: 0 };
+      const wallet = w.exists() ? w.data() : { balance:0, creditsTotal:0, debitsTotal:0 };
 
       balEl.textContent = fmtMoney(wallet.balance || 0);
       creditsEl.textContent = fmtMoney(wallet.creditsTotal || 0);
@@ -228,4 +353,75 @@
       netEl.textContent = fmtMoney((wallet.creditsTotal||0) - (wallet.debitsTotal||0));
 
       const r = await getDoc(doc(db, "rates", sess.uid));
-     
+      const rate = r.exists() ? (r.data().ratePerAccount ?? "—") : "—";
+      rateLine.textContent = `Rate: ₹ ${rate} / account`;
+    }catch(e){
+      showErr("Cannot load wallet: " + e.message);
+    }
+  }
+
+  // Listen statement (wallets/{uid}/runs)
+  function listenRuns(){
+    const qy = query(collection(db, "wallets", sess.uid, "runs"), orderBy("createdAt", "desc"));
+    onSnapshot(qy, (snap)=>{
+      allRuns = snap.docs.map(d => ({ id:d.id, ...d.data() }));
+      render();
+    }, (e)=>{
+      showErr("Cannot load statement: " + e.message);
+    });
+  }
+
+  // Downloads
+  function getFiltered(){
+    return allRuns
+      .filter(r => withinRange(r.createdAt))
+      .filter(r => matchesSearch(r));
+  }
+
+  function downloadFile(name, text){
+    const blob = new Blob([text], {type:"text/plain;charset=utf-8"});
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = name;
+    a.click();
+    setTimeout(()=>URL.revokeObjectURL(a.href), 800);
+  }
+
+  document.getElementById("downloadCSV").onclick = ()=>{
+    const list = getFiltered();
+    const lines = ["Date,Type,Description,Accounts,Amount"];
+    for (const r of list){
+      const d = fmtTime(r.createdAt).replace(/,/g," ");
+      const t = (r.type||"").toUpperCase();
+      const desc = (r.description || r.reason || "").replace(/"/g,'""');
+      const cnt = (r.accountsCount ?? "");
+      const amt = (r.amount ?? "");
+      lines.push(`"${d}","${t}","${desc}","${cnt}","${amt}"`);
+    }
+    downloadFile("wallet_statement.csv", lines.join("\n"));
+  };
+
+  document.getElementById("downloadTXT").onclick = ()=>{
+    const list = getFiltered();
+    const lines = [];
+    lines.push("BUCKUP-MEDIA WALLET STATEMENT");
+    lines.push("----------------------------------------");
+    for (const r of list){
+      const d = fmtTime(r.createdAt);
+      const t = (r.type||"").toUpperCase();
+      const desc = (r.description || r.reason || "");
+      const cnt = (r.accountsCount ?? "—");
+      const amt = r.amount ?? 0;
+      lines.push(`${d} | ${t} | ${desc} | Accounts: ${cnt} | Amount: ${amt}`);
+    }
+    downloadFile("wallet_statement.txt", lines.join("\n"));
+  };
+
+  // Init
+  setPresetRange("3m");
+  loadHeader();
+  listenRuns();
+</script>
+
+</body>
+</html>
