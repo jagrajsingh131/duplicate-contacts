@@ -4,10 +4,11 @@
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Home | Buckup-Media</title>
-  <link rel="stylesheet" href="./style.css?v=3">
+  <link rel="stylesheet" href="./style.css?v=10">
 </head>
 <body class="adminShell">
 
+  <!-- SIDEBAR -->
   <aside class="sideNav">
     <div class="sideTop">
       <div class="sideLogo">BM</div>
@@ -31,6 +32,7 @@
     </div>
   </aside>
 
+  <!-- MAIN -->
   <div class="mainArea">
     <header class="topBar">
       <div>
@@ -47,55 +49,156 @@
     <main class="content">
       <section class="page show">
 
-        <div class="dashGrid">
-          <!-- Wallet Card -->
-          <div class="dashCard walletGlow" id="walletCard" role="button" tabindex="0">
-            <div class="dashCardTop">
-              <div>
-                <div class="dashLabel">Wallet</div>
-                <div class="dashBig" id="walletBal">₹ —</div>
-                <div class="dashSmall" id="walletSmall">Tap to open statement</div>
-              </div>
-              <div class="dashIcon">₹</div>
-            </div>
-            <div class="dashPills">
-              <span class="miniPill">Bank-style statement</span>
-              <span class="miniPill">CSV / TXT</span>
-              <span class="miniPill">30-min deductions</span>
+        <!-- HERO STRIP -->
+        <div class="heroStrip">
+          <div class="heroLeft">
+            <div class="heroHello" id="helloName">Welcome 👋</div>
+            <div class="heroLine">Manage your Accounts, Wallet and Tools from one place.</div>
+          </div>
+
+          <div class="heroRight">
+            <div class="heroBadge">
+              <div class="heroBadgeK">Status</div>
+              <div class="heroBadgeV" id="statusText">Loading…</div>
             </div>
           </div>
+        </div>
+
+        <!-- TOP METRICS -->
+        <div class="metricGrid">
+          <div class="metricCard glow" id="walletCard" role="button" tabindex="0">
+            <div class="metricTop">
+              <div>
+                <div class="metricK">Wallet Balance</div>
+                <div class="metricV" id="walletBal">₹ —</div>
+                <div class="metricS">Tap to open statement</div>
+              </div>
+              <div class="metricIcon">₹</div>
+            </div>
+            <div class="metricFoot">
+              <span class="miniPill">CSV</span>
+              <span class="miniPill">TXT</span>
+              <span class="miniPill">Statement</span>
+            </div>
+          </div>
+
+          <div class="metricCard">
+            <div class="metricTop">
+              <div>
+                <div class="metricK">Accounts</div>
+                <div class="metricV" id="accCount">—</div>
+                <div class="metricS">Shared database</div>
+              </div>
+              <div class="metricIcon soft">👤</div>
+            </div>
+            <div class="metricFoot">
+              <span class="miniPill">Tags</span>
+              <span class="miniPill">Filters</span>
+              <span class="miniPill">Details</span>
+            </div>
+          </div>
+
+          <div class="metricCard">
+            <div class="metricTop">
+              <div>
+                <div class="metricK">Tools</div>
+                <div class="metricV">Ready</div>
+                <div class="metricS">Data Duplicater enabled</div>
+              </div>
+              <div class="metricIcon soft">⚙️</div>
+            </div>
+            <div class="metricFoot">
+              <span class="miniPill">Upload</span>
+              <span class="miniPill">Paste</span>
+              <span class="miniPill">Download</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- MAIN GRID -->
+        <div class="dashMainGrid">
 
           <!-- Quick Actions -->
-          <div class="dashCard">
-            <div class="dashLabel">Quick actions</div>
-            <div class="dashActions">
-              <button class="toolBtn primary" id="goAccounts">Open Accounts</button>
-              <button class="toolBtn ghost" id="goTool">Open Duplicater</button>
-              <button class="toolBtn ghost" id="goProfile">My Profile</button>
+          <div class="dashPanel">
+            <div class="panelTop">
+              <div>
+                <div class="panelTitle">Quick Actions</div>
+                <div class="panelSub">Fast navigation</div>
+              </div>
             </div>
-            <div class="toolHint" style="margin-top:10px;">
-              Wallet credits are calculated by system (admin sets your rate).
+
+            <div class="actionGrid">
+              <button class="actionBtn primary" id="goAccounts">
+                <div class="actionI">👤</div>
+                <div>
+                  <div class="actionT">Accounts</div>
+                  <div class="actionS">Add / tag / filter</div>
+                </div>
+              </button>
+
+              <button class="actionBtn" id="goTool">
+                <div class="actionI">📄</div>
+                <div>
+                  <div class="actionT">Data Duplicater</div>
+                  <div class="actionS">Upload & duplicate</div>
+                </div>
+              </button>
+
+              <button class="actionBtn" id="goProfile">
+                <div class="actionI">🧾</div>
+                <div>
+                  <div class="actionT">My Profile</div>
+                  <div class="actionS">Profile & payments</div>
+                </div>
+              </button>
+
+              <button class="actionBtn" id="goWallet">
+                <div class="actionI">💰</div>
+                <div>
+                  <div class="actionT">Wallet</div>
+                  <div class="actionS">Statement & exports</div>
+                </div>
+              </button>
+            </div>
+
+            <div class="panelHint">
+              Wallet credits depend on admin rate per account.
             </div>
           </div>
 
-          <!-- Stats dummy cards -->
-          <div class="dashCard">
-            <div class="dashLabel">Usage</div>
-            <div class="dashStatRow">
-              <div class="dashStat">
-                <div class="dashStatK">This week</div>
-                <div class="dashStatV">Active</div>
+          <!-- Dummy chart / insights -->
+          <div class="dashPanel">
+            <div class="panelTop">
+              <div>
+                <div class="panelTitle">Activity Overview</div>
+                <div class="panelSub">Visual analytics (UI)</div>
               </div>
-              <div class="dashStat">
-                <div class="dashStatK">Status</div>
-                <div class="dashStatV">Verified</div>
+              <span class="chip small">Weekly</span>
+            </div>
+
+            <div class="chartBox">
+              <div class="barRow">
+                <div class="barLabel">Mon</div><div class="barTrack"><div class="barFill" style="width:62%"></div></div>
+              </div>
+              <div class="barRow">
+                <div class="barLabel">Tue</div><div class="barTrack"><div class="barFill" style="width:35%"></div></div>
+              </div>
+              <div class="barRow">
+                <div class="barLabel">Wed</div><div class="barTrack"><div class="barFill" style="width:78%"></div></div>
+              </div>
+              <div class="barRow">
+                <div class="barLabel">Thu</div><div class="barTrack"><div class="barFill" style="width:55%"></div></div>
+              </div>
+              <div class="barRow">
+                <div class="barLabel">Fri</div><div class="barTrack"><div class="barFill" style="width:82%"></div></div>
+              </div>
+
+              <div class="chartNote">
+                This is a visual placeholder to match big-company dashboards.
               </div>
             </div>
-            <div class="dashBar">
-              <div class="dashBarFill" style="width:72%"></div>
-            </div>
-            <div class="dashSmall" style="margin-top:8px;">Dummy chart (UI only)</div>
           </div>
+
         </div>
 
       </section>
@@ -106,20 +209,32 @@
   import { auth, db } from "./firebase.js";
   import { getSession, clearSession } from "./cache.js";
   import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-  import { doc, getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+  import { doc, getDoc, collection, getCountFromServer } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
   const sess = getSession();
   if (!sess) location.href = "index.html";
 
   const verChip = document.getElementById("verChip");
+  const statusText = document.getElementById("statusText");
   const walletBal = document.getElementById("walletBal");
+  const accCount = document.getElementById("accCount");
+  const helloName = document.getElementById("helloName");
 
   onAuthStateChanged(auth, async (user) => {
     if (!user) location.href = "index.html";
     if (!user.emailVerified) location.href = "index.html";
-    verChip.textContent = "Verified";
 
-    // show wallet balance preview (if wallet doc exists)
+    verChip.textContent = "Verified";
+    statusText.textContent = "Active";
+
+    // Greeting name if available in users/{uid}
+    try{
+      const u = await getDoc(doc(db, "users", user.uid));
+      const nm = u.exists() ? (u.data().name || "") : "";
+      helloName.textContent = nm ? `Welcome, ${nm} 👋` : "Welcome 👋";
+    }catch{}
+
+    // Wallet preview
     try{
       const w = await getDoc(doc(db, "wallets", user.uid));
       const bal = w.exists() ? (w.data().balance || 0) : 0;
@@ -127,27 +242,34 @@
     }catch{
       walletBal.textContent = "₹ —";
     }
+
+    // Accounts count (shared)
+    try{
+      const snap = await getCountFromServer(collection(db, "accounts"));
+      accCount.textContent = snap.data().count.toLocaleString("en-IN");
+    }catch{
+      accCount.textContent = "—";
+    }
   });
 
-  // NAV
-  document.getElementById("navAccounts").onclick = ()=> location.href = "accounts.html";
-  document.getElementById("navTool").onclick = ()=> location.href = "dashboard.html";
-  document.getElementById("navAdmin").onclick = ()=> location.href = "admin.html";
-
-  // Wallet click: set flag so wallet.html plays coin sound
+  // Wallet open with coin sound
   function openWallet(){
     sessionStorage.setItem("bm_wallet_sound", "1");
     location.href = "wallet.html";
   }
-  document.getElementById("navWallet").onclick = openWallet;
-  const walletCard = document.getElementById("walletCard");
-  walletCard.onclick = openWallet;
-  walletCard.onkeydown = (e)=>{ if(e.key==="Enter" || e.key===" ") openWallet(); };
 
-  // Quick actions
+  document.getElementById("walletCard").onclick = openWallet;
+  document.getElementById("walletCard").onkeydown = (e)=>{ if(e.key==="Enter" || e.key===" ") openWallet(); };
+
+  document.getElementById("navWallet").onclick = openWallet;
+  document.getElementById("navAccounts").onclick = ()=> location.href = "accounts.html";
+  document.getElementById("navTool").onclick = ()=> location.href = "dashboard.html";
+  document.getElementById("navAdmin").onclick = ()=> location.href = "admin.html";
+
   document.getElementById("goAccounts").onclick = ()=> location.href = "accounts.html";
   document.getElementById("goTool").onclick = ()=> location.href = "dashboard.html";
   document.getElementById("goProfile").onclick = ()=> location.href = "account.html";
+  document.getElementById("goWallet").onclick = openWallet;
 
   // Logout
   document.getElementById("logoutBtn").onclick = async ()=>{
