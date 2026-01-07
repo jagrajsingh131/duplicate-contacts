@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Wallet | Buckup-Media</title>
+  <link rel="stylesheet" href="./style.css?v=3">
+</head>
+<body class="adminShell">
+
+  <aside class="sideNav">
+    <div class="sideTop">
+      <div class="sideLogo">BM</div>
+      <div>
+        <div class="sideName">Buckup-Media</div>
+        <div class="sideSub">Wallet</div>
+      </div>
+    </div>
+
+    <nav class="sideMenu">
+      <button class="navItem" id="goHome">Home</button>
+      <button class="navItem active">Wallet</button>
+      <button class="navItem" id="goAccounts">Accounts</button>
+      <button class="navItem" id="goTool">Data Duplicater</button>
+    </nav>
+
+    <div class="sideBottom">
+      <div class="sideHint">Secure ledger (server)</div>
+      <div class="sideSmall">© Buckup-Media</div>
+    </div>
+  </aside>
+
+  <div class="mainArea">
+    <header class="topBar">
+      <div>
+        <div class="topTitle">Wallet</div>
+        <div class="topSub">Statement • Downloads • Filters</div>
+      </div>
+
+      <div class="topRight">
+        <div class="chip">Verified</div>
+      </div>
+    </header>
+
+    <main class="content">
+      <section class="page show">
+
+        <div class="walletHero">
+          <div class="walletCard">
+            <div class="wTop">
+              <div>
+                <div class="wLabel">Available Balance</div>
+                <div class="wBal" id="bal">—</div>
+                <div class="wSmall" id="rateLine">Rate: —</div>
+              </div>
+              <div class="wIcon">₹</div>
+            </div>
+            <div class="wMeta">
+              <div class="wMetaItem"><span>Credits</span><b id="credits">—</b></div>
+              <div class="wMetaItem"><span>Deductions</span><b id="debits">—</b></div>
+              <div class="wMetaItem"><span>Net</span><b id="net">—</b></div>
+            </div>
+          </div>
+
+          <div class="walletCard soft">
+            <div class="wTop">
+              <div>
+                <div class="wLabel">Statement Filters</div>
+                <div class="wSmall">Download CSV/TXT for selected range</div>
+              </div>
+            </div>
+
+            <div class="filtersRow">
+              <div class="pillGroup" id="rangePills">
+                <button class="pill active" data-range="3m">Last 3 months</button>
+                <button class="pill" data-range="6m">Last 6 months</button>
+                <button class="pill" data-range="all">All</button>
+              </div>
+
+              <div class="datePack">
+                <input id="fromDate" type="date" class="toolInput compact">
+                <span class="dateSep">→</span>
+                <input id="toDate" type="date" class="toolInput compact">
+              </div>
+            </div>
+
+            <div class="btnRow" style="display:flex; gap:10px; flex-wrap:wrap; margin-top:12px;">
+              <button class="toolBtn primary" id="downloadCSV">Download CSV</button>
+              <button class="toolBtn ghost" id="downloadTXT">Download TXT</button>
+              <button class="toolBtn ghost" id="refresh">Refresh</button>
+            </div>
+
+            <div class="toolHint" style="margin-top:10px;">
+              Credits happen when you add accounts. Deductions happen every 30 minutes for accounts later tagged <b>locked</b> or <b>incorrect password</b>. Each account deducts only once.
+            </div>
+          </div>
+        </div>
+
+        <div class="cardX" style="margin-top:16px;">
+          <div class="cardXTitle">Statement</div>
+          <div class="cardXSub">Bank-style ledger</div>
+
+          <div id="er" class="toolMsg err"></div>
+
+          <div class="accTableWrap" style="margin-top:14px;">
+            <table class="accTable">
+              <thead>
+                <tr>
+                  <th>Date</th>
+                  <th>Type</th>
+                  <th>Description</th>
+                  <th>Accounts</th>
+                  <th>Amount</th>
+                </tr>
+              </thead>
+              <tbody id="rows">
+                <tr><td colspan="5" style="padding:14px;color:#64748b;">Loading…</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+      </section>
+    </main>
+  </div>
+
+<script type="module">
+  import { auth, db } from "./firebase.js";
+  import { getSession } from "./cache.js";
+  import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+  import { doc, getDoc, collection, query, orderBy, onSnapshot } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+  const sess = getSession();
+  if (!sess) location.href = "index.html";
+
+  onAuthStateChanged(auth, (user) => {
+    if (!user || !user.emailVerified) location.href = "index.html";
+  });
+
+  document.getElementById("goHome").onclick = ()=> location.href = "home.html";
+  document.getElementById("goAccounts").onclick = ()=> location.href = "accounts.html";
+  document.getElementById("goTool").onclick = ()=> location.href = "dashboard.html";
+
+  const er = document.getElementById("er");
+  const rows = document.getElementById("rows");
+
+  const balEl = document.getElementById("bal");
+  const rateLine = document.getElementById("rateLine");
+  const creditsEl = document.getElementById("credits");
+  const debitsEl = document.getElementById("debits");
+  const netEl = document.getElementById("net");
+
+  const fromDate = document.getElementById("fromDate");
+  const toDate = document.getElementById("toDate");
+
+  let allRuns = [];
+  let selectedRange = "3m";
+
+  function fmtMoney(n){
+    const x = Number(n || 0);
+    return "₹ " + x.toLocaleString("en-IN");
+  }
+
+  function fmtTime(ts){
+    try{
+      if (!ts) return "—";
+      const d = ts.toDate ? ts.toDate() : new Date(ts);
+      return d.toLocaleString();
+    }catch{ return "—"; }
+  }
+
+  function withinRange(ts){
+    if (!ts) return false;
+    const d = ts.toDate ? ts.toDate() : new Date(ts);
+    const f = fromDate.value ? new Date(fromDate.value + "T00:00:00") : null;
+    const t = toDate.value ? new Date(toDate.value + "T23:59:59") : null;
+    if (f && d < f) return false;
+    if (t && d > t) return false;
+    return true;
+  }
+
+  function setPresetRange(range){
+    selectedRange = range;
+    const now = new Date();
+    const start = new Date(now);
+
+    if (range === "3m") start.setMonth(start.getMonth() - 3);
+    if (range === "6m") start.setMonth(start.getMonth() - 6);
+    if (range === "all") {
+      fromDate.value = "";
+      toDate.value = "";
+      render();
+      return;
+    }
+
+    const yyyy = start.getFullYear();
+    const mm = String(start.getMonth()+1).padStart(2,"0");
+    const dd = String(start.getDate()).padStart(2,"0");
+    fromDate.value = `${yyyy}-${mm}-${dd}`;
+
+    const y2 = now.getFullYear();
+    const m2 = String(now.getMonth()+1).padStart(2,"0");
+    const d2 = String(now.getDate()).padStart(2,"0");
+    toDate.value = `${y2}-${m2}-${d2}`;
+
+    render();
+  }
+
+  document.querySelectorAll("#rangePills .pill").forEach(p=>{
+    p.onclick = ()=>{
+      document.querySelectorAll("#rangePills .pill").forEach(x=>x.classList.remove("active"));
+      p.classList.add("active");
+      setPresetRange(p.dataset.range);
+    };
+  });
+
+  fromDate.onchange = render;
+  toDate.onchange = render;
+
+  async function loadWalletHeader(){
+    try{
+      const w = await getDoc(doc(db, "wallets", sess.uid));
+      const wallet = w.exists() ? w.data() : { balance: 0, creditsTotal: 0, debitsTotal: 0 };
+
+      balEl.textContent = fmtMoney(wallet.balance || 0);
+      creditsEl.textContent = fmtMoney(wallet.creditsTotal || 0);
+      debitsEl.textContent = fmtMoney(wallet.debitsTotal || 0);
+      netEl.textContent = fmtMoney((wallet.creditsTotal||0) - (wallet.debitsTotal||0));
+
+      const r = await getDoc(doc(db, "rates", sess.uid));
+     
