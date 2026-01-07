@@ -1140,3 +1140,243 @@ button{
 .copyMini:hover{background:#f8fafc;}
 .dRight{display:flex; align-items:center; gap:10px;}
 
+/* --- Premium dashboard / wallet / admin add-on --- */
+
+.adminShell{display:flex; min-height:100vh;}
+.sideNav{
+  width:280px; padding:18px; position:sticky; top:0; height:100vh;
+  border-right:1px solid rgba(255,255,255,.08);
+  background:rgba(15,26,47,.55);
+  backdrop-filter: blur(14px);
+}
+.sideTop{display:flex; gap:12px; align-items:center; padding:10px 10px 18px;}
+.sideLogo{
+  width:46px; height:46px; border-radius:16px;
+  display:flex; align-items:center; justify-content:center;
+  font-weight:900;
+  background:linear-gradient(135deg,#6d5efc, #38d4a6);
+  box-shadow: 0 12px 35px rgba(0,0,0,.35);
+}
+.sideName{font-weight:900; font-size:16px}
+.sideSub{color:#9fb1d3; font-size:12px; font-weight:700}
+.sideMenu{display:flex; flex-direction:column; gap:10px; padding:8px;}
+.navItem{
+  text-align:left; padding:12px 14px; border-radius:16px;
+  border:1px solid rgba(255,255,255,.08);
+  background:rgba(255,255,255,.04);
+  color:#e7eefc; font-weight:900; cursor:pointer;
+}
+.navItem:hover{background:rgba(255,255,255,.07)}
+.navItem.active{
+  border-color: rgba(109,94,252,.7);
+  background:linear-gradient(90deg, rgba(109,94,252,.22), rgba(56,212,166,.12));
+}
+.sideBottom{padding:12px 10px; color:#9fb1d3; margin-top:auto}
+.sideHint{font-weight:800}
+.sideSmall{opacity:.7; font-size:12px}
+
+.mainArea{flex:1; padding:18px 18px 30px;}
+.topBar{
+  display:flex; align-items:center; justify-content:space-between;
+  gap:12px; padding:14px 16px; border-radius:20px;
+  border:1px solid rgba(255,255,255,.08);
+  background:rgba(255,255,255,.04);
+  backdrop-filter: blur(12px);
+}
+.topTitle{font-weight:1000; font-size:22px}
+.topSub{color:#9fb1d3; font-weight:800; font-size:12px}
+.topRight{display:flex; gap:10px; align-items:center}
+
+.chip{
+  padding:8px 12px; border-radius:999px; font-weight:900; font-size:12px;
+  border:1px solid rgba(255,255,255,.10);
+  background:rgba(255,255,255,.05);
+}
+
+.content{padding-top:16px}
+.page.show{display:block}
+
+.toolBtn{
+  padding:10px 14px; border-radius:14px;
+  border:1px solid rgba(255,255,255,.10);
+  background:rgba(255,255,255,.05);
+  color:#e7eefc; font-weight:900; cursor:pointer;
+}
+.toolBtn:hover{background:rgba(255,255,255,.08)}
+.toolBtn.primary{
+  border-color: rgba(109,94,252,.7);
+  background:linear-gradient(90deg,#6d5efc,#38d4a6);
+  color:#081224;
+}
+.toolBtn.ghost{background:rgba(255,255,255,.04)}
+.toolInput{
+  width:100%; padding:12px 14px; border-radius:14px;
+  border:1px solid rgba(255,255,255,.10);
+  background:rgba(255,255,255,.04);
+  color:#e7eefc; outline:none; font-weight:800;
+}
+.toolInput::placeholder{color:#8ea4c9}
+.toolInput.compact{height:42px; padding:10px 12px}
+
+.cardX{
+  border:1px solid rgba(255,255,255,.08);
+  background:rgba(255,255,255,.04);
+  border-radius:22px;
+  padding:16px;
+  box-shadow: 0 18px 55px rgba(0,0,0,.35);
+}
+.cardXTop{display:flex; justify-content:space-between; align-items:center; gap:12px}
+.cardXTitle{font-weight:1000; font-size:18px}
+.cardXSub{color:#9fb1d3; font-weight:800; font-size:12px}
+
+.toolMsg{display:none; margin-top:12px; padding:10px 12px; border-radius:14px; font-weight:900}
+.toolMsg.ok{display:none; background:rgba(34,197,94,.12); border:1px solid rgba(34,197,94,.35)}
+.toolMsg.err{display:none; background:rgba(251,113,133,.12); border:1px solid rgba(251,113,133,.35)}
+
+.toolHint{color:#9fb1d3; font-weight:800; font-size:12px}
+
+.dashGrid{
+  display:grid; gap:16px;
+  grid-template-columns: 1.1fr 1fr;
+}
+@media(max-width: 1000px){
+  .dashGrid{grid-template-columns: 1fr;}
+  .sideNav{display:none}
+}
+.dashCard{
+  border:1px solid rgba(255,255,255,.08);
+  background:rgba(255,255,255,.04);
+  border-radius:22px;
+  padding:16px;
+  box-shadow: 0 18px 55px rgba(0,0,0,.35);
+}
+.walletGlow{
+  cursor:pointer;
+  background:
+    radial-gradient(600px 220px at 20% 0%, rgba(109,94,252,.25), transparent 60%),
+    radial-gradient(500px 240px at 90% 20%, rgba(56,212,166,.18), transparent 60%),
+    rgba(255,255,255,.04);
+}
+.dashCardTop{display:flex; justify-content:space-between; align-items:center; gap:10px}
+.dashLabel{color:#9fb1d3; font-weight:1000; font-size:12px}
+.dashBig{font-weight:1100; font-size:28px; margin-top:6px}
+.dashSmall{color:#9fb1d3; font-weight:800; font-size:12px}
+.dashIcon{
+  width:48px; height:48px; border-radius:16px;
+  display:flex; align-items:center; justify-content:center;
+  font-weight:1000; font-size:18px;
+  background:linear-gradient(135deg,#6d5efc,#38d4a6);
+  color:#081224;
+}
+.dashPills{display:flex; gap:8px; flex-wrap:wrap; margin-top:12px}
+.miniPill{
+  padding:6px 10px; border-radius:999px;
+  border:1px solid rgba(255,255,255,.10);
+  background:rgba(255,255,255,.04);
+  font-weight:900; font-size:12px; color:#e7eefc;
+}
+.dashActions{display:flex; gap:10px; flex-wrap:wrap; margin-top:12px}
+.dashStatRow{display:flex; gap:12px; margin-top:10px}
+.dashStat{flex:1; padding:12px; border-radius:18px; background:rgba(0,0,0,.20); border:1px solid rgba(255,255,255,.06)}
+.dashStatK{color:#9fb1d3; font-weight:900; font-size:12px}
+.dashStatV{font-weight:1000; font-size:16px; margin-top:6px}
+.dashBar{height:12px; background:rgba(255,255,255,.06); border-radius:999px; overflow:hidden; margin-top:12px}
+.dashBarFill{height:12px; background:linear-gradient(90deg,#6d5efc,#38d4a6); border-radius:999px}
+
+.walletGrid{display:grid; grid-template-columns: 1.1fr 1fr; gap:16px}
+@media(max-width: 1100px){ .walletGrid{grid-template-columns:1fr;} }
+
+.walletHeroCard{
+  border:1px solid rgba(255,255,255,.08);
+  background:rgba(255,255,255,.04);
+  border-radius:24px;
+  padding:18px;
+  box-shadow: 0 18px 55px rgba(0,0,0,.35);
+}
+.walletHeroCard.soft{
+  background:
+    radial-gradient(600px 220px at 10% 0%, rgba(56,212,166,.18), transparent 60%),
+    rgba(255,255,255,.04);
+}
+.wHead{display:flex; justify-content:space-between; align-items:center; gap:10px}
+.wLabel{color:#9fb1d3; font-weight:1000; font-size:12px}
+.wBal{font-weight:1100; font-size:34px; margin-top:6px}
+.wMetaLine{color:#9fb1d3; font-weight:900; font-size:12px; margin-top:8px}
+.wBadge{
+  width:52px; height:52px; border-radius:18px;
+  display:flex; align-items:center; justify-content:center;
+  font-weight:1100; font-size:18px;
+  background:linear-gradient(135deg,#6d5efc,#38d4a6);
+  color:#081224;
+}
+.wBadge.alt{background:linear-gradient(135deg,#38d4a6,#6d5efc)}
+.wMiniStats{display:grid; grid-template-columns: repeat(3,1fr); gap:10px; margin-top:14px}
+.wStat{padding:12px; border-radius:18px; background:rgba(0,0,0,.20); border:1px solid rgba(255,255,255,.06)}
+.wStatLabel{color:#9fb1d3; font-weight:1000; font-size:12px}
+.wStatVal{font-weight:1100; font-size:16px; margin-top:8px}
+.wNotice{margin-top:14px; padding:12px; border-radius:18px; background:rgba(0,0,0,.20); border:1px solid rgba(255,255,255,.06); color:#cfe0ff; font-weight:800; font-size:12px; line-height:1.5}
+
+.pillGroup{
+  display:flex; gap:8px; flex-wrap:wrap;
+  padding:10px; border-radius:999px;
+  border:1px solid rgba(255,255,255,.10);
+  background:rgba(0,0,0,.18);
+}
+.pill{
+  padding:8px 12px; border-radius:999px;
+  border:1px solid rgba(255,255,255,.10);
+  background:rgba(255,255,255,.04);
+  color:#e7eefc; font-weight:1000; cursor:pointer;
+}
+.pill:hover{background:rgba(255,255,255,.08)}
+.pill.active{
+  border-color: rgba(109,94,252,.7);
+  background:linear-gradient(90deg, rgba(109,94,252,.22), rgba(56,212,166,.12));
+}
+.datePack{
+  display:flex; align-items:center; gap:10px;
+  padding:10px 12px;
+  border-radius:18px;
+  border:1px solid rgba(255,255,255,.10);
+  background:rgba(0,0,0,.18);
+}
+.dateSep{color:#9fb1d3; font-weight:1000}
+.wControls{margin-top:14px; display:flex; flex-direction:column; gap:12px}
+.wBtns{display:flex; gap:10px; flex-wrap:wrap}
+
+.searchMiniWrap{min-width:260px}
+
+.accTableWrap{overflow:auto; border-radius:18px; border:1px solid rgba(255,255,255,.08)}
+.accTable{width:100%; border-collapse:collapse; min-width:760px}
+.accTable th, .accTable td{
+  padding:12px 12px;
+  border-bottom:1px solid rgba(255,255,255,.08);
+  font-weight:900;
+}
+.accTable th{color:#9fb1d3; font-size:12px; text-transform:uppercase; letter-spacing:.04em}
+.accTable td{color:#e7eefc; font-size:13px}
+.mono{font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;}
+
+.typePill{
+  padding:6px 10px; border-radius:999px;
+  border:1px solid rgba(255,255,255,.10);
+  background:rgba(255,255,255,.04);
+  font-size:12px; font-weight:1000;
+}
+.typePill.good{border-color: rgba(34,197,94,.45); background:rgba(34,197,94,.10)}
+.typePill.bad{border-color: rgba(251,113,133,.45); background:rgba(251,113,133,.10)}
+.amtGood{color:#6ee7b7; font-weight:1100}
+.amtBad{color:#fda4af; font-weight:1100}
+
+.adminForm{
+  margin-top:12px;
+  display:grid;
+  grid-template-columns: 1.2fr 1fr auto;
+  gap:12px;
+  align-items:end;
+}
+.adminFormBtns{display:flex; gap:10px; flex-wrap:wrap}
+@media(max-width: 900px){
+  .adminForm{grid-template-columns: 1fr;}
+}
+
