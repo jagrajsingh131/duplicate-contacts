@@ -4,296 +4,208 @@
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Accounts | Buckup-Media</title>
-  <link rel="stylesheet" href="./style.css?v=140">
+  <link rel="stylesheet" href="./style.css?v=3">
 </head>
+<body class="toolBody">
 
-<body class="adminShell">
-
-  <!-- SIDEBAR (same style as Home/Wallet) -->
-  <aside class="sideNav">
-    <div class="sideTop">
-      <div class="sideLogo">BM</div>
-      <div>
-        <div class="sideName">Buckup-Media</div>
-        <div class="sideSub">Accounts</div>
-      </div>
+<header class="toolTop">
+  <div class="toolBrand">
+    <div class="toolLogo">BM</div>
+    <div>
+      <div class="toolTitle">Accounts</div>
+      <div class="toolSub">Shared list • Tags • Details</div>
     </div>
+  </div>
 
-    <nav class="sideMenu">
-      <button class="navItem" id="goHome">Home</button>
-      <button class="navItem active">Accounts</button>
-      <button class="navItem" id="goTool">Data Duplicater</button>
-      <button class="navItem" id="goWallet">Wallet</button>
-      <button class="navItem" id="goAdmin">Admin</button>
-    </nav>
+  <div class="toolActions">
+    <button class="toolBtn ghost" id="homeBtn">Home</button>
+    <button class="toolBtn primary" id="openAdd">Add More Accounts</button>
+  </div>
+</header>
 
-    <div class="sideBottom">
-      <div class="sideHint">Shared database</div>
-      <div class="sideSmall">© Buckup-Media</div>
-    </div>
-  </aside>
+<main class="toolMain">
 
-  <!-- MAIN -->
-  <div class="mainArea">
-    <header class="topBar">
+  <section class="toolCard">
+    <div class="toolCardHead" style="align-items:flex-end;">
       <div>
-        <div class="topTitle">Accounts</div>
-        <div class="topSub">Add • Tag • Filter • Details</div>
+        <div class="toolCardTitle">All Accounts</div>
+        <div class="toolCardSub">This list is shared for all users</div>
       </div>
 
-      <div class="topRight">
-        <span class="chip" id="verChip">Verified</span>
+      <div style="display:flex; gap:10px; flex-wrap:wrap;">
+        <input id="search" class="toolInput" style="min-width:260px" placeholder="Search by name / number / tag">
         <button class="toolBtn ghost" id="refreshBtn">Refresh</button>
       </div>
-    </header>
-
-    <main class="content">
-      <section class="page show">
-
-        <!-- ADD + FILTERS -->
-        <div class="cardX" data-tilt>
-          <div class="cardXTop">
-            <div>
-              <div class="cardXTitle">Accounts Manager</div>
-              <div class="cardXSub">Paste accounts in any format — we auto-clean names & phones.</div>
-            </div>
-            <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
-              <button class="toolBtn primary" id="openAdd">Add More Accounts</button>
-              <span class="chip small" id="countChip">0</span>
-            </div>
-          </div>
-
-          <div class="bmFilters">
-            <div class="bmF">
-              <div class="bmLabel">Tag</div>
-              <select class="toolInput compact" id="filterTag">
-                <option value="">All</option>
-                <option value="locked">Locked</option>
-                <option value="cod issue">COD Issue</option>
-                <option value="incorrect password">Incorrect Password</option>
-                <option value="ok">OK</option>
-              </select>
-            </div>
-
-            <div class="bmF">
-              <div class="bmLabel">Created by (email)</div>
-              <input class="toolInput compact" id="filterBy" placeholder="example@gmail.com">
-            </div>
-
-            <div class="bmF">
-              <div class="bmLabel">Created date</div>
-              <input class="toolInput compact" id="filterDate" type="date">
-            </div>
-
-            <div class="bmF grow">
-              <div class="bmLabel">Search</div>
-              <input class="toolInput compact" id="searchBox" placeholder="search name / phone">
-            </div>
-          </div>
-
-          <div id="er" class="toolMsg err"></div>
-        </div>
-
-        <!-- TABLE -->
-        <div class="cardX" data-tilt style="margin-top:16px;">
-          <div class="cardXTop">
-            <div>
-              <div class="cardXTitle">Accounts List</div>
-              <div class="cardXSub">Click phone to open account details</div>
-            </div>
-          </div>
-
-          <div class="accTableWrap" style="margin-top:12px;">
-            <table class="accTable">
-              <thead>
-                <tr>
-                  <th style="width:42%;">Name</th>
-                  <th style="width:22%;">Phone</th>
-                  <th style="width:18%;">Tag</th>
-                  <th style="width:18%;">Actions</th>
-                </tr>
-              </thead>
-              <tbody id="rows">
-                <tr class="skRow"><td colspan="4">
-                  <div class="skLine"></div>
-                  <div class="skLine w80"></div>
-                  <div class="skLine w60"></div>
-                </td></tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
-
-      </section>
-    </main>
-  </div>
-
-  <!-- ADD MODAL -->
-  <div class="bmModalBack" id="addModal" style="display:none;">
-    <div class="bmModalCard">
-      <div class="bmModalTop">
-        <div>
-          <div class="bmModalTitle">Add Accounts</div>
-          <div class="bmModalSub">Paste lines like: <b>Name<TAB>Phone</b> or <b>Name  Phone</b> or <b>Name - Phone</b></div>
-        </div>
-        <button class="toolBtn ghost" id="closeAdd" style="padding:10px 12px;">✕</button>
-      </div>
-
-      <textarea id="pasteBox" class="toolInput bmArea"
-        placeholder="Shekhu Gupta	9731523112
-Mohini Karana	9871519319
-Samir Mangat  8981541144
-AR Raghavan - 7621809197"></textarea>
-
-      <div class="bmSmallNote">
-        We will: (1) clean name to single spaces, (2) keep last 10 digits of phone.
-      </div>
-
-      <div class="btnRow" style="margin-top:12px;">
-        <button class="toolBtn ghost" id="clearPaste">Clear</button>
-        <button class="toolBtn primary" id="savePaste">Save</button>
-      </div>
-
-      <div id="addInfo" class="toolMsg" style="display:none;"></div>
     </div>
-  </div>
 
-  <!-- DETAILS MODAL -->
-  <div class="bmModalBack" id="detailModal" style="display:none;">
-    <div class="bmModalCard">
-      <div class="bmModalTop">
-        <div>
-          <div class="bmModalTitle">Account Details</div>
-          <div class="bmModalSub">Created by/time are shown only here</div>
-        </div>
-        <button class="toolBtn ghost" id="closeDetail" style="padding:10px 12px;">✕</button>
-      </div>
-
-      <div class="bmDetailGrid">
-        <div class="bmDetailItem">
-          <div class="bmK">Name</div>
-          <div class="bmV" id="dName">—</div>
-        </div>
-        <div class="bmDetailItem">
-          <div class="bmK">Phone</div>
-          <div class="bmV mono" id="dPhone">—</div>
-        </div>
-        <div class="bmDetailItem">
-          <div class="bmK">Tag</div>
-          <div class="bmV" id="dTag">—</div>
-        </div>
-        <div class="bmDetailItem">
-          <div class="bmK">Created By</div>
-          <div class="bmV" id="dBy">—</div>
-        </div>
-        <div class="bmDetailItem">
-          <div class="bmK">Created At</div>
-          <div class="bmV" id="dAt">—</div>
-        </div>
-      </div>
-
-      <div style="margin-top:10px;">
-        <div class="bmLabel">Update tag</div>
-        <select class="toolInput" id="tagSelect">
-          <option value="">No tag</option>
-          <option value="locked">Locked</option>
-          <option value="cod issue">COD Issue</option>
-          <option value="incorrect password">Incorrect Password</option>
-          <option value="ok">OK</option>
+    <!-- ✅ FILTER BAR -->
+    <div class="accFilters">
+      <div class="accFilt">
+        <label class="toolLabel">Tag</label>
+        <select id="tagFilter" class="toolInput">
+          <option value="">All</option>
+          <option value="locked">locked</option>
+          <option value="cod issue">cod issue</option>
+          <option value="incorrect password">incorrect password</option>
+          <option value="__none__">No tag</option>
         </select>
       </div>
 
-      <div class="btnRow" style="margin-top:12px;">
-        <button class="toolBtn ghost" id="copyDetail">Copy Name + Phone</button>
-        <button class="toolBtn primary" id="saveTag">Save Tag</button>
+      <div class="accFilt">
+        <label class="toolLabel">Created By</label>
+        <select id="userFilter" class="toolInput">
+          <option value="">All users</option>
+        </select>
       </div>
 
-      <div id="detailInfo" class="toolMsg" style="display:none;"></div>
+      <div class="accFilt">
+        <label class="toolLabel">From</label>
+        <input id="fromDate" type="date" class="toolInput">
+      </div>
+
+      <div class="accFilt">
+        <label class="toolLabel">To</label>
+        <input id="toDate" type="date" class="toolInput">
+      </div>
+
+      <div class="accFilt accFiltBtns">
+        <button class="toolBtn ghost" id="clearFilters">Clear Filters</button>
+      </div>
+    </div>
+
+    <div id="ok" class="toolMsg ok"></div>
+    <div id="er" class="toolMsg err"></div>
+
+    <div class="accTableWrap" style="margin-top:14px;">
+      <table class="accTable">
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Phone</th>
+            <th>Tag</th>
+            <th>Created By</th>
+            <th>Added</th>
+          </tr>
+        </thead>
+        <tbody id="rows">
+          <tr><td colspan="5" style="padding:14px;color:#64748b;">Loading…</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="toolHint" style="margin-top:10px;">
+      Click any row to open <b>Account Details</b> and <b>Add Tag</b>.
+    </div>
+  </section>
+</main>
+
+<!-- ADD MODAL -->
+<div class="modalBack" id="addModal" style="display:none;">
+  <div class="modalCard">
+    <div class="modalHead">
+      <div>
+        <div class="toolCardTitle">Add More Accounts</div>
+        <div class="toolCardSub">Paste like: <b>Name[TAB]Phone</b> (one per line)</div>
+      </div>
+      <button class="toolBtn ghost" id="closeAdd">Close</button>
+    </div>
+
+    <textarea id="pasteBox" class="toolArea" rows="10"
+      placeholder="Example:
+Dhananjay Butala	9884155629
+Kajal Shenoy	8438525192"></textarea>
+
+    <div class="toolHint">
+      ✅ Supports TAB or spaces. <b>Phone must be last digits</b> in the line.
+      Names can contain double spaces and will stay correct.
+    </div>
+
+    <div class="btnRow" style="margin-top:12px; display:flex; gap:10px; flex-wrap:wrap;">
+      <button class="toolBtn primary" id="saveAccounts">Save Accounts</button>
+      <button class="toolBtn ghost" id="clearPaste">Clear</button>
+    </div>
+
+    <div id="addMsg" class="toolMsg ok"></div>
+    <div id="addErr" class="toolMsg err"></div>
+  </div>
+</div>
+
+<!-- DETAILS MODAL -->
+<div class="modalBack" id="detailModal" style="display:none;">
+  <div class="modalCard">
+    <div class="modalHead">
+      <div>
+        <div class="toolCardTitle">Account Details</div>
+        <div class="toolCardSub" id="detailSub">—</div>
+      </div>
+      <button class="toolBtn ghost" id="closeDetail">Close</button>
+    </div>
+
+    <div class="detailBox">
+      <div class="dRow"><span>Name</span><b id="dName">—</b></div>
+      <div class="dRow"><span>Phone</span><b id="dPhone">—</b></div>
+      <div class="dRow"><span>Created At</span><b id="dCreated">—</b></div>
+      <div class="dRow"><span>Added By</span><b id="dBy">—</b></div>
+      <div class="dRow"><span>Current Tag</span><b id="dTag">—</b></div>
+
+      <hr style="border:none;border-top:1px solid #e2e8f0;margin:12px 0;">
+
+      <label class="toolLabel">Set Tag</label>
+      <select id="tagSelect" class="toolInput">
+        <option value="">No tag</option>
+        <option value="locked">locked</option>
+        <option value="cod issue">cod issue</option>
+        <option value="incorrect password">incorrect password</option>
+      </select>
+
+      <div class="btnRow" style="margin-top:12px; display:flex; gap:10px; flex-wrap:wrap;">
+        <button class="toolBtn primary" id="saveTag">Save Tag</button>
+        <button class="toolBtn info" id="copyPhone">Copy Phone</button>
+      </div>
+
+      <div id="detailOk" class="toolMsg ok"></div>
+      <div id="detailEr" class="toolMsg err"></div>
     </div>
   </div>
+</div>
 
 <script type="module">
   import { auth, db } from "./firebase.js";
-  import { getSession } from "./cache.js";
+  import { getSession, getProfileLocal } from "./cache.js";
   import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
   import {
-    collection, addDoc, doc, updateDoc, onSnapshot,
-    query, orderBy, serverTimestamp
+    collection, query, orderBy, onSnapshot, doc, getDoc, setDoc, updateDoc,
+    serverTimestamp
   } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-  // Require session
+  // UI messages
+  const ok = document.getElementById("ok");
+  const er = document.getElementById("er");
+  const showOk = (t)=>{ ok.style.display="block"; er.style.display="none"; ok.textContent=t; };
+  const showEr = (t)=>{ er.style.display="block"; ok.style.display="none"; er.textContent=t; };
+
+  const rows = document.getElementById("rows");
+  const search = document.getElementById("search");
+
+  // filters
+  const tagFilter = document.getElementById("tagFilter");
+  const userFilter = document.getElementById("userFilter");
+  const fromDate = document.getElementById("fromDate");
+  const toDate = document.getElementById("toDate");
+
+  // session check
   const sess = getSession();
   if (!sess) location.href = "index.html";
 
-  onAuthStateChanged(auth, (u)=>{
-    if (!u) location.href = "index.html";
-    if (!u.emailVerified) location.href = "index.html";
+  onAuthStateChanged(auth, (user) => {
+    if (!user || !user.emailVerified) location.href = "index.html";
   });
 
-  // NAV
-  document.getElementById("goHome").onclick = ()=> location.href="home.html";
-  document.getElementById("goTool").onclick = ()=> location.href="dashboard.html";
-  document.getElementById("goWallet").onclick = ()=> location.href="wallet.html";
-  document.getElementById("goAdmin").onclick = ()=> location.href="admin.html";
-  document.getElementById("refreshBtn").onclick = ()=> location.reload();
-
-  // Tilt (subtle)
-  (function initTilt(){
-    const cards = document.querySelectorAll("[data-tilt]");
-    cards.forEach(card=>{
-      card.addEventListener("mousemove", (e)=>{
-        const r = card.getBoundingClientRect();
-        const x = (e.clientX - r.left) / r.width - 0.5;
-        const y = (e.clientY - r.top) / r.height - 0.5;
-        card.style.transform = `perspective(900px) rotateX(${(-y*2.6).toFixed(2)}deg) rotateY(${(x*2.6).toFixed(2)}deg) translateY(-2px)`;
-      });
-      card.addEventListener("mouseleave", ()=>{
-        card.style.transform = `perspective(900px) rotateX(0deg) rotateY(0deg) translateY(0px)`;
-      });
-    });
-  })();
-
-  // UI refs
-  const rows = document.getElementById("rows");
-  const er = document.getElementById("er");
-  const countChip = document.getElementById("countChip");
-  const filterTag = document.getElementById("filterTag");
-  const filterBy = document.getElementById("filterBy");
-  const filterDate = document.getElementById("filterDate");
-  const searchBox = document.getElementById("searchBox");
-
-  // modals
-  const addModal = document.getElementById("addModal");
-  const openAdd = document.getElementById("openAdd");
-  const closeAdd = document.getElementById("closeAdd");
-  const pasteBox = document.getElementById("pasteBox");
-  const clearPaste = document.getElementById("clearPaste");
-  const savePaste = document.getElementById("savePaste");
-  const addInfo = document.getElementById("addInfo");
-
-  const detailModal = document.getElementById("detailModal");
-  const closeDetail = document.getElementById("closeDetail");
-  const dName = document.getElementById("dName");
-  const dPhone = document.getElementById("dPhone");
-  const dTag = document.getElementById("dTag");
-  const dBy = document.getElementById("dBy");
-  const dAt = document.getElementById("dAt");
-  const tagSelect = document.getElementById("tagSelect");
-  const saveTag = document.getElementById("saveTag");
-  const copyDetail = document.getElementById("copyDetail");
-  const detailInfo = document.getElementById("detailInfo");
+  document.getElementById("homeBtn").onclick = () => location.href = "home.html";
 
   let allAccounts = [];
-  let selectedId = null;
+  let unsubscribe = null;
 
-  function showErr(t){ er.style.display="block"; er.textContent=t; }
-  function clearErr(){ er.style.display="none"; er.textContent=""; }
-  function toast(el, msg, kind="ok"){
-    el.style.display="block";
-    el.className = "toolMsg " + (kind==="err" ? "err" : "ok");
-    el.textContent = msg;
-    setTimeout(()=>{ el.style.display="none"; }, 2600);
-  }
   function fmtTime(ts){
     try{
       if (!ts) return "—";
@@ -301,353 +213,278 @@ AR Raghavan - 7621809197"></textarea>
       return d.toLocaleString();
     }catch{ return "—"; }
   }
-  function copyText(t){ navigator.clipboard.writeText(t).catch(()=>{}); }
 
-  // ===== VERY STRONG CLEANERS =====
-  // removes hidden unicode spaces, normalizes tabs/spaces, trims
-  function normalizeLine(line){
-    return (line || "")
-      .replace(/[\u00A0\u2000-\u200B\u202F\u205F\u3000]/g, " ")  // weird spaces -> normal
-      .replace(/\s+/g, " ")                                     // collapse any whitespace
-      .trim();
-  }
-  function cleanName(raw){
-    return normalizeLine(raw);
-  }
-  function cleanPhone(raw){
-    const digits = (raw || "").replace(/\D/g, ""); // keep only digits
-    if (digits.length >= 10) return digits.slice(-10); // keep last 10
-    return "";
+  function dateOnly(ts){
+    try{
+      if (!ts) return null;
+      const d = ts.toDate ? ts.toDate() : new Date(ts);
+      const yyyy = d.getFullYear();
+      const mm = String(d.getMonth()+1).padStart(2,"0");
+      const dd = String(d.getDate()).padStart(2,"0");
+      return `${yyyy}-${mm}-${dd}`;
+    }catch{ return null; }
   }
 
-  // Accepts: TAB, multiple spaces, comma, hyphen, etc.
-  // Key rule: phone should be at END of line
+  function badge(tag){
+    const t = (tag || "").trim();
+    if (!t) return `<span class="tagBadge none">No tag</span>`;
+    if (t === "locked") return `<span class="tagBadge locked">locked</span>`;
+    if (t === "cod issue") return `<span class="tagBadge cod">cod issue</span>`;
+    if (t === "incorrect password") return `<span class="tagBadge pass">incorrect password</span>`;
+    return `<span class="tagBadge other">${t}</span>`;
+  }
+
+  function render(list){
+    if (!list.length){
+      rows.innerHTML = `<tr><td colspan="5" style="padding:14px;color:#64748b;">No accounts match.</td></tr>`;
+      return;
+    }
+    rows.innerHTML = list.map(a => `
+      <tr class="accRow" data-id="${a.id}">
+        <td>${(a.name || "—")}</td>
+        <td class="mono">${a.phone || a.id}</td>
+        <td>${badge(a.tag)}</td>
+        <td>${(a.createdByName || "—")}</td>
+        <td>${fmtTime(a.createdAt)}</td>
+      </tr>
+    `).join("");
+
+    document.querySelectorAll(".accRow").forEach(tr=>{
+      tr.onclick = ()=> openDetails(tr.dataset.id);
+    });
+  }
+
+  function fillUserFilter(){
+    const names = new Set();
+    allAccounts.forEach(a => {
+      if (a.createdByName) names.add(a.createdByName);
+    });
+    const current = userFilter.value;
+
+    userFilter.innerHTML = `<option value="">All users</option>` +
+      Array.from(names).sort().map(n => `<option value="${n}">${n}</option>`).join("");
+
+    userFilter.value = current; // keep selection if possible
+  }
+
+  function applyFilters(){
+    const q = search.value.trim().toLowerCase();
+    const t = tagFilter.value;
+    const u = userFilter.value;
+
+    const from = fromDate.value || "";
+    const to = toDate.value || "";
+
+    const filtered = allAccounts.filter(a => {
+      const name = (a.name || "").toLowerCase();
+      const phone = (a.phone || a.id || "").toLowerCase();
+      const tag = (a.tag || "").toLowerCase();
+      const by = (a.createdByName || "");
+
+      // search
+      if (q && !(name.includes(q) || phone.includes(q) || tag.includes(q))) return false;
+
+      // tag filter
+      if (t === "__none__") {
+        if ((a.tag || "").trim() !== "") return false;
+      } else if (t) {
+        if ((a.tag || "").trim() !== t) return false;
+      }
+
+      // user filter
+      if (u && by !== u) return false;
+
+      // date filter
+      const d = dateOnly(a.createdAt);
+      if (from && d && d < from) return false;
+      if (to && d && d > to) return false;
+      // if createdAt missing, keep it unless date filters are strict:
+      if ((from || to) && !d) return false;
+
+      return true;
+    });
+
+    render(filtered);
+  }
+
+  function startListener(){
+    if (unsubscribe) unsubscribe();
+    const qy = query(collection(db, "accounts"), orderBy("createdAt", "desc"));
+    unsubscribe = onSnapshot(qy, (snap)=>{
+      allAccounts = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+      fillUserFilter();
+      applyFilters();
+    }, (e)=>{
+      showEr("Cannot load accounts: " + e.message);
+    });
+  }
+
+  startListener();
+
+  search.addEventListener("input", applyFilters);
+  tagFilter.addEventListener("change", applyFilters);
+  userFilter.addEventListener("change", applyFilters);
+  fromDate.addEventListener("change", applyFilters);
+  toDate.addEventListener("change", applyFilters);
+
+  document.getElementById("clearFilters").onclick = () => {
+    search.value = "";
+    tagFilter.value = "";
+    userFilter.value = "";
+    fromDate.value = "";
+    toDate.value = "";
+    applyFilters();
+  };
+
+  document.getElementById("refreshBtn").onclick = () => { showOk("Refreshed ✅"); startListener(); };
+
+  // Add Modal
+  const addModal = document.getElementById("addModal");
+  const pasteBox = document.getElementById("pasteBox");
+  const addMsg = document.getElementById("addMsg");
+  const addErr = document.getElementById("addErr");
+
+  const showAddOk = (t)=>{ addMsg.style.display="block"; addErr.style.display="none"; addMsg.textContent=t; };
+  const showAddEr = (t)=>{ addErr.style.display="block"; addMsg.style.display="none"; addErr.textContent=t; };
+
+  document.getElementById("openAdd").onclick = ()=>{
+    addModal.style.display="flex";
+    addMsg.style.display="none";
+    addErr.style.display="none";
+  };
+  document.getElementById("closeAdd").onclick = ()=> addModal.style.display="none";
+  document.getElementById("clearPaste").onclick = ()=> pasteBox.value = "";
+
+  // ✅ NEW parser: phone is LAST digits, name is everything before it (keeps spaces)
   function parseAccounts(text){
+    const lines = text.split(/\r?\n/).filter(l => l.trim().length > 0);
     const out = [];
-    const lines = (text || "").split(/\r?\n/);
 
-    for (let line of lines){
-      if (!line) continue;
-
-      // keep original for matching phone, but remove weird spaces
-      const fixed = (line || "").replace(/[\u00A0\u2000-\u200B\u202F\u205F\u3000]/g, " ").trim();
-      if (!fixed) continue;
-
-      // match a phone-like group at end (supports tabs/spaces/hyphens in between)
-      const m = fixed.match(/(\+?\d[\d\s\-\(\)]{7,}\d)\s*$/);
+    for (const raw of lines){
+      const line = raw.replace(/\r/g,""); // safe
+      const m = line.match(/(\d{6,})\s*$/); // last digits at end
       if (!m) continue;
 
-      const phone = cleanPhone(m[1]);
+      const phone = m[1].replace(/\D/g,"");
       if (!phone) continue;
 
-      // Name = everything before the phone match
-      let namePart = fixed.slice(0, fixed.length - m[0].length);
-      namePart = namePart.replace(/[\t ,;|:\-]+$/g, ""); // trailing separators
-      const name = cleanName(namePart);
+      const name = line.slice(0, m.index).trim(); // keep inner spacing
       if (!name) continue;
 
       out.push({ name, phone });
     }
-
-    // Deduplicate in same paste by phone
-    const seen = new Set();
-    return out.filter(a=>{
-      if (seen.has(a.phone)) return false;
-      seen.add(a.phone);
-      return true;
-    });
+    return out;
   }
 
-  // ===== FILTERS =====
-  function passesFilters(a){
-    const tg = (filterTag.value || "").trim().toLowerCase();
-    const by = (filterBy.value || "").trim().toLowerCase();
-    const dt = (filterDate.value || "").trim();
-    const q = (searchBox.value || "").trim().toLowerCase();
+  document.getElementById("saveAccounts").onclick = async ()=>{
+    addMsg.style.display="none";
+    addErr.style.display="none";
 
-    if (tg && String(a.tag||"").toLowerCase() !== tg) return false;
-    if (by && !String(a.createdBy||"").toLowerCase().includes(by)) return false;
+    const items = parseAccounts(pasteBox.value);
+    if (!items.length) return showAddEr("No valid accounts found. Make sure phone is last digits in each line.");
 
-    if (dt){
-      const d = a.createdAt?.toDate ? a.createdAt.toDate() : (a.createdAt ? new Date(a.createdAt) : null);
-      if (!d) return false;
-      const yyyy = d.getFullYear();
-      const mm = String(d.getMonth()+1).padStart(2,"0");
-      const dd = String(d.getDate()).padStart(2,"0");
-      const stamp = `${yyyy}-${mm}-${dd}`;
-      if (stamp !== dt) return false;
-    }
+    const prof = getProfileLocal() || {};
+    const createdByName = prof.name || "—";
+    const createdByEmail = sess.email || "—";
 
-    if (q){
-      const n = String(a.name||"").toLowerCase();
-      const p = String(a.phone||"").toLowerCase();
-      if (!n.includes(q) && !p.includes(q)) return false;
-    }
-    return true;
-  }
+    let added = 0, skipped = 0;
 
-  function setSkeleton(){
-    rows.innerHTML = `
-      <tr class="skRow"><td colspan="4">
-        <div class="skLine"></div>
-        <div class="skLine w80"></div>
-        <div class="skLine w60"></div>
-      </td></tr>`;
-  }
+    for (const it of items){
+      const id = it.phone; // shared unique key by phone
+      const ref = doc(db, "accounts", id);
 
-  function render(){
-    clearErr();
-
-    const list = allAccounts.filter(passesFilters);
-    countChip.textContent = list.length.toLocaleString("en-IN");
-
-    if (!list.length){
-      rows.innerHTML = `<tr><td colspan="4" style="padding:14px;color:#9fb1d3;">No accounts found.</td></tr>`;
-      return;
-    }
-
-    rows.innerHTML = list.map(a=>{
-      const tag = a.tag ? a.tag : "";
-      const tagPill = tag
-        ? `<span class="bmTag">${tag}</span>`
-        : `<span class="bmTag soft">—</span>`;
-
-      return `
-        <tr>
-          <td>
-            <div class="bmRowFlex">
-              <span style="font-weight:1000;">${escapeHtml(a.name || "")}</span>
-              <button class="bmMiniBtn" data-copy="${encodeURIComponent(a.name || "")}">Copy</button>
-            </div>
-          </td>
-
-          <td class="mono">
-            <div class="bmRowFlex">
-              <button class="bmLink" data-open="${a.id}">${escapeHtml(a.phone || "")}</button>
-              <button class="bmMiniBtn" data-copy="${encodeURIComponent(a.phone || "")}">Copy</button>
-            </div>
-          </td>
-
-          <td>${tagPill}</td>
-
-          <td>
-            <select class="toolInput compact" data-tag="${a.id}">
-              <option value="" ${!tag?"selected":""}>No tag</option>
-              <option value="locked" ${tag==="locked"?"selected":""}>Locked</option>
-              <option value="cod issue" ${tag==="cod issue"?"selected":""}>COD Issue</option>
-              <option value="incorrect password" ${tag==="incorrect password"?"selected":""}>Incorrect Password</option>
-              <option value="ok" ${tag==="ok"?"selected":""}>OK</option>
-            </select>
-          </td>
-        </tr>
-      `;
-    }).join("");
-
-    rows.querySelectorAll("[data-copy]").forEach(b=>{
-      b.onclick = ()=> copyText(decodeURIComponent(b.dataset.copy || ""));
-    });
-
-    rows.querySelectorAll("[data-open]").forEach(b=>{
-      b.onclick = ()=> openDetails(b.dataset.open);
-    });
-
-    rows.querySelectorAll("[data-tag]").forEach(sel=>{
-      sel.onchange = async ()=>{
-        try{
-          await updateDoc(doc(db,"accounts", sel.dataset.tag), { tag: sel.value || "" });
-        }catch(e){
-          showErr(e.message);
+      try{
+        const existing = await getDoc(ref);
+        if (existing.exists()){
+          skipped++;
+          continue;
         }
-      };
-    });
-  }
 
-  function escapeHtml(s){
-    return String(s||"")
-      .replaceAll("&","&amp;")
-      .replaceAll("<","&lt;")
-      .replaceAll(">","&gt;")
-      .replaceAll('"',"&quot;")
-      .replaceAll("'","&#039;");
-  }
-
-  // ===== DETAILS MODAL =====
-  function openDetails(id){
-    const a = allAccounts.find(x=>x.id===id);
-    if (!a) return;
-    selectedId = id;
-
-    dName.textContent = a.name || "—";
-    dPhone.textContent = a.phone || "—";
-    dTag.textContent = a.tag || "—";
-    dBy.textContent = a.createdBy || "—";
-    dAt.textContent = fmtTime(a.createdAt);
-    tagSelect.value = a.tag || "";
-
-    detailModal.style.display = "flex";
-  }
-
-  closeDetail.onclick = ()=> detailModal.style.display="none";
-  detailModal.addEventListener("click",(e)=>{
-    if (e.target === detailModal) detailModal.style.display="none";
-  });
-
-  copyDetail.onclick = ()=>{
-    const a = allAccounts.find(x=>x.id===selectedId);
-    if (!a) return;
-    copyText(`${a.name}\t${a.phone}`);
-    toast(detailInfo, "Copied (Name + Phone)", "ok");
-  };
-
-  saveTag.onclick = async ()=>{
-    if (!selectedId) return;
-    try{
-      await updateDoc(doc(db,"accounts", selectedId), { tag: tagSelect.value || "" });
-      toast(detailInfo, "Tag updated", "ok");
-    }catch(e){
-      toast(detailInfo, e.message, "err");
-    }
-  };
-
-  // ===== ADD MODAL =====
-  openAdd.onclick = ()=>{ addModal.style.display="flex"; pasteBox.focus(); };
-  closeAdd.onclick = ()=> addModal.style.display="none";
-  addModal.addEventListener("click",(e)=>{
-    if (e.target === addModal) addModal.style.display="none";
-  });
-  clearPaste.onclick = ()=> pasteBox.value="";
-
-  savePaste.onclick = async ()=>{
-    try{
-      addInfo.style.display="none";
-      const raw = pasteBox.value || "";
-      const parsed = parseAccounts(raw);
-
-      const totalLines = raw.split(/\r?\n/).map(x=>x.trim()).filter(Boolean).length;
-      const skipped = Math.max(0, totalLines - parsed.length);
-
-      if (!parsed.length){
-        toast(addInfo, "No valid accounts found. Ensure phone number is at end of line.", "err");
-        return;
-      }
-
-      // Save one by one (stable on GitHub Pages)
-      let saved = 0;
-      for (const a of parsed){
-        await addDoc(collection(db,"accounts"), {
-          name: a.name,
-          phone: a.phone,
+        await setDoc(ref, {
+          name: it.name,
+          phone: it.phone,
           tag: "",
           createdAt: serverTimestamp(),
-          createdBy: sess.email || "",
-          createdByUid: sess.uid || ""
+          createdByUid: sess.uid,
+          createdByEmail,
+          createdByName,
+          updatedAt: serverTimestamp(),
+          updatedByUid: sess.uid,
+          updatedByEmail: createdByEmail
         });
-        saved++;
-      }
 
-      toast(addInfo, `Saved ${saved}. Skipped ${skipped}.`, "ok");
-      pasteBox.value = "";
+        added++;
+      }catch(e){
+        console.warn("Add fail", it, e);
+      }
+    }
+
+    showAddOk(`Saved ✅ Added: ${added} | Skipped (already exists): ${skipped}`);
+    pasteBox.value = "";
+  };
+
+  // Details + Tag update
+  const detailModal = document.getElementById("detailModal");
+  const detailOk = document.getElementById("detailOk");
+  const detailEr = document.getElementById("detailEr");
+
+  const showDetOk = (t)=>{ detailOk.style.display="block"; detailEr.style.display="none"; detailOk.textContent=t; };
+  const showDetEr = (t)=>{ detailEr.style.display="block"; detailOk.style.display="none"; detailEr.textContent=t; };
+
+  let currentId = null;
+
+  async function openDetails(id){
+    currentId = id;
+    detailOk.style.display="none";
+    detailEr.style.display="none";
+    document.getElementById("detailSub").textContent = `Account: ${id}`;
+
+    try{
+      const snap = await getDoc(doc(db, "accounts", id));
+      if (!snap.exists()) return showDetEr("Account not found.");
+
+      const a = { id: snap.id, ...snap.data() };
+      document.getElementById("dName").textContent = a.name || "—";
+      document.getElementById("dPhone").textContent = a.phone || a.id;
+      document.getElementById("dCreated").textContent = fmtTime(a.createdAt);
+      document.getElementById("dBy").textContent = (a.createdByName || "—") + " • " + (a.createdByEmail || "—");
+      document.getElementById("dTag").textContent = a.tag ? a.tag : "No tag";
+      document.getElementById("tagSelect").value = a.tag || "";
+
+      detailModal.style.display="flex";
     }catch(e){
-      toast(addInfo, e.message, "err");
+      showDetEr("Cannot open details: " + e.message);
+    }
+  }
+
+  document.getElementById("closeDetail").onclick = ()=> detailModal.style.display="none";
+
+  document.getElementById("saveTag").onclick = async ()=>{
+    if (!currentId) return;
+
+    const tag = document.getElementById("tagSelect").value;
+    try{
+      await updateDoc(doc(db, "accounts", currentId), {
+        tag,
+        updatedAt: serverTimestamp(),
+        updatedByUid: sess.uid,
+        updatedByEmail: sess.email || "—"
+      });
+      showDetOk("Tag saved ✅ Visible to all users.");
+    }catch(e){
+      showDetEr("Tag save failed: " + e.message);
     }
   };
 
-  // filters
-  filterTag.onchange = render;
-  filterBy.oninput = render;
-  filterDate.onchange = render;
-  searchBox.oninput = render;
-
-  // Load shared accounts
-  setSkeleton();
-  const qy = query(collection(db,"accounts"), orderBy("createdAt","desc"));
-  onSnapshot(qy, (snap)=>{
-    allAccounts = snap.docs.map(d=>({ id:d.id, ...d.data() }));
-    render();
-  }, (e)=>{
-    showErr("Cannot load accounts: " + e.message);
-  });
-
+  document.getElementById("copyPhone").onclick = async ()=>{
+    try{
+      await navigator.clipboard.writeText(currentId || "");
+      showDetOk("Phone copied ✅");
+    }catch{
+      showDetEr("Copy failed.");
+    }
+  };
 </script>
-
-<!-- Minimal CSS only for modal/layout; uses your existing theme classes -->
-<style>
-  .bmFilters{
-    display:flex; gap:12px; flex-wrap:wrap;
-    margin-top:14px;
-  }
-  .bmF{ min-width:200px; }
-  .bmF.grow{ flex:1; min-width:240px; }
-  .bmLabel{ font-weight:900; font-size:12px; color:#9fb1d3; margin-bottom:6px; }
-
-  .bmModalBack{
-    position:fixed; inset:0; z-index:90;
-    background:rgba(0,0,0,.55);
-    display:flex; align-items:center; justify-content:center;
-    padding:16px;
-  }
-  .bmModalCard{
-    width:min(820px,100%);
-    border-radius:24px;
-    padding:14px;
-    border:1px solid rgba(255,255,255,.10);
-    background:
-      radial-gradient(700px 260px at 15% 0%, rgba(109,94,252,.22), transparent 60%),
-      radial-gradient(650px 280px at 92% 18%, rgba(56,212,166,.16), transparent 60%),
-      rgba(255,255,255,.05);
-    box-shadow: 0 25px 70px rgba(0,0,0,.55);
-    backdrop-filter: blur(10px);
-  }
-  .bmModalTop{ display:flex; justify-content:space-between; gap:12px; align-items:flex-start; margin-bottom:10px; }
-  .bmModalTitle{ font-weight:1100; font-size:18px; }
-  .bmModalSub{ font-weight:800; font-size:12px; color:#9fb1d3; margin-top:3px; }
-  .bmArea{ height:240px; resize:vertical; }
-
-  .bmSmallNote{ margin-top:10px; color:#9fb1d3; font-weight:800; font-size:12px; }
-
-  .bmRowFlex{ display:flex; gap:10px; align-items:center; flex-wrap:wrap; }
-  .bmMiniBtn{
-    padding:6px 10px; border-radius:12px;
-    border:1px solid rgba(255,255,255,.12);
-    background:rgba(255,255,255,.05);
-    color:#e7eefc; font-weight:900;
-    cursor:pointer;
-  }
-  .bmMiniBtn:hover{ background:rgba(255,255,255,.08); }
-  .bmLink{
-    background:transparent; border:none; cursor:pointer;
-    color:#9ad7ff; font-weight:1000;
-    text-decoration:underline;
-  }
-  .bmTag{
-    display:inline-block;
-    padding:6px 10px;
-    border-radius:999px;
-    font-weight:1000;
-    font-size:12px;
-    border:1px solid rgba(109,94,252,.50);
-    background:linear-gradient(90deg,rgba(109,94,252,.30),rgba(56,212,166,.18));
-  }
-  .bmTag.soft{
-    border:1px solid rgba(255,255,255,.10);
-    background:rgba(255,255,255,.05);
-  }
-
-  .bmDetailGrid{
-    display:grid;
-    grid-template-columns: 1fr 1fr;
-    gap:10px;
-    margin-top:10px;
-  }
-  .bmDetailItem{
-    padding:12px;
-    border-radius:18px;
-    border:1px solid rgba(255,255,255,.10);
-    background:rgba(0,0,0,.18);
-  }
-  .bmK{ color:#9fb1d3; font-weight:900; font-size:12px; }
-  .bmV{ margin-top:6px; font-weight:1000; }
-</style>
 
 </body>
 </html>
