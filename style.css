@@ -1053,3 +1053,18 @@ button{
 .detailBox .dRow:last-child{border-bottom:none;}
 .detailBox span{color:#64748b;font-weight:800;font-size:12px;}
 .detailBox b{font-weight:900;font-size:13px;color:#0f172a;}
+/* Accounts Filters bar */
+.accFilters{
+  margin-top:14px;
+  display:grid;
+  grid-template-columns: 2fr 1fr 1.4fr 1fr 1fr auto;
+  gap:12px;
+  padding:12px;
+  background: rgba(255,255,255,.70);
+  border:1px solid #e2e8f0;
+  border-radius:18px;
+}
+@media(max-width: 980px){
+  .accFilters{grid-template-columns:1fr; }
+}
+
