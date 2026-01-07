@@ -120,3 +120,210 @@ button{
 }
 .tileTitle{ font-weight:800; font-size:16px; }
 .tileSub{ color:#64748b; font-size:13px; margin-bottom:6px; }
+/* =========================
+   PROFESSIONAL HOME DASHBOARD THEME
+   ========================= */
+
+.dashBody{
+  margin:0;
+  font-family: Arial, Helvetica, sans-serif;
+  background: radial-gradient(1200px 600px at 20% 10%, #e8efff 0%, transparent 60%),
+              radial-gradient(900px 500px at 90% 0%, #e8fff4 0%, transparent 55%),
+              #f6f8fc;
+  color:#0f172a;
+}
+
+.dashTop{
+  position: sticky;
+  top:0;
+  z-index:10;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  padding:18px 22px;
+  border-bottom:1px solid #e2e8f0;
+  background: rgba(255,255,255,0.75);
+  backdrop-filter: blur(10px);
+}
+
+.dashBrand{display:flex; align-items:center; gap:12px;}
+.dashLogo{
+  width:44px; height:44px;
+  border-radius:14px;
+  display:grid; place-items:center;
+  font-weight:900;
+  color:white;
+  background: linear-gradient(135deg,#4f46e5,#22c55e);
+  box-shadow: 0 10px 24px rgba(79,70,229,.25);
+}
+.dashTitle{font-weight:900; font-size:16px; line-height:1.1;}
+.dashSubtitle{color:#64748b; font-size:12px; margin-top:2px;}
+
+.dashActions{display:flex; gap:10px; flex-wrap:wrap;}
+
+.dashBtn{
+  border:0;
+  border-radius:12px;
+  padding:10px 14px;
+  font-weight:800;
+  cursor:pointer;
+  transition: transform .08s ease, box-shadow .12s ease;
+}
+.dashBtn:hover{transform: translateY(-1px); box-shadow: 0 12px 22px rgba(15,23,42,.12);}
+
+.dashBtn.primary{background: #4f46e5; color:white;}
+.dashBtn.success{background: #16a34a; color:white;}
+.dashBtn.info{background: #0ea5e9; color:white;}
+.dashBtn.ghost{background:#eef2ff; color:#0f172a;}
+.dashBtn.danger{background:#fee2e2; color:#7f1d1d;}
+
+.dashMain{
+  max-width: 1100px;
+  margin: 18px auto;
+  padding: 0 18px 26px;
+}
+
+.dashHero{
+  display:grid;
+  grid-template-columns: 1.2fr .8fr;
+  gap:14px;
+  margin-top: 14px;
+}
+
+.heroLeft, .heroRight{
+  background: rgba(255,255,255,.85);
+  border: 1px solid #e2e8f0;
+  border-radius: 18px;
+  padding: 18px;
+  box-shadow: 0 12px 30px rgba(15,23,42,.06);
+}
+
+.heroTag{
+  display:inline-flex;
+  padding:6px 10px;
+  border-radius:999px;
+  background:#eef2ff;
+  color:#3730a3;
+  font-weight:800;
+  font-size:12px;
+}
+
+.heroHeading{
+  margin:10px 0 6px;
+  font-size:26px;
+  line-height:1.15;
+}
+
+.heroText{
+  margin:0 0 14px;
+  color:#475569;
+  font-size:13px;
+}
+
+.heroQuick{
+  display:grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap:10px;
+}
+
+.quickCard{
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+  padding: 12px;
+  background:#fff;
+}
+
+.quickLabel{color:#64748b; font-size:12px; font-weight:700;}
+.quickValue{margin-top:6px; font-weight:900; font-size:13px;}
+
+.statBox{
+  display:flex;
+  gap:12px;
+  padding:12px;
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+  background:#fff;
+  margin-bottom:10px;
+}
+
+.statIcon{
+  width:40px; height:40px;
+  border-radius: 14px;
+  display:grid; place-items:center;
+  background: #f1f5f9;
+  font-size:18px;
+}
+
+.statTitle{font-weight:900;}
+.statSub{color:#64748b; font-size:12px; margin-top:2px;}
+
+.dashGrid{
+  margin-top: 14px;
+  display:grid;
+  grid-template-columns: 1fr 1fr;
+  gap:14px;
+}
+
+.appCard{
+  background: rgba(255,255,255,.9);
+  border: 1px solid #e2e8f0;
+  border-radius: 18px;
+  padding: 16px;
+  box-shadow: 0 12px 30px rgba(15,23,42,.06);
+  display:flex;
+  flex-direction:column;
+  justify-content:space-between;
+  min-height: 150px;
+}
+
+.appCardWide{grid-column: span 2;}
+
+.appHead{display:flex; gap:12px; align-items:flex-start;}
+.appIcon{
+  width:46px; height:46px;
+  border-radius: 16px;
+  display:grid; place-items:center;
+  font-size:20px;
+  color:white;
+  box-shadow: 0 12px 26px rgba(15,23,42,.12);
+}
+.appIcon.blue{background: linear-gradient(135deg,#2563eb,#22c55e);}
+.appIcon.green{background: linear-gradient(135deg,#16a34a,#0ea5e9);}
+.appIcon.purple{background: linear-gradient(135deg,#7c3aed,#2563eb);}
+.appIcon.orange{background: linear-gradient(135deg,#f97316,#ef4444);}
+
+.appTitle{font-weight:900; font-size:16px;}
+.appSub{color:#64748b; font-size:12px; margin-top:3px;}
+
+.appFooter{margin-top:12px; display:flex; gap:10px; flex-wrap:wrap;}
+
+.dashToast{
+  display:none;
+  margin-top: 14px;
+  padding: 12px 14px;
+  border-radius: 14px;
+  border: 1px solid #fecaca;
+  background: #fee2e2;
+  color: #7f1d1d;
+  font-weight:700;
+}
+
+.dashFoot{
+  margin-top: 16px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  color:#64748b;
+  font-size:12px;
+  padding: 10px 2px;
+}
+
+.mutedSmall{color:#94a3b8;}
+
+@media(max-width: 900px){
+  .dashHero{grid-template-columns: 1fr;}
+  .heroQuick{grid-template-columns: 1fr;}
+  .dashGrid{grid-template-columns: 1fr;}
+  .appCardWide{grid-column: auto;}
+}
+
