@@ -6,205 +6,357 @@
   <title>Home | Buckup-Media</title>
   <link rel="stylesheet" href="./style.css?v=3">
 </head>
-<body class="dashBody">
+<body class="adminShell">
 
-  <!-- Top Nav -->
-  <header class="dashTop">
-    <div class="dashBrand">
-      <div class="dashLogo">BM</div>
+  <!-- Sidebar -->
+  <aside class="sideNav">
+    <div class="sideTop">
+      <div class="sideLogo">BM</div>
       <div>
-        <div class="dashTitle">Buckup-Media Portal</div>
-        <div class="dashSubtitle">Professional dashboard</div>
+        <div class="sideName">Buckup-Media</div>
+        <div class="sideSub">Admin Dashboard</div>
       </div>
     </div>
 
-    <div class="dashActions">
-      <button class="dashBtn ghost" id="openSheetTop">My Work</button>
-      <button class="dashBtn ghost" id="editProfileTop">Edit Profile</button>
-      <button class="dashBtn danger" id="logoutBtn">Logout</button>
+    <nav class="sideMenu">
+      <button class="navItem active" data-page="overview">Overview</button>
+      <button class="navItem" data-page="profile">Profile</button>
+      <button class="navItem" data-page="work">My Work</button>
+      <button class="navItem" data-page="tool">Data Duplicater</button>
+    </nav>
+
+    <div class="sideBottom">
+      <div class="sideHint">Fast mode: Local storage</div>
+      <div class="sideSmall">© Buckup-Media</div>
     </div>
-  </header>
+  </aside>
 
   <!-- Main -->
-  <main class="dashMain">
+  <div class="mainArea">
 
-    <!-- Welcome + Status -->
-    <section class="dashHero">
-      <div class="heroLeft">
-        <div class="heroTag">Welcome</div>
-        <h1 class="heroHeading" id="welcomeName">Your workspace is ready</h1>
-        <p class="heroText">
-          Manage your profile, payment details, open your work sheet, and use the data duplicater — all from one place.
-        </p>
+    <!-- Top bar -->
+    <header class="topBar">
+      <div>
+        <div class="topTitle" id="pageTitle">Overview</div>
+        <div class="topSub" id="pageSub">Your workspace summary</div>
+      </div>
 
-        <div class="heroQuick">
-          <div class="quickCard">
-            <div class="quickLabel">Account</div>
-            <div class="quickValue" id="quickEmail">—</div>
+      <div class="topRight">
+        <div class="chip" id="chipStatus">Verified</div>
+
+        <div class="avatarWrap" id="avatarWrap">
+          <div class="avatar" id="avatarCircle">U</div>
+          <div class="avatarMeta">
+            <div class="avatarName" id="avatarName">User</div>
+            <div class="avatarEmail" id="avatarEmail">—</div>
           </div>
-          <div class="quickCard">
-            <div class="quickLabel">Profile Status</div>
-            <div class="quickValue" id="quickStatus">—</div>
-          </div>
-          <div class="quickCard">
-            <div class="quickLabel">Saved Sheet</div>
-            <div class="quickValue" id="quickSheet">—</div>
+          <div class="chev">▾</div>
+
+          <!-- Dropdown -->
+          <div class="dropdown" id="dropdown">
+            <button class="ddItem" id="ddEditProfile">Edit Profile</button>
+            <button class="ddItem" id="ddPayment">Payment</button>
+            <button class="ddItem danger" id="ddLogout">Logout</button>
           </div>
         </div>
       </div>
+    </header>
 
-      <div class="heroRight">
-        <div class="statBox">
-          <div class="statIcon">⚡</div>
+    <!-- Pages -->
+    <main class="content">
+
+      <!-- OVERVIEW -->
+      <section class="page show" id="page_overview">
+        <div class="heroCard">
           <div>
-            <div class="statTitle">Fast Mode Enabled</div>
-            <div class="statSub">Your data loads instantly from local storage.</div>
+            <div class="heroTag">Welcome</div>
+            <div class="heroH1" id="welcomeLine">Welcome back</div>
+            <div class="heroP">Manage account, payment, open sheet, and use duplicater from one dashboard.</div>
+          </div>
+          <div class="heroStats">
+            <div class="miniCard">
+              <div class="miniLabel">Profile</div>
+              <div class="miniValue" id="miniProfile">—</div>
+            </div>
+            <div class="miniCard">
+              <div class="miniLabel">Payment</div>
+              <div class="miniValue" id="miniPayment">—</div>
+            </div>
+            <div class="miniCard">
+              <div class="miniLabel">Sheet</div>
+              <div class="miniValue" id="miniSheet">—</div>
+            </div>
           </div>
         </div>
 
-        <div class="statBox">
-          <div class="statIcon">🔒</div>
-          <div>
-            <div class="statTitle">Secure Login</div>
-            <div class="statSub">Email verified authentication is active.</div>
+        <div class="grid2">
+          <div class="cardX">
+            <div class="cardXTitle">Usage</div>
+            <div class="cardXSub">Dummy chart (sample)</div>
+            <div class="chartBox">
+              <div class="bar b1"></div>
+              <div class="bar b2"></div>
+              <div class="bar b3"></div>
+              <div class="bar b4"></div>
+              <div class="bar b5"></div>
+              <div class="bar b6"></div>
+            </div>
+            <div class="chartNote">Data: sample visual only</div>
+          </div>
+
+          <div class="cardX">
+            <div class="cardXTitle">Quick Actions</div>
+            <div class="cardXSub">One click access</div>
+
+            <div class="quickBtns">
+              <button class="btnP" id="goProfileSetup">Edit Profile</button>
+              <button class="btnI" id="goPaymentPage">Payment</button>
+              <button class="btnS" id="goTool">Open Duplicater</button>
+              <button class="btnG" id="goSheet">Open Sheet</button>
+            </div>
           </div>
         </div>
+      </section>
 
-        <div class="statBox">
-          <div class="statIcon">📦</div>
-          <div>
-            <div class="statTitle">Tools</div>
-            <div class="statSub">Account • Payment • Work • Data Duplicater</div>
+      <!-- PROFILE (contains profile + payment like amazon) -->
+      <section class="page" id="page_profile">
+        <div class="grid2">
+          <div class="cardX">
+            <div class="cardXTitle">My Profile</div>
+            <div class="cardXSub">Account information</div>
+
+            <div class="profileBox">
+              <img id="profileAvatar" class="profileAvatar" alt="avatar"/>
+              <div>
+                <div class="pName" id="pName">—</div>
+                <div class="pLine" id="pPhone">—</div>
+                <div class="pLine" id="pAge">—</div>
+                <div class="pLine small" id="pEmail">—</div>
+              </div>
+            </div>
+
+            <div class="quickBtns">
+              <button class="btnP" id="editProfileBtn">Edit Profile</button>
+              <button class="btnD" id="logoutBtn2">Logout</button>
+            </div>
+          </div>
+
+          <div class="cardX">
+            <div class="cardXTitle">Payment</div>
+            <div class="cardXSub">Saved once, edits locked</div>
+
+            <div class="paySummary" id="paySummary">
+              <div class="pLine">Status: <b id="payStatus">Not added</b></div>
+              <div class="pLine small" id="payReq">—</div>
+            </div>
+
+            <div class="quickBtns">
+              <button class="btnI" id="openPaymentBtn">Open Payment Page</button>
+              <button class="btnG" id="requestChangeBtn">Request details change</button>
+            </div>
+
+            <div class="small muted" style="margin-top:10px;">
+              Admin unlock page (local): <b>admin.html</b>
+            </div>
           </div>
         </div>
-      </div>
-    </section>
+      </section>
 
-    <!-- Apps Grid -->
-    <section class="dashGrid">
-      <article class="appCard">
-        <div class="appHead">
-          <div class="appIcon blue">👤</div>
-          <div>
-            <div class="appTitle">My Account</div>
-            <div class="appSub">View and edit your profile details</div>
+      <!-- WORK -->
+      <section class="page" id="page_work">
+        <div class="cardX">
+          <div class="cardXTitle">My Work</div>
+          <div class="cardXSub">Open your Google Sheet instantly</div>
+
+          <div class="workBox">
+            <div class="pLine small">Saved Sheet Link:</div>
+            <div class="workLink" id="sheetLinkText">—</div>
+
+            <div class="quickBtns" style="margin-top:14px;">
+              <button class="btnG" id="openSheetBtn">Open Sheet</button>
+              <button class="btnP" id="updateSheetBtn">Update Sheet Link</button>
+            </div>
           </div>
         </div>
-        <div class="appFooter">
-          <button class="dashBtn primary" id="goAccount">Open</button>
-        </div>
-      </article>
+      </section>
 
-      <article class="appCard">
-        <div class="appHead">
-          <div class="appIcon green">💳</div>
-          <div>
-            <div class="appTitle">Payment</div>
-            <div class="appSub">Add or update bank + UPI details</div>
+      <!-- TOOL -->
+      <section class="page" id="page_tool">
+        <div class="cardX">
+          <div class="cardXTitle">Data Duplicater</div>
+          <div class="cardXSub">Open your existing tool page</div>
+
+          <div class="quickBtns">
+            <button class="btnS" id="openToolBtn">Open Duplicater Tool</button>
           </div>
         </div>
-        <div class="appFooter">
-          <button class="dashBtn primary" id="goPayment">Open</button>
-        </div>
-      </article>
+      </section>
 
-      <article class="appCard appCardWide">
-        <div class="appHead">
-          <div class="appIcon purple">📄</div>
-          <div>
-            <div class="appTitle">My Work</div>
-            <div class="appSub">Open your Google Sheet directly</div>
-          </div>
-        </div>
-        <div class="appFooter">
-          <button class="dashBtn info" id="openSheet">Open Sheet</button>
-          <button class="dashBtn ghost" id="editProfile">Update Sheet Link</button>
-        </div>
-      </article>
-
-      <article class="appCard appCardWide">
-        <div class="appHead">
-          <div class="appIcon orange">🧩</div>
-          <div>
-            <div class="appTitle">Data Duplicater</div>
-            <div class="appSub">Upload or paste data • duplicate • copy • download</div>
-          </div>
-        </div>
-        <div class="appFooter">
-          <button class="dashBtn success" id="goDup">Open Tool</button>
-        </div>
-      </article>
-    </section>
-
-    <!-- Error toast -->
-    <div class="dashToast err" id="toastErr"></div>
-
-    <!-- Footer -->
-    <footer class="dashFoot">
-      <div>© Buckup-Media Data Duplicater</div>
-      <div class="mutedSmall">Built for speed • Local storage enabled</div>
-    </footer>
-
-  </main>
+      <div class="toastErr" id="toastErr"></div>
+    </main>
+  </div>
 
 <script type="module">
   import { auth } from "./firebase.js";
   import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-  import { getSession, clearSession, getProfileLocal } from "./cache.js";
+  import { getSession, clearSession, getProfileLocal, getPaymentLocal, savePaymentLocal } from "./cache.js";
 
   const toastErr = document.getElementById("toastErr");
   function showErr(msg){
     toastErr.style.display = "block";
     toastErr.textContent = msg;
-    setTimeout(() => toastErr.style.display = "none", 3500);
+    setTimeout(()=> toastErr.style.display="none", 3500);
   }
 
   const sess = getSession();
   if (!sess) location.href = "index.html";
 
-  // Fill top quick stats from local (fast)
-  const profile = getProfileLocal();
-
-  const welcomeName = document.getElementById("welcomeName");
-  const quickEmail = document.getElementById("quickEmail");
-  const quickStatus = document.getElementById("quickStatus");
-  const quickSheet = document.getElementById("quickSheet");
-
-  quickEmail.textContent = sess.email || "—";
-  quickStatus.textContent = profile?.profileCompleted ? "Completed ✅" : "Pending";
-  quickSheet.textContent = profile?.googleSheetUrl ? "Linked ✅" : "Not added";
-
-  if (profile?.name) {
-    welcomeName.textContent = `Welcome, ${profile.name}`;
-  }
-
   onAuthStateChanged(auth, (user) => {
     if (!user || !user.emailVerified) location.href = "index.html";
   });
 
-  // Buttons
-  document.getElementById("goAccount").onclick = () => location.href = "account.html";
-  document.getElementById("goPayment").onclick = () => location.href = "payment.html";
-  document.getElementById("goDup").onclick = () => location.href = "dashboard.html";
+  // ---- Load local data fast ----
+  const profile = getProfileLocal();
+  const payment = getPaymentLocal();
 
-  document.getElementById("editProfile").onclick = () => location.href = "profile.html";
-  document.getElementById("editProfileTop").onclick = () => location.href = "profile.html";
-  document.getElementById("openSheetTop").onclick = () => document.getElementById("openSheet").click();
-
-  function openSheetNow(){
-    const p = getProfileLocal();
-    const link = p?.googleSheetUrl;
-    if (!link) { showErr("Google Sheet link not found. Please update profile."); return; }
-    window.open(link, "_blank");
+  // If profile not completed, go profile setup ONCE
+  if (!profile?.profileCompleted) {
+    location.href = "profile.html";
   }
 
-  document.getElementById("openSheet").onclick = openSheetNow;
+  // Header user
+  const nm = profile?.name || "User";
+  document.getElementById("avatarName").textContent = nm;
+  document.getElementById("avatarEmail").textContent = sess.email || "—";
+  document.getElementById("welcomeLine").textContent = `Welcome, ${nm}`;
 
-  document.getElementById("logoutBtn").onclick = async () => {
+  // Avatar circle initials
+  const initials = (nm.trim().split(" ").filter(Boolean).slice(0,2).map(x=>x[0].toUpperCase()).join("")) || "U";
+  document.getElementById("avatarCircle").textContent = initials;
+
+  // Profile avatar image (dicebear)
+  const av = profile?.avatarUrl || `https://api.dicebear.com/9.x/bottts/svg?seed=${encodeURIComponent(nm)}`;
+  document.getElementById("profileAvatar").src = av;
+
+  // Overview minis
+  document.getElementById("miniProfile").textContent = profile?.profileCompleted ? "Completed ✅" : "Pending";
+  document.getElementById("miniPayment").textContent = payment?.locked ? "Saved ✅" : "Not added";
+  document.getElementById("miniSheet").textContent = profile?.googleSheetUrl ? "Linked ✅" : "Not linked";
+
+  // Profile page content
+  document.getElementById("pName").textContent = profile?.name || "—";
+  document.getElementById("pPhone").textContent = "Phone: " + (profile?.phone || "—");
+  document.getElementById("pAge").textContent = "Age: " + (profile?.age ?? "—");
+  document.getElementById("pEmail").textContent = sess.email || "—";
+
+  // Payment status
+  const payStatus = document.getElementById("payStatus");
+  const payReq = document.getElementById("payReq");
+  if (payment?.locked) {
+    payStatus.textContent = "Saved (Locked) ✅";
+    payReq.textContent = payment?.requestedChange ? "Change request: Pending ✅" : "No change request.";
+  } else {
+    payStatus.textContent = "Not added";
+    payReq.textContent = "Add payment details once.";
+  }
+
+  // Work page link
+  document.getElementById("sheetLinkText").textContent = profile?.googleSheetUrl || "Not available";
+
+  // ---- Sidebar Navigation ----
+  const navBtns = document.querySelectorAll(".navItem");
+  const pages = {
+    overview: document.getElementById("page_overview"),
+    profile: document.getElementById("page_profile"),
+    work: document.getElementById("page_work"),
+    tool: document.getElementById("page_tool"),
+  };
+
+  function setPage(key){
+    navBtns.forEach(b => b.classList.remove("active"));
+    document.querySelector(`.navItem[data-page="${key}"]`).classList.add("active");
+    Object.values(pages).forEach(p => p.classList.remove("show"));
+    pages[key].classList.add("show");
+
+    const titles = {
+      overview:["Overview","Your workspace summary"],
+      profile:["Profile","Manage account + payment"],
+      work:["My Work","Open your sheet directly"],
+      tool:["Data Duplicater","Upload/paste and duplicate"],
+    };
+    document.getElementById("pageTitle").textContent = titles[key][0];
+    document.getElementById("pageSub").textContent = titles[key][1];
+  }
+
+  navBtns.forEach(btn => btn.onclick = ()=> setPage(btn.dataset.page));
+
+  // ---- Dropdown ----
+  const avatarWrap = document.getElementById("avatarWrap");
+  const dropdown = document.getElementById("dropdown");
+  avatarWrap.addEventListener("click", () => {
+    dropdown.classList.toggle("show");
+  });
+  document.addEventListener("click", (e)=>{
+    if (!avatarWrap.contains(e.target)) dropdown.classList.remove("show");
+  });
+
+  // ---- Actions ----
+  const openSheet = () => {
+    const link = getProfileLocal()?.googleSheetUrl;
+    if (!link) return showErr("Google Sheet link not found. Update profile.");
+    window.open(link, "_blank");
+  };
+
+  document.getElementById("goSheet").onclick = openSheet;
+  document.getElementById("openSheetBtn").onclick = openSheet;
+
+  document.getElementById("goTool").onclick = () => location.href = "dashboard.html";
+  document.getElementById("openToolBtn").onclick = () => location.href = "dashboard.html";
+
+  document.getElementById("goProfileSetup").onclick = () => location.href = "account.html";
+  document.getElementById("editProfileBtn").onclick = () => location.href = "account.html";
+  document.getElementById("updateSheetBtn").onclick = () => location.href = "account.html";
+
+  document.getElementById("openPaymentBtn").onclick = () => location.href = "payment.html";
+  document.getElementById("goPaymentPage").onclick = () => location.href = "payment.html";
+
+  document.getElementById("requestChangeBtn").onclick = () => {
+    const p = getPaymentLocal();
+    if (!p?.locked) return location.href = "payment.html";
+    p.requestedChange = true;
+    savePaymentLocal(p);
+    showErr("Request submitted ✅ Admin will review.");
+    // refresh text
+    payReq.textContent = "Change request: Pending ✅";
+  };
+
+  async function doLogout(){
     clearSession();
     await signOut(auth);
     location.href = "index.html";
-  };
+  }
+
+  document.getElementById("ddEditProfile").onclick = () => location.href = "account.html";
+  document.getElementById("ddPayment").onclick = () => location.href = "payment.html";
+  document.getElementById("ddLogout").onclick = doLogout;
+
+  document.getElementById("logoutBtn2").onclick = doLogout;
+  document.getElementById("logoutBtn2").onclick = doLogout;
+  document.getElementById("logoutBtn2").onclick = doLogout;
+
+  document.getElementById("logoutBtn2").onclick = doLogout;
+  document.getElementById("logoutBtn2").onclick = doLogout;
+
+  document.getElementById("logoutBtn2").onclick = doLogout;
+
+  document.getElementById("logoutBtn2").onclick = doLogout;
+
+  document.getElementById("logoutBtn2").onclick = doLogout;
+
+  document.getElementById("logoutBtn2").onclick = doLogout;
+  document.getElementById("logoutBtn2").onclick = doLogout;
+
+  // (keep also top dropdown logout)
 </script>
 
 </body>
