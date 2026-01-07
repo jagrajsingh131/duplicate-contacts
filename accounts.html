@@ -4,211 +4,302 @@
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Accounts | Buckup-Media</title>
-  <link rel="stylesheet" href="./style.css?v=3">
+  <link rel="stylesheet" href="./style.css?v=120">
 </head>
-<body class="toolBody">
 
-<header class="toolTop">
-  <div class="toolBrand">
-    <div class="toolLogo">BM</div>
-    <div>
-      <div class="toolTitle">Accounts</div>
-      <div class="toolSub">Shared list • Tags • Details</div>
-    </div>
-  </div>
+<body class="adminShell">
 
-  <div class="toolActions">
-    <button class="toolBtn ghost" id="homeBtn">Home</button>
-    <button class="toolBtn primary" id="openAdd">Add More Accounts</button>
-  </div>
-</header>
-
-<main class="toolMain">
-
-  <section class="toolCard">
-    <div class="toolCardHead" style="align-items:flex-end;">
+  <!-- SIDEBAR -->
+  <aside class="sideNav">
+    <div class="sideTop">
+      <div class="sideLogo">BM</div>
       <div>
-        <div class="toolCardTitle">All Accounts</div>
-        <div class="toolCardSub">This list is shared for all users</div>
+        <div class="sideName">Buckup-Media</div>
+        <div class="sideSub">Accounts</div>
+      </div>
+    </div>
+
+    <nav class="sideMenu">
+      <button class="navItem" id="goHome">Home</button>
+      <button class="navItem active">Accounts</button>
+      <button class="navItem" id="goTool">Data Duplicater</button>
+      <button class="navItem" id="goWallet">Wallet</button>
+      <button class="navItem" id="goAdmin">Admin</button>
+    </nav>
+
+    <div class="sideBottom">
+      <div class="sideHint">Shared database</div>
+      <div class="sideSmall">© Buckup-Media</div>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <div class="mainArea">
+    <header class="topBar">
+      <div>
+        <div class="topTitle">Accounts</div>
+        <div class="topSub">Shared list • Tags • Filters • Details</div>
       </div>
 
-      <div style="display:flex; gap:10px; flex-wrap:wrap;">
-        <input id="search" class="toolInput" style="min-width:260px" placeholder="Search by name / number / tag">
+      <div class="topRight">
+        <span class="chip" id="verChip">Verified</span>
         <button class="toolBtn ghost" id="refreshBtn">Refresh</button>
       </div>
-    </div>
+    </header>
 
-    <!-- ✅ BIG COMPANY FILTER BAR -->
-    <div class="filtersBar">
-      <div class="filtersLeft">
-        <div class="pillGroup" id="tagPills">
-          <button class="pill active" data-tag="">All</button>
-          <button class="pill" data-tag="locked">Locked</button>
-          <button class="pill" data-tag="cod issue">COD Issue</button>
-          <button class="pill" data-tag="incorrect password">Incorrect Password</button>
-          <button class="pill" data-tag="__none__">No Tag</button>
+    <main class="content">
+      <section class="page show">
+
+        <!-- TOP CONTROLS -->
+        <div class="cardX hoverParallax" data-tilt>
+          <div class="cardXTop">
+            <div>
+              <div class="cardXTitle">Add more accounts</div>
+              <div class="cardXSub">Paste in any format. We auto-clean it.</div>
+            </div>
+            <div style="display:flex;gap:10px;align-items:center;">
+              <button class="toolBtn primary" id="openAdd">Add More Accounts</button>
+            </div>
+          </div>
+
+          <div class="filterRow" style="margin-top:14px;">
+            <div class="filterBox">
+              <div class="filterLabel">Filter by tag</div>
+              <select class="toolInput compact" id="filterTag">
+                <option value="">All</option>
+                <option value="locked">Locked</option>
+                <option value="cod issue">COD Issue</option>
+                <option value="incorrect password">Incorrect Password</option>
+                <option value="ok">OK</option>
+              </select>
+            </div>
+
+            <div class="filterBox">
+              <div class="filterLabel">Created by (email)</div>
+              <input class="toolInput compact" id="filterBy" placeholder="example@gmail.com">
+            </div>
+
+            <div class="filterBox">
+              <div class="filterLabel">Created date (YYYY-MM-DD)</div>
+              <input class="toolInput compact" id="filterDate" type="date">
+            </div>
+
+            <div class="filterBox grow">
+              <div class="filterLabel">Search name / phone</div>
+              <input class="toolInput compact" id="searchBox" placeholder="type to search...">
+            </div>
+          </div>
         </div>
 
-        <select id="userFilter" class="toolInput compact">
-          <option value="">All users</option>
-        </select>
+        <!-- TABLE -->
+        <div class="cardX hoverParallax" data-tilt style="margin-top:16px;">
+          <div class="cardXTop">
+            <div>
+              <div class="cardXTitle">Accounts List</div>
+              <div class="cardXSub">Click phone to open details</div>
+            </div>
+            <div class="chip small" id="countChip">0</div>
+          </div>
 
-        <div class="datePack">
-          <input id="fromDate" type="date" class="toolInput compact">
-          <span class="dateSep">→</span>
-          <input id="toDate" type="date" class="toolInput compact">
+          <div id="er" class="toolMsg err"></div>
+
+          <div class="accTableWrap" style="margin-top:12px;">
+            <table class="accTable">
+              <thead>
+                <tr>
+                  <th>Name</th>
+                  <th>Phone</th>
+                  <th>Tag</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="rows">
+                <tr class="skRow"><td colspan="4">
+                  <div class="skLine"></div>
+                  <div class="skLine w80"></div>
+                  <div class="skLine w60"></div>
+                </td></tr>
+              </tbody>
+            </table>
+          </div>
         </div>
-      </div>
 
-      <div class="filtersRight">
-        <button class="toolBtn ghost" id="clearFilters">Clear</button>
-      </div>
-    </div>
-
-    <div id="ok" class="toolMsg ok"></div>
-    <div id="er" class="toolMsg err"></div>
-
-    <div class="accTableWrap" style="margin-top:14px;">
-      <table class="accTable">
-        <thead>
-          <tr>
-            <th>Name</th>
-            <th>Phone</th>
-            <th>Tag</th>
-          </tr>
-        </thead>
-        <tbody id="rows">
-          <tr><td colspan="3" style="padding:14px;color:#64748b;">Loading…</td></tr>
-        </tbody>
-      </table>
-    </div>
-
-    <div class="toolHint" style="margin-top:10px;">
-      Click any row to open <b>Account Details</b> and <b>Add Tag</b>.
-    </div>
-  </section>
-</main>
-
-<!-- ADD MODAL -->
-<div class="modalBack" id="addModal" style="display:none;">
-  <div class="modalCard">
-    <div class="modalHead">
-      <div>
-        <div class="toolCardTitle">Add More Accounts</div>
-        <div class="toolCardSub">Paste like: <b>Name[TAB]Phone</b> (one per line)</div>
-      </div>
-      <button class="toolBtn ghost" id="closeAdd">Close</button>
-    </div>
-
-    <textarea id="pasteBox" class="toolArea" rows="10"
-      placeholder="Example:
-Dhananjay Butala	9884155629
-Kajal Shenoy	8438525192"></textarea>
-
-    <div class="toolHint">
-      ✅ Phone must be the last digits in each line. Names can contain double spaces.
-    </div>
-
-    <div class="btnRow" style="margin-top:12px; display:flex; gap:10px; flex-wrap:wrap;">
-      <button class="toolBtn primary" id="saveAccounts">Save Accounts</button>
-      <button class="toolBtn ghost" id="clearPaste">Clear</button>
-    </div>
-
-    <div id="addMsg" class="toolMsg ok"></div>
-    <div id="addErr" class="toolMsg err"></div>
+      </section>
+    </main>
   </div>
-</div>
 
-<!-- DETAILS MODAL -->
-<div class="modalBack" id="detailModal" style="display:none;">
-  <div class="modalCard">
-    <div class="modalHead">
-      <div>
-        <div class="toolCardTitle">Account Details</div>
-        <div class="toolCardSub" id="detailSub">—</div>
+  <!-- ADD MODAL -->
+  <div class="modalBack" id="addModal" style="display:none;">
+    <div class="modalCard">
+      <div class="modalTop">
+        <div>
+          <div class="modalTitle">Paste Accounts</div>
+          <div class="modalSub">We accept any separators. Phone must be last in line.</div>
+        </div>
+        <button class="xBtn" id="closeAdd">✕</button>
       </div>
-      <button class="toolBtn ghost" id="closeDetail">Close</button>
+
+      <textarea id="pasteBox" class="toolInput" style="height:220px;resize:vertical;"
+        placeholder="Example:
+Dhananjay   Butala     9884155629
+Kajal Shenoy - 84 38 52 51 92
+Anaya Deshpande,7354177191
+Name<TAB>Phone"></textarea>
+
+      <div class="modalHint">
+        ✅ Name will be cleaned to single spaces. ✅ Phone keeps last 10 digits.
+      </div>
+
+      <div class="btnRow" style="margin-top:12px;">
+        <button class="toolBtn ghost" id="clearPaste">Clear</button>
+        <button class="toolBtn primary" id="savePaste">Save Accounts</button>
+      </div>
+
+      <div class="toolMsg" id="addInfo" style="display:none;"></div>
     </div>
+  </div>
 
-    <div class="detailBox">
-      <div class="dRow">
-        <span>Name</span>
-        <div class="dRight">
-          <b id="dName">—</b>
-          <button class="copyMini" id="copyNameBtn">Copy</button>
+  <!-- DETAILS MODAL -->
+  <div class="modalBack" id="detailModal" style="display:none;">
+    <div class="modalCard">
+      <div class="modalTop">
+        <div>
+          <div class="modalTitle">Account Details</div>
+          <div class="modalSub">Full info + tag update</div>
+        </div>
+        <button class="xBtn" id="closeDetail">✕</button>
+      </div>
+
+      <div class="detailGrid">
+        <div class="detailItem">
+          <div class="detailK">Name</div>
+          <div class="detailV" id="dName">—</div>
+        </div>
+        <div class="detailItem">
+          <div class="detailK">Phone</div>
+          <div class="detailV mono" id="dPhone">—</div>
+        </div>
+        <div class="detailItem">
+          <div class="detailK">Tag</div>
+          <div class="detailV" id="dTag">—</div>
+        </div>
+        <div class="detailItem">
+          <div class="detailK">Created By</div>
+          <div class="detailV" id="dBy">—</div>
+        </div>
+        <div class="detailItem">
+          <div class="detailK">Created At</div>
+          <div class="detailV" id="dAt">—</div>
         </div>
       </div>
 
-      <div class="dRow">
-        <span>Phone</span>
-        <div class="dRight">
-          <b id="dPhone">—</b>
-          <button class="copyMini" id="copyPhoneBtn">Copy</button>
-        </div>
+      <div style="margin-top:10px;">
+        <div class="filterLabel">Change tag</div>
+        <select class="toolInput" id="tagSelect">
+          <option value="">No tag</option>
+          <option value="locked">Locked</option>
+          <option value="cod issue">COD Issue</option>
+          <option value="incorrect password">Incorrect Password</option>
+          <option value="ok">OK</option>
+        </select>
       </div>
 
-      <!-- ✅ ONLY HERE we show created by and time -->
-      <div class="dRow"><span>Created At</span><b id="dCreated">—</b></div>
-      <div class="dRow"><span>Created By</span><b id="dBy">—</b></div>
-
-      <div class="dRow"><span>Current Tag</span><b id="dTag">—</b></div>
-
-      <hr style="border:none;border-top:1px solid #e2e8f0;margin:12px 0;">
-
-      <label class="toolLabel">Set Tag</label>
-      <select id="tagSelect" class="toolInput">
-        <option value="">No tag</option>
-        <option value="locked">locked</option>
-        <option value="cod issue">cod issue</option>
-        <option value="incorrect password">incorrect password</option>
-      </select>
-
-      <div class="btnRow" style="margin-top:12px; display:flex; gap:10px; flex-wrap:wrap;">
+      <div class="btnRow" style="margin-top:12px;">
+        <button class="toolBtn ghost" id="copyDetail">Copy (Name + Phone)</button>
         <button class="toolBtn primary" id="saveTag">Save Tag</button>
       </div>
 
-      <div id="detailOk" class="toolMsg ok"></div>
-      <div id="detailEr" class="toolMsg err"></div>
+      <div class="toolMsg" id="detailInfo" style="display:none;"></div>
     </div>
   </div>
-</div>
 
 <script type="module">
   import { auth, db } from "./firebase.js";
-  import { getSession, getProfileLocal } from "./cache.js";
+  import { getSession } from "./cache.js";
   import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
   import {
-    collection, query, orderBy, onSnapshot, doc, getDoc, setDoc, updateDoc,
-    serverTimestamp
+    collection, addDoc, doc, updateDoc, onSnapshot, query, orderBy, serverTimestamp
   } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-  // session check
+  // require login
   const sess = getSession();
   if (!sess) location.href = "index.html";
 
-  onAuthStateChanged(auth, (user) => {
-    if (!user || !user.emailVerified) location.href = "index.html";
+  onAuthStateChanged(auth, (u)=>{
+    if (!u) location.href = "index.html";
+    if (!u.emailVerified) location.href = "index.html";
   });
 
-  // UI messages
-  const ok = document.getElementById("ok");
-  const er = document.getElementById("er");
-  const showOk = (t)=>{ ok.style.display="block"; er.style.display="none"; ok.textContent=t; };
-  const showEr = (t)=>{ er.style.display="block"; ok.style.display="none"; er.textContent=t; };
+  // nav
+  document.getElementById("goHome").onclick = ()=> location.href="home.html";
+  document.getElementById("goTool").onclick = ()=> location.href="dashboard.html";
+  document.getElementById("goWallet").onclick = ()=> location.href="wallet.html";
+  document.getElementById("goAdmin").onclick = ()=> location.href="admin.html";
+  document.getElementById("refreshBtn").onclick = ()=> location.reload();
 
+  // tilt
+  (function initTilt(){
+    const cards = document.querySelectorAll("[data-tilt]");
+    cards.forEach(card=>{
+      card.addEventListener("mousemove", (e)=>{
+        const r = card.getBoundingClientRect();
+        const x = (e.clientX - r.left) / r.width - 0.5;
+        const y = (e.clientY - r.top) / r.height - 0.5;
+        card.style.transform = `perspective(900px) rotateX(${(-y*3).toFixed(2)}deg) rotateY(${(x*3).toFixed(2)}deg) translateY(-2px)`;
+      });
+      card.addEventListener("mouseleave", ()=>{
+        card.style.transform = `perspective(900px) rotateX(0deg) rotateY(0deg) translateY(0px)`;
+      });
+    });
+  })();
+
+  // UI refs
   const rows = document.getElementById("rows");
-  const search = document.getElementById("search");
+  const er = document.getElementById("er");
+  const countChip = document.getElementById("countChip");
 
-  // filters
-  const userFilter = document.getElementById("userFilter");
-  const fromDate = document.getElementById("fromDate");
-  const toDate = document.getElementById("toDate");
-  let selectedTag = "";
+  const filterTag = document.getElementById("filterTag");
+  const filterBy = document.getElementById("filterBy");
+  const filterDate = document.getElementById("filterDate");
+  const searchBox = document.getElementById("searchBox");
 
-  document.getElementById("homeBtn").onclick = () => location.href = "home.html";
+  // add modal
+  const addModal = document.getElementById("addModal");
+  const openAdd = document.getElementById("openAdd");
+  const closeAdd = document.getElementById("closeAdd");
+  const pasteBox = document.getElementById("pasteBox");
+  const clearPaste = document.getElementById("clearPaste");
+  const savePaste = document.getElementById("savePaste");
+  const addInfo = document.getElementById("addInfo");
+
+  // detail modal
+  const detailModal = document.getElementById("detailModal");
+  const closeDetail = document.getElementById("closeDetail");
+  const dName = document.getElementById("dName");
+  const dPhone = document.getElementById("dPhone");
+  const dTag = document.getElementById("dTag");
+  const dBy = document.getElementById("dBy");
+  const dAt = document.getElementById("dAt");
+  const tagSelect = document.getElementById("tagSelect");
+  const saveTag = document.getElementById("saveTag");
+  const copyDetail = document.getElementById("copyDetail");
+  const detailInfo = document.getElementById("detailInfo");
 
   let allAccounts = [];
-  let unsubscribe = null;
+  let selectedId = null;
+
+  function showErr(t){
+    er.style.display="block"; er.textContent=t;
+  }
+  function clearErr(){
+    er.style.display="none"; er.textContent="";
+  }
+  function info(el, msg, kind="ok"){
+    el.style.display="block";
+    el.className = "toolMsg " + (kind==="err" ? "err" : "ok");
+    el.textContent = msg;
+    setTimeout(()=>{ el.style.display="none"; }, 2800);
+  }
 
   function fmtTime(ts){
     try{
@@ -218,307 +309,292 @@ Kajal Shenoy	8438525192"></textarea>
     }catch{ return "—"; }
   }
 
-  function dateOnly(ts){
-    try{
-      if (!ts) return null;
-      const d = ts.toDate ? ts.toDate() : new Date(ts);
+  // ===== Parsing: accept ANY format =====
+  function cleanName(raw){
+    return (raw || "").replace(/\s+/g, " ").trim();
+  }
+  function cleanPhone(raw){
+    const digits = (raw || "").replace(/\D/g, "");
+    if (digits.length >= 10) return digits.slice(-10);
+    return "";
+  }
+
+  function parseAccounts(text){
+    const out = [];
+    const lines = (text || "").split(/\r?\n/);
+
+    for (let line of lines){
+      line = line.trim();
+      if (!line) continue;
+
+      // find last phone-like run at end of line
+      const phoneMatch = line.match(/(\+?\d[\d\s\-()]{7,}\d)\s*$/);
+      if (!phoneMatch) continue;
+
+      const phone = cleanPhone(phoneMatch[1]);
+      if (!phone) continue;
+
+      let nameRaw = line.slice(0, line.length - phoneMatch[0].length);
+      nameRaw = nameRaw.replace(/[\t,;|:-]+$/g, "");
+      const name = cleanName(nameRaw);
+      if (!name) continue;
+
+      out.push({ name, phone });
+    }
+
+    // dedupe within paste by phone
+    const seen = new Set();
+    return out.filter(a=>{
+      if (seen.has(a.phone)) return false;
+      seen.add(a.phone);
+      return true;
+    });
+  }
+
+  // ===== Filters =====
+  function passesFilters(a){
+    const tg = (filterTag.value || "").trim().toLowerCase();
+    const by = (filterBy.value || "").trim().toLowerCase();
+    const dt = (filterDate.value || "").trim();
+    const q = (searchBox.value || "").trim().toLowerCase();
+
+    if (tg && (String(a.tag||"").toLowerCase() !== tg)) return false;
+    if (by && !(String(a.createdBy||"").toLowerCase().includes(by))) return false;
+
+    if (dt){
+      const d = a.createdAt?.toDate ? a.createdAt.toDate() : (a.createdAt ? new Date(a.createdAt) : null);
+      if (!d) return false;
       const yyyy = d.getFullYear();
       const mm = String(d.getMonth()+1).padStart(2,"0");
       const dd = String(d.getDate()).padStart(2,"0");
-      return `${yyyy}-${mm}-${dd}`;
-    }catch{ return null; }
+      const stamp = `${yyyy}-${mm}-${dd}`;
+      if (stamp !== dt) return false;
+    }
+
+    if (q){
+      const n = String(a.name||"").toLowerCase();
+      const p = String(a.phone||"").toLowerCase();
+      if (!n.includes(q) && !p.includes(q)) return false;
+    }
+
+    return true;
   }
 
-  function badge(tag){
-    const t = (tag || "").trim();
-    if (!t) return `<span class="tagBadge none">No tag</span>`;
-    if (t === "locked") return `<span class="tagBadge locked">locked</span>`;
-    if (t === "cod issue") return `<span class="tagBadge cod">cod issue</span>`;
-    if (t === "incorrect password") return `<span class="tagBadge pass">incorrect password</span>`;
-    return `<span class="tagBadge other">${t}</span>`;
+  function copyText(text){
+    navigator.clipboard.writeText(text).catch(()=>{});
   }
 
-  function render(list){
+  function render(){
+    clearErr();
+
+    const list = allAccounts.filter(passesFilters);
+    countChip.textContent = list.length.toLocaleString("en-IN");
+
     if (!list.length){
-      rows.innerHTML = `<tr><td colspan="3" style="padding:14px;color:#64748b;">No accounts match.</td></tr>`;
+      rows.innerHTML = `<tr><td colspan="4" style="padding:14px;color:#64748b;">No accounts found.</td></tr>`;
       return;
     }
 
-    rows.innerHTML = list.map(a => `
-      <tr class="accRow" data-id="${a.id}">
-        <td>
-          <div class="cellCopy">
-            <span>${(a.name || "—")}</span>
-            <button class="copyMini" data-copy="${(a.name || "")}">Copy</button>
-          </div>
-        </td>
+    rows.innerHTML = list.map(a=>{
+      const tag = a.tag ? a.tag : "";
+      return `
+        <tr>
+          <td>
+            <div class="rowFlex">
+              <span class="strong">${a.name}</span>
+              <button class="miniCopy" data-copy="${encodeURIComponent(a.name)}" title="Copy name">Copy</button>
+            </div>
+          </td>
 
-        <td class="mono">
-          <div class="cellCopy">
-            <span>${a.phone || a.id}</span>
-            <button class="copyMini" data-copy="${a.phone || a.id}">Copy</button>
-          </div>
-        </td>
+          <td class="mono">
+            <div class="rowFlex">
+              <button class="linkBtn" data-open="${a.id}" title="Open details">${a.phone}</button>
+              <button class="miniCopy" data-copy="${encodeURIComponent(a.phone)}" title="Copy phone">Copy</button>
+            </div>
+          </td>
 
-        <td>${badge(a.tag)}</td>
-      </tr>
-    `).join("");
+          <td>
+            ${tag ? `<span class="tagPill">${tag}</span>` : `<span class="tagPill soft">—</span>`}
+          </td>
 
-    // row click opens details
-    document.querySelectorAll(".accRow").forEach(tr=>{
-      tr.onclick = ()=> openDetails(tr.dataset.id);
+          <td>
+            <select class="toolInput compact" data-tag="${a.id}">
+              <option value="" ${!tag?"selected":""}>No tag</option>
+              <option value="locked" ${tag==="locked"?"selected":""}>Locked</option>
+              <option value="cod issue" ${tag==="cod issue"?"selected":""}>COD Issue</option>
+              <option value="incorrect password" ${tag==="incorrect password"?"selected":""}>Incorrect Password</option>
+              <option value="ok" ${tag==="ok"?"selected":""}>OK</option>
+            </select>
+          </td>
+        </tr>
+      `;
+    }).join("");
+
+    // copy buttons
+    rows.querySelectorAll(".miniCopy").forEach(b=>{
+      b.onclick = ()=> copyText(decodeURIComponent(b.dataset.copy));
     });
 
-    // copy buttons do NOT open details
-    document.querySelectorAll(".copyMini").forEach(btn=>{
-      btn.onclick = async (e)=>{
-        e.stopPropagation();
-        const val = btn.dataset.copy || "";
-        if (!val) return;
-        await navigator.clipboard.writeText(val);
-        showOk("Copied ✅");
+    // open details
+    rows.querySelectorAll("[data-open]").forEach(b=>{
+      b.onclick = ()=> openDetails(b.dataset.open);
+    });
+
+    // tag dropdown quick set
+    rows.querySelectorAll("[data-tag]").forEach(sel=>{
+      sel.onchange = async ()=>{
+        try{
+          await updateDoc(doc(db,"accounts", sel.dataset.tag), {
+            tag: sel.value || ""
+          });
+        }catch(e){
+          showErr(e.message);
+        }
       };
     });
   }
 
-  function fillUserFilter(){
-    const names = new Set();
-    allAccounts.forEach(a => {
-      if (a.createdByName) names.add(a.createdByName);
-    });
-    const current = userFilter.value;
+  // ===== Details modal =====
+  function openDetails(id){
+    const a = allAccounts.find(x=>x.id===id);
+    if (!a) return;
 
-    userFilter.innerHTML = `<option value="">All users</option>` +
-      Array.from(names).sort().map(n => `<option value="${n}">${n}</option>`).join("");
+    selectedId = id;
+    dName.textContent = a.name || "—";
+    dPhone.textContent = a.phone || "—";
+    dTag.textContent = a.tag || "—";
+    dBy.textContent = a.createdBy || "—";
+    dAt.textContent = fmtTime(a.createdAt);
+    tagSelect.value = a.tag || "";
 
-    userFilter.value = current;
+    detailModal.style.display="flex";
   }
 
-  function applyFilters(){
-    const q = search.value.trim().toLowerCase();
-    const t = selectedTag;
-    const u = userFilter.value;
-    const from = fromDate.value || "";
-    const to = toDate.value || "";
-
-    const filtered = allAccounts.filter(a => {
-      const name = (a.name || "").toLowerCase();
-      const phone = (a.phone || a.id || "").toLowerCase();
-      const tag = (a.tag || "").toLowerCase();
-      const by = (a.createdByName || "");
-
-      // search
-      if (q && !(name.includes(q) || phone.includes(q) || tag.includes(q))) return false;
-
-      // tag pill
-      if (t === "__none__") {
-        if ((a.tag || "").trim() !== "") return false;
-      } else if (t) {
-        if ((a.tag || "").trim() !== t) return false;
-      }
-
-      // user filter
-      if (u && by !== u) return false;
-
-      // date range
-      const d = dateOnly(a.createdAt);
-      if ((from || to) && !d) return false;
-      if (from && d < from) return false;
-      if (to && d > to) return false;
-
-      return true;
-    });
-
-    render(filtered);
-  }
-
-  function startListener(){
-    if (unsubscribe) unsubscribe();
-    const qy = query(collection(db, "accounts"), orderBy("createdAt", "desc"));
-    unsubscribe = onSnapshot(qy, (snap)=>{
-      allAccounts = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-      fillUserFilter();
-      applyFilters();
-    }, (e)=>{
-      showEr("Cannot load accounts: " + e.message);
-    });
-  }
-
-  startListener();
-
-  // pills
-  document.querySelectorAll("#tagPills .pill").forEach(p=>{
-    p.onclick = ()=>{
-      document.querySelectorAll("#tagPills .pill").forEach(x=>x.classList.remove("active"));
-      p.classList.add("active");
-      selectedTag = p.dataset.tag || "";
-      applyFilters();
-    };
+  closeDetail.onclick = ()=> detailModal.style.display="none";
+  detailModal.addEventListener("click", (e)=>{
+    if (e.target === detailModal) detailModal.style.display="none";
   });
 
-  // inputs
-  search.addEventListener("input", applyFilters);
-  userFilter.addEventListener("change", applyFilters);
-  fromDate.addEventListener("change", applyFilters);
-  toDate.addEventListener("change", applyFilters);
-
-  document.getElementById("clearFilters").onclick = () => {
-    search.value = "";
-    userFilter.value = "";
-    fromDate.value = "";
-    toDate.value = "";
-    selectedTag = "";
-    document.querySelectorAll("#tagPills .pill").forEach(x=>x.classList.remove("active"));
-    document.querySelector('#tagPills .pill[data-tag=""]').classList.add("active");
-    applyFilters();
+  copyDetail.onclick = ()=>{
+    const a = allAccounts.find(x=>x.id===selectedId);
+    if (!a) return;
+    copyText(`${a.name}\t${a.phone}`);
+    info(detailInfo, "Copied (Name + Phone)", "ok");
   };
 
-  document.getElementById("refreshBtn").onclick = () => { showOk("Refreshed ✅"); startListener(); };
-
-  // ADD MODAL
-  const addModal = document.getElementById("addModal");
-  const pasteBox = document.getElementById("pasteBox");
-  const addMsg = document.getElementById("addMsg");
-  const addErr = document.getElementById("addErr");
-  const showAddOk = (t)=>{ addMsg.style.display="block"; addErr.style.display="none"; addMsg.textContent=t; };
-  const showAddEr = (t)=>{ addErr.style.display="block"; addMsg.style.display="none"; addErr.textContent=t; };
-
-  document.getElementById("openAdd").onclick = ()=>{
-    addModal.style.display="flex";
-    addMsg.style.display="none";
-    addErr.style.display="none";
-  };
-  document.getElementById("closeAdd").onclick = ()=> addModal.style.display="none";
-  document.getElementById("clearPaste").onclick = ()=> pasteBox.value = "";
-
-  // ✅ parser: phone is last digits, name is everything before it
-  function parseAccounts(text){
-    const lines = text.split(/\r?\n/).filter(l => l.trim().length > 0);
-    const out = [];
-    for (const raw of lines){
-      const line = raw.replace(/\r/g,"");
-      const m = line.match(/(\d{6,})\s*$/);
-      if (!m) continue;
-      const phone = m[1].replace(/\D/g,"");
-      if (!phone) continue;
-      const name = line.slice(0, m.index).trim();
-      if (!name) continue;
-      out.push({ name, phone });
+  saveTag.onclick = async ()=>{
+    if (!selectedId) return;
+    try{
+      await updateDoc(doc(db,"accounts",selectedId), {
+        tag: tagSelect.value || ""
+      });
+      info(detailInfo, "Tag updated", "ok");
+    }catch(e){
+      info(detailInfo, e.message, "err");
     }
-    return out;
-  }
+  };
 
-  document.getElementById("saveAccounts").onclick = async ()=>{
-    addMsg.style.display="none";
-    addErr.style.display="none";
+  // ===== Add modal =====
+  openAdd.onclick = ()=> { addModal.style.display="flex"; pasteBox.focus(); };
+  closeAdd.onclick = ()=> addModal.style.display="none";
+  addModal.addEventListener("click",(e)=>{
+    if (e.target === addModal) addModal.style.display="none";
+  });
 
-    const items = parseAccounts(pasteBox.value);
-    if (!items.length) return showAddEr("No valid accounts found. Phone must be at end of each line.");
+  clearPaste.onclick = ()=> pasteBox.value="";
 
-    const prof = getProfileLocal() || {};
-    const createdByName = prof.name || "—";
-    const createdByEmail = sess.email || "—";
+  savePaste.onclick = async ()=>{
+    try{
+      addInfo.style.display="none";
 
-    let added = 0, skipped = 0;
+      const raw = pasteBox.value || "";
+      const parsed = parseAccounts(raw);
 
-    for (const it of items){
-      const id = it.phone;
-      const ref = doc(db, "accounts", id);
+      const totalLines = raw.split(/\r?\n/).filter(l=>l.trim()).length;
+      const skipped = Math.max(0, totalLines - parsed.length);
 
-      try{
-        const existing = await getDoc(ref);
-        if (existing.exists()){
-          skipped++;
-          continue;
-        }
+      if (!parsed.length){
+        info(addInfo, "No valid accounts found. Put phone at end of line.", "err");
+        return;
+      }
 
-        await setDoc(ref, {
-          name: it.name,
-          phone: it.phone,
+      // save each account
+      let saved = 0;
+
+      for (const a of parsed){
+        await addDoc(collection(db,"accounts"), {
+          name: a.name,
+          phone: a.phone,
           tag: "",
           createdAt: serverTimestamp(),
-          createdByUid: sess.uid,
-          createdByEmail,
-          createdByName,
-          updatedAt: serverTimestamp(),
-          updatedByUid: sess.uid,
-          updatedByEmail: createdByEmail
+          createdBy: sess.email || "",
+          createdByUid: sess.uid || ""
         });
-
-        added++;
-      }catch(e){
-        console.warn("Add fail", it, e);
+        saved++;
       }
-    }
 
-    showAddOk(`Saved ✅ Added: ${added} | Skipped: ${skipped}`);
-    pasteBox.value = "";
+      info(addInfo, `Saved ${saved} accounts. Skipped ${skipped} lines.`, "ok");
+      pasteBox.value = "";
+      // keep modal open for fast paste
+    }catch(e){
+      info(addInfo, e.message, "err");
+    }
   };
 
-  // DETAILS MODAL
-  const detailModal = document.getElementById("detailModal");
-  const detailOk = document.getElementById("detailOk");
-  const detailEr = document.getElementById("detailEr");
-  const showDetOk = (t)=>{ detailOk.style.display="block"; detailEr.style.display="none"; detailOk.textContent=t; };
-  const showDetEr = (t)=>{ detailEr.style.display="block"; detailOk.style.display="none"; detailEr.textContent=t; };
+  // filters re-render
+  filterTag.onchange = render;
+  filterBy.oninput = render;
+  filterDate.onchange = render;
+  searchBox.oninput = render;
 
-  let currentId = null;
-
-  async function openDetails(id){
-    currentId = id;
-    detailOk.style.display="none";
-    detailEr.style.display="none";
-    document.getElementById("detailSub").textContent = `Account: ${id}`;
-
-    try{
-      const snap = await getDoc(doc(db, "accounts", id));
-      if (!snap.exists()) return showDetEr("Account not found.");
-
-      const a = { id: snap.id, ...snap.data() };
-      document.getElementById("dName").textContent = a.name || "—";
-      document.getElementById("dPhone").textContent = a.phone || a.id;
-      document.getElementById("dCreated").textContent = fmtTime(a.createdAt);
-      document.getElementById("dBy").textContent = (a.createdByName || "—") + " • " + (a.createdByEmail || "—");
-      document.getElementById("dTag").textContent = a.tag ? a.tag : "No tag";
-      document.getElementById("tagSelect").value = a.tag || "";
-
-      detailModal.style.display="flex";
-    }catch(e){
-      showDetEr("Cannot open details: " + e.message);
-    }
+  // ===== Load accounts shared =====
+  function setSkeleton(){
+    rows.innerHTML = `
+      <tr class="skRow"><td colspan="4">
+        <div class="skLine"></div>
+        <div class="skLine w80"></div>
+        <div class="skLine w60"></div>
+      </td></tr>`;
   }
 
-  document.getElementById("closeDetail").onclick = ()=> detailModal.style.display="none";
+  setSkeleton();
 
-  document.getElementById("saveTag").onclick = async ()=>{
-    if (!currentId) return;
-    const tag = document.getElementById("tagSelect").value;
+  const qy = query(collection(db,"accounts"), orderBy("createdAt","desc"));
+  onSnapshot(qy, (snap)=>{
+    allAccounts = snap.docs.map(d=> ({ id:d.id, ...d.data() }));
+    render();
+  }, (e)=>{
+    showErr("Cannot load accounts: " + e.message);
+  });
 
-    try{
-      await updateDoc(doc(db, "accounts", currentId), {
-        tag,
-        updatedAt: serverTimestamp(),
-        updatedByUid: sess.uid,
-        updatedByEmail: sess.email || "—"
-      });
-      showDetOk("Tag saved ✅ Visible to all users.");
-    }catch(e){
-      showDetEr("Tag save failed: " + e.message);
-    }
-  };
-
-  document.getElementById("copyNameBtn").onclick = async ()=>{
-    const v = document.getElementById("dName").textContent || "";
-    await navigator.clipboard.writeText(v);
-    showDetOk("Name copied ✅");
-  };
-
-  document.getElementById("copyPhoneBtn").onclick = async ()=>{
-    const v = document.getElementById("dPhone").textContent || "";
-    await navigator.clipboard.writeText(v);
-    showDetOk("Phone copied ✅");
-  };
 </script>
+
+<!-- Small page-specific CSS (keeps your theme intact) -->
+<style>
+  .filterRow{display:flex;gap:12px;flex-wrap:wrap}
+  .filterBox{min-width:200px}
+  .filterBox.grow{flex:1}
+  .filterLabel{font-weight:900;font-size:12px;color:#9fb1d3;margin-bottom:6px}
+  .modalBack{position:fixed;inset:0;background:rgba(0,0,0,.55);display:flex;align-items:center;justify-content:center;padding:16px;z-index:80}
+  .modalCard{width:min(820px,100%);background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.10);border-radius:22px;padding:14px;box-shadow:0 25px 70px rgba(0,0,0,.55);backdrop-filter: blur(10px)}
+  .modalTop{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-bottom:10px}
+  .modalTitle{font-weight:1100;font-size:18px}
+  .modalSub{font-weight:800;font-size:12px;color:#9fb1d3;margin-top:3px}
+  .xBtn{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.10);color:#e7eefc;border-radius:12px;padding:8px 10px;cursor:pointer}
+  .modalHint{margin-top:8px;color:#9fb1d3;font-weight:800;font-size:12px}
+  .rowFlex{display:flex;gap:10px;align-items:center}
+  .strong{font-weight:1000}
+  .mono{font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace}
+  .miniCopy{padding:6px 10px;border-radius:12px;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.05);color:#e7eefc;font-weight:900;cursor:pointer}
+  .miniCopy:hover{background:rgba(255,255,255,.08)}
+  .linkBtn{background:transparent;border:none;color:#9ad7ff;font-weight:1000;cursor:pointer;text-decoration:underline}
+  .tagPill{display:inline-block;padding:6px 10px;border-radius:999px;background:linear-gradient(90deg,rgba(109,94,252,.30),rgba(56,212,166,.18));border:1px solid rgba(109,94,252,.50);font-weight:1000;font-size:12px}
+  .tagPill.soft{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.10)}
+  .detailGrid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:8px}
+  .detailItem{padding:10px;border-radius:16px;border:1px solid rgba(255,255,255,.10);background:rgba(0,0,0,.18)}
+  .detailK{color:#9fb1d3;font-weight:900;font-size:12px}
+  .detailV{margin-top:5px;font-weight:1000}
+</style>
 
 </body>
 </html>
