@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Accounts | Buckup-Media</title>
+  <link rel="stylesheet" href="./style.css?v=3">
+</head>
+<body class="toolBody">
+
+<header class="toolTop">
+  <div class="toolBrand">
+    <div class="toolLogo">BM</div>
+    <div>
+      <div class="toolTitle">Accounts</div>
+      <div class="toolSub">Shared list • Tags • Details</div>
+    </div>
+  </div>
+
+  <div class="toolActions">
+    <button class="toolBtn ghost" id="homeBtn">Home</button>
+    <button class="toolBtn primary" id="openAdd">Add More Accounts</button>
+  </div>
+</header>
+
+<main class="toolMain">
+
+  <section class="toolCard">
+    <div class="toolCardHead">
+      <div>
+        <div class="toolCardTitle">All Accounts</div>
+        <div class="toolCardSub">This list is shared for all users</div>
+      </div>
+
+      <div style="display:flex; gap:10px; flex-wrap:wrap;">
+        <input id="search" class="toolInput" style="min-width:260px" placeholder="Search by name / number / tag">
+        <button class="toolBtn ghost" id="refreshBtn">Refresh</button>
+      </div>
+    </div>
+
+    <div id="ok" class="toolMsg ok"></div>
+    <div id="er" class="toolMsg err"></div>
+
+    <div class="accTableWrap" style="margin-top:14px;">
+      <table class="accTable">
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Phone</th>
+            <th>Tag</th>
+            <th>Added</th>
+          </tr>
+        </thead>
+        <tbody id="rows">
+          <tr><td colspan="4" style="padding:14px;color:#64748b;">Loading…</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="toolHint" style="margin-top:10px;">
+      Click any row to open <b>Account Details</b> and <b>Add Tag</b>.
+    </div>
+  </section>
+</main>
+
+<!-- ADD MODAL -->
+<div class="modalBack" id="addModal" style="display:none;">
+  <div class="modalCard">
+    <div class="modalHead">
+      <div>
+        <div class="toolCardTitle">Add More Accounts</div>
+        <div class="toolCardSub">Paste like: <b>Name[TAB]Phone</b> (one per line)</div>
+      </div>
+      <button class="toolBtn ghost" id="closeAdd">Close</button>
+    </div>
+
+    <textarea id="pasteBox" class="toolArea" rows="10"
+      placeholder="Example:
+Manoj Bajpai	7049626274
+Dhruv Dhawan	7069522310"></textarea>
+
+    <div class="toolHint">Supports TAB, comma, multiple spaces. Phone digits only will be used.</div>
+
+    <div class="btnRow" style="margin-top:12px; display:flex; gap:10px; flex-wrap:wrap;">
+      <button class="toolBtn primary" id="saveAccounts">Save Accounts</button>
+      <button class="toolBtn ghost" id="clearPaste">Clear</button>
+    </div>
+
+    <div id="addMsg" class="toolMsg ok"></div>
+    <div id="addErr" class="toolMsg err"></div>
+  </div>
+</div>
+
+<!-- DETAILS MODAL -->
+<div class="modalBack" id="detailModal" style="display:none;">
+  <div class="modalCard">
+    <div class="modalHead">
+      <div>
+        <div class="toolCardTitle">Account Details</div>
+        <div class="toolCardSub" id="detailSub">—</div>
+      </div>
+      <button class="toolBtn ghost" id="closeDetail">Close</button>
+    </div>
+
+    <div class="detailBox">
+      <div class="dRow"><span>Name</span><b id="dName">—</b></div>
+      <div class="dRow"><span>Phone</span><b id="dPhone">—</b></div>
+      <div class="dRow"><span>Created At</span><b id="dCreated">—</b></div>
+      <div class="dRow"><span>Added By</span><b id="dBy">—</b></div>
+      <div class="dRow"><span>Current Tag</span><b id="dTag">—</b></div>
+
+      <hr style="border:none;border-top:1px solid #e2e8f0;margin:12px 0;">
+
+      <label class="toolLabel">Set Tag</label>
+      <select id="tagSelect" class="toolInput">
+        <option value="">No tag</option>
+        <option value="locked">locked</option>
+        <option value="cod issue">cod issue</option>
+        <option value="incorrect password">incorrect password</option>
+      </select>
+
+      <div class="btnRow" style="margin-top:12px; display:flex; gap:10px; flex-wrap:wrap;">
+        <button class="toolBtn primary" id="saveTag">Save Tag</button>
+        <button class="toolBtn info" id="copyPhone">Copy Phone</button>
+      </div>
+
+      <div id="detailOk" class="toolMsg ok"></div>
+      <div id="detailEr" class="toolMsg err"></div>
+    </div>
+  </div>
+</div>
+
+<script type="module">
+  import { auth, db } from "./firebase.js";
+  import { getSession, getProfileLocal } from "./cache.js";
+  import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+  import {
+    collection, query, orderBy, onSnapshot, doc, getDoc, setDoc, updateDoc,
+    serverTimestamp
+  } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+  // ---- UI helpers
+  const ok = document.getElementById("ok");
+  const er = document.getElementById("er");
+  const showOk = (t)=>{ ok.style.display="block"; er.style.display="none"; ok.textContent=t; };
+  const showEr = (t)=>{ er.style.display="block"; ok.style.display="none"; er.textContent=t; };
+
+  const rows = document.getElementById("rows");
+  const search = document.getElementById("search");
+
+  // session check
+  const sess = getSession();
+  if (!sess) location.href = "index.html";
+
+  onAuthStateChanged(auth, (user) => {
+    if (!user || !user.emailVerified) location.href = "index.html";
+  });
+
+  document.getElementById("homeBtn").onclick = () => location.href = "home.html";
+
+  // ---- Firestore live list
+  let allAccounts = []; // cached list for search
+  let unsubscribe = null;
+
+  function fmtTime(ts){
+    try{
+      if (!ts) return "—";
+      const d = ts.toDate ? ts.toDate() : new Date(ts);
+      return d.toLocaleString(); // user local timezone
+    }catch{ return "—"; }
+  }
+
+  function badge(tag){
+    const t = (tag || "").trim();
+    if (!t) return `<span class="tagBadge none">No tag</span>`;
+    if (t === "locked") return `<span class="tagBadge locked">locked</span>`;
+    if (t === "cod issue") return `<span class="tagBadge cod">cod issue</span>`;
+    if (t === "incorrect password") return `<span class="tagBadge pass">incorrect password</span>`;
+    return `<span class="tagBadge other">${t}</span>`;
+  }
+
+  function render(list){
+    if (!list.length){
+      rows.innerHTML = `<tr><td colspan="4" style="padding:14px;color:#64748b;">No accounts yet.</td></tr>`;
+      return;
+    }
+    rows.innerHTML = list.map(a => `
+      <tr class="accRow" data-id="${a.id}">
+        <td>${(a.name || "—")}</td>
+        <td class="mono">${a.phone || a.id}</td>
+        <td>${badge(a.tag)}</td>
+        <td>${fmtTime(a.createdAt)}</td>
+      </tr>
+    `).join("");
+
+    document.querySelectorAll(".accRow").forEach(tr=>{
+      tr.onclick = ()=> openDetails(tr.dataset.id);
+    });
+  }
+
+  function applySearch(){
+    const q = search.value.trim().toLowerCase();
+    if (!q) return render(allAccounts);
+    const filtered = allAccounts.filter(a =>
+      (a.name || "").toLowerCase().includes(q) ||
+      (a.phone || a.id || "").toLowerCase().includes(q) ||
+      (a.tag || "").toLowerCase().includes(q)
+    );
+    render(filtered);
+  }
+
+  function startListener(){
+    if (unsubscribe) unsubscribe();
+    const qy = query(collection(db, "accounts"), orderBy("createdAt", "desc"));
+    unsubscribe = onSnapshot(qy, (snap)=>{
+      allAccounts = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+      applySearch();
+    }, (e)=>{
+      showEr("Cannot load accounts: " + e.message);
+    });
+  }
+
+  startListener();
+  search.addEventListener("input", applySearch);
+  document.getElementById("refreshBtn").onclick = () => { showOk("Refreshed ✅"); startListener(); };
+
+  // ---- Add Modal
+  const addModal = document.getElementById("addModal");
+  const pasteBox = document.getElementById("pasteBox");
+  const addMsg = document.getElementById("addMsg");
+  const addErr = document.getElementById("addErr");
+
+  const showAddOk = (t)=>{ addMsg.style.display="block"; addErr.style.display="none"; addMsg.textContent=t; };
+  const showAddEr = (t)=>{ addErr.style.display="block"; addMsg.style.display="none"; addErr.textContent=t; };
+
+  document.getElementById("openAdd").onclick = ()=>{
+    addModal.style.display="flex";
+    addMsg.style.display="none";
+    addErr.style.display="none";
+  };
+  document.getElementById("closeAdd").onclick = ()=> addModal.style.display="none";
+  document.getElementById("clearPaste").onclick = ()=> pasteBox.value = "";
+
+  function parseAccounts(text){
+    const lines = text.split(/\r?\n/).map(l=>l.trim()).filter(Boolean);
+    const out = [];
+    for (const line of lines){
+      // allow tab, comma, or multiple spaces
+      const parts = line.split(/\t|,|\s{2,}/).map(x=>x.trim()).filter(Boolean);
+      if (parts.length < 2) continue;
+      const name = parts[0];
+      const phone = (parts.slice(1).join(" ")).replace(/\D/g,""); // digits only
+      if (!phone) continue;
+      out.push({ name, phone });
+    }
+    return out;
+  }
+
+  document.getElementById("saveAccounts").onclick = async ()=>{
+    addMsg.style.display="none";
+    addErr.style.display="none";
+
+    const items = parseAccounts(pasteBox.value);
+    if (!items.length) return showAddEr("No valid accounts found. Paste Name + Phone in each line.");
+
+    const prof = getProfileLocal() || {};
+    const createdByName = prof.name || "—";
+    const createdByEmail = sess.email || "—";
+
+    let added = 0, skipped = 0;
+
+    // Use phone as document ID to avoid duplicates (shared list)
+    for (const it of items){
+      const id = it.phone;
+      const ref = doc(db, "accounts", id);
+
+      try{
+        const existing = await getDoc(ref);
+        if (existing.exists()){
+          skipped++;
+          continue;
+        }
+
+        await setDoc(ref, {
+          name: it.name,
+          phone: it.phone,
+          tag: "",
+          createdAt: serverTimestamp(),
+          createdByUid: sess.uid,
+          createdByEmail,
+          createdByName,
+          updatedAt: serverTimestamp(),
+          updatedByUid: sess.uid,
+          updatedByEmail: createdByEmail
+        });
+
+        added++;
+      }catch(e){
+        console.warn("Add fail", it, e);
+      }
+    }
+
+    showAddOk(`Saved ✅ Added: ${added} | Skipped (already exists): ${skipped}`);
+    pasteBox.value = "";
+  };
+
+  // ---- Details Modal + Tag update
+  const detailModal = document.getElementById("detailModal");
+  const detailOk = document.getElementById("detailOk");
+  const detailEr = document.getElementById("detailEr");
+
+  const showDetOk = (t)=>{ detailOk.style.display="block"; detailEr.style.display="none"; detailOk.textContent=t; };
+  const showDetEr = (t)=>{ detailEr.style.display="block"; detailOk.style.display="none"; detailEr.textContent=t; };
+
+  let currentId = null;
+
+  async function openDetails(id){
+    currentId = id;
+    detailOk.style.display="none";
+    detailEr.style.display="none";
+    document.getElementById("detailSub").textContent = `Account: ${id}`;
+
+    try{
+      const snap = await getDoc(doc(db, "accounts", id));
+      if (!snap.exists()) return showDetEr("Account not found.");
+
+      const a = { id: snap.id, ...snap.data() };
+      document.getElementById("dName").textContent = a.name || "—";
+      document.getElementById("dPhone").textContent = a.phone || a.id;
+      document.getElementById("dCreated").textContent = fmtTime(a.createdAt);
+      document.getElementById("dBy").textContent = (a.createdByName || "—") + " • " + (a.createdByEmail || "—");
+      document.getElementById("dTag").innerHTML = a.tag ? a.tag : "No tag";
+      document.getElementById("tagSelect").value = a.tag || "";
+
+      detailModal.style.display="flex";
+    }catch(e){
+      showDetEr("Cannot open details: " + e.message);
+    }
+  }
+
+  document.getElementById("closeDetail").onclick = ()=> detailModal.style.display="none";
+
+  document.getElementById("saveTag").onclick = async ()=>{
+    if (!currentId) return;
+
+    const tag = document.getElementById("tagSelect").value;
+    try{
+      await updateDoc(doc(db, "accounts", currentId), {
+        tag,
+        updatedAt: serverTimestamp(),
+        updatedByUid: sess.uid,
+        updatedByEmail: sess.email || "—"
+      });
+      showDetOk("Tag saved ✅ Visible to all users.");
+    }catch(e){
+      showDetEr("Tag save failed: " + e.message);
+    }
+  };
+
+  document.getElementById("copyPhone").onclick = async ()=>{
+    try{
+      await navigator.clipboard.writeText(currentId || "");
+      showDetOk("Phone copied ✅");
+    }catch{
+      showDetEr("Copy failed.");
+    }
+  };
+</script>
+
+</body>
+</html>
