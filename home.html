@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Home | Buckup-Media</title>
+  <link rel="stylesheet" href="./style.css?v=3">
+</head>
+<body>
+
+<div class="card card-xl">
+  <div class="brand">Buckup-Media Portal</div>
+  <div class="sub">Choose what you want to do</div>
+
+  <div class="row">
+    <div class="tile">
+      <div class="tileTitle">My Account</div>
+      <div class="tileSub">View/Edit your profile details</div>
+      <button class="primary" id="goAccount">Open</button>
+    </div>
+
+    <div class="tile">
+      <div class="tileTitle">Payment</div>
+      <div class="tileSub">Add/Edit bank & UPI details</div>
+      <button class="primary" id="goPayment">Open</button>
+    </div>
+  </div>
+
+  <div class="row" style="margin-top:12px;">
+    <div class="tile">
+      <div class="tileTitle">My Work</div>
+      <div class="tileSub">Open your saved Google Sheet</div>
+      <button class="info" id="openSheet">Open Sheet</button>
+    </div>
+
+    <div class="tile">
+      <div class="tileTitle">Data Duplicater</div>
+      <div class="tileSub">Upload/Paste data and duplicate</div>
+      <button class="success" id="goDup">Open</button>
+    </div>
+  </div>
+
+  <div class="btnRow" style="margin-top:16px;">
+    <button class="ghost" id="goProfile">Edit Profile</button>
+    <button class="ghost" id="logoutBtn">Logout</button>
+  </div>
+
+  <div id="er" class="msg err"></div>
+</div>
+
+<script type="module">
+  import { auth } from "./firebase.js";
+  import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+  import { getSession, clearSession, getProfileLocal } from "./cache.js";
+
+  const er = document.getElementById("er");
+  const showEr = (t)=>{ er.style.display="block"; er.textContent=t; };
+
+  const sess = getSession();
+  if (!sess) location.href = "index.html";
+
+  onAuthStateChanged(auth, (user) => {
+    if (!user || !user.emailVerified) location.href = "index.html";
+  });
+
+  document.getElementById("goAccount").onclick = () => location.href = "account.html";
+  document.getElementById("goPayment").onclick = () => location.href = "payment.html";
+  document.getElementById("goDup").onclick = () => location.href = "dashboard.html";
+  document.getElementById("goProfile").onclick = () => location.href = "profile.html";
+
+  document.getElementById("openSheet").onclick = () => {
+    const p = getProfileLocal();
+    const link = p?.googleSheetUrl;
+    if (!link) { showEr("Google Sheet link not found. Please update profile."); return; }
+    window.open(link, "_blank");
+  };
+
+  document.getElementById("logoutBtn").onclick = async () => {
+    clearSession();
+    await signOut(auth);
+    location.href = "index.html";
+  };
+</script>
+
+</body>
+</html>
