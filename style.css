@@ -1668,3 +1668,107 @@ button{
 }
 .chartNote{margin-top:12px; color:#9fb1d3; font-weight:800; font-size:12px}
 
+
+/* ===== COLOR BOOST PATCH (Fix dull look) ===== */
+:root{
+  --bg:#070b16;
+  --cardGlass: rgba(255,255,255,.06);
+  --cardGlass2: rgba(255,255,255,.08);
+  --stroke: rgba(255,255,255,.10);
+  --shadowDeep: 0 25px 70px rgba(0,0,0,.45);
+}
+
+/* stronger page background glow */
+body{
+  background:
+    radial-gradient(1100px 700px at 18% -10%, rgba(109,94,252,.45), transparent 60%),
+    radial-gradient(900px 600px at 90% 8%, rgba(56,212,166,.30), transparent 55%),
+    radial-gradient(900px 650px at 15% 115%, rgba(251,113,133,.20), transparent 55%),
+    var(--bg) !important;
+}
+
+/* Sidebar: darker + premium */
+.sideNav{
+  background:
+    radial-gradient(900px 500px at 30% 0%, rgba(109,94,252,.18), transparent 60%),
+    radial-gradient(700px 520px at 90% 20%, rgba(56,212,166,.14), transparent 60%),
+    rgba(10,16,30,.92) !important;
+  border-right: 1px solid var(--stroke) !important;
+}
+
+/* Nav buttons: higher contrast */
+.navItem{
+  background: rgba(255,255,255,.05) !important;
+  border: 1px solid rgba(255,255,255,.10) !important;
+  color:#eef3ff !important;
+}
+.navItem:hover{
+  background: rgba(255,255,255,.08) !important;
+}
+.navItem.active{
+  background:
+    linear-gradient(90deg, rgba(109,94,252,.35), rgba(56,212,166,.18)) !important;
+  border-color: rgba(109,94,252,.75) !important;
+  box-shadow: 0 14px 35px rgba(109,94,252,.18);
+}
+
+/* Top bar: richer */
+.topBar{
+  background: rgba(255,255,255,.06) !important;
+  border: 1px solid rgba(255,255,255,.10) !important;
+  box-shadow: var(--shadowDeep);
+}
+
+/* Main cards/panels: richer glass */
+.cardX,
+.metricCard,
+.dashPanel,
+.walletHeroCard,
+.dashCard{
+  background: var(--cardGlass) !important;
+  border: 1px solid rgba(255,255,255,.10) !important;
+  box-shadow: var(--shadowDeep) !important;
+}
+
+/* Glow cards: more pop */
+.metricCard.glow,
+.walletGlow{
+  background:
+    radial-gradient(700px 260px at 12% 0%, rgba(109,94,252,.35), transparent 60%),
+    radial-gradient(650px 280px at 92% 18%, rgba(56,212,166,.22), transparent 60%),
+    rgba(255,255,255,.06) !important;
+}
+
+/* Buttons: stronger, more premium */
+.toolBtn.primary,
+.actionBtn.primary{
+  background: linear-gradient(90deg, #6d5efc, #38d4a6) !important;
+  border-color: rgba(109,94,252,.70) !important;
+  color:#061021 !important;
+  box-shadow: 0 16px 40px rgba(109,94,252,.18);
+}
+
+.toolBtn.ghost{
+  background: rgba(255,255,255,.05) !important;
+  border: 1px solid rgba(255,255,255,.10) !important;
+}
+
+/* Inputs: higher contrast */
+.toolInput{
+  background: rgba(255,255,255,.06) !important;
+  border: 1px solid rgba(255,255,255,.12) !important;
+  color:#eef3ff !important;
+}
+.toolInput::placeholder{ color: rgba(231,238,252,.55) !important; }
+
+/* Table area: cleaner */
+.accTableWrap{
+  background: rgba(0,0,0,.20) !important;
+  border: 1px solid rgba(255,255,255,.10) !important;
+}
+
+/* Improve chip */
+.chip{
+  background: rgba(255,255,255,.06) !important;
+  border: 1px solid rgba(255,255,255,.12) !important;
+}
