@@ -13,9 +13,10 @@ const firebaseConfig = {
 };
 
 const app = initializeApp(firebaseConfig);
+
 export const auth = getAuth(app);
 
-// Force long polling to reduce “offline” issues in some networks
+// Keep Firestore stable (reduces "offline" issues on some networks)
 export const db = initializeFirestore(app, {
   experimentalForceLongPolling: true,
   useFetchStreams: false
