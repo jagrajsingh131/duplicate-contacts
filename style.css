@@ -1380,3 +1380,147 @@ button{
   .adminForm{grid-template-columns: 1fr;}
 }
 
+/* ===== HOME DASHBOARD UPGRADE ===== */
+.heroStrip{
+  display:flex; justify-content:space-between; align-items:center;
+  gap:16px; padding:18px;
+  border:1px solid rgba(255,255,255,.08);
+  background:
+    radial-gradient(800px 240px at 20% 0%, rgba(109,94,252,.20), transparent 60%),
+    radial-gradient(700px 250px at 90% 10%, rgba(56,212,166,.14), transparent 60%),
+    rgba(255,255,255,.04);
+  border-radius:24px;
+  box-shadow: 0 18px 55px rgba(0,0,0,.35);
+}
+.heroHello{font-weight:1100; font-size:22px}
+.heroLine{margin-top:6px; color:#9fb1d3; font-weight:800; font-size:13px}
+.heroBadge{
+  padding:12px 14px; border-radius:18px;
+  border:1px solid rgba(255,255,255,.10);
+  background:rgba(0,0,0,.18);
+  min-width:160px;
+}
+.heroBadgeK{color:#9fb1d3; font-weight:900; font-size:12px}
+.heroBadgeV{margin-top:6px; font-weight:1100; font-size:16px}
+
+.metricGrid{
+  margin-top:16px;
+  display:grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap:16px;
+}
+@media(max-width: 1100px){
+  .metricGrid{grid-template-columns:1fr;}
+}
+.metricCard{
+  cursor:default;
+  border:1px solid rgba(255,255,255,.08);
+  background:rgba(255,255,255,.04);
+  border-radius:24px;
+  padding:16px;
+  box-shadow: 0 18px 55px rgba(0,0,0,.35);
+  transition: transform .18s ease, background .18s ease;
+}
+.metricCard.glow{
+  cursor:pointer;
+  background:
+    radial-gradient(650px 240px at 15% 0%, rgba(109,94,252,.22), transparent 60%),
+    radial-gradient(600px 260px at 90% 20%, rgba(56,212,166,.16), transparent 60%),
+    rgba(255,255,255,.04);
+}
+.metricCard.glow:hover{transform: translateY(-2px)}
+.metricTop{display:flex; justify-content:space-between; align-items:center; gap:10px}
+.metricK{color:#9fb1d3; font-weight:1000; font-size:12px}
+.metricV{margin-top:6px; font-weight:1100; font-size:26px}
+.metricS{margin-top:4px; color:#9fb1d3; font-weight:800; font-size:12px}
+.metricIcon{
+  width:54px; height:54px; border-radius:18px;
+  display:flex; align-items:center; justify-content:center;
+  font-weight:1100; font-size:18px;
+  background:linear-gradient(135deg,#6d5efc,#38d4a6);
+  color:#081224;
+}
+.metricIcon.soft{
+  background:rgba(0,0,0,.22);
+  border:1px solid rgba(255,255,255,.10);
+  color:#e7eefc;
+}
+.metricFoot{display:flex; gap:8px; flex-wrap:wrap; margin-top:12px}
+
+.dashMainGrid{
+  margin-top:16px;
+  display:grid;
+  grid-template-columns: 1.2fr 1fr;
+  gap:16px;
+}
+@media(max-width: 1100px){
+  .dashMainGrid{grid-template-columns:1fr;}
+}
+.dashPanel{
+  border:1px solid rgba(255,255,255,.08);
+  background:rgba(255,255,255,.04);
+  border-radius:24px;
+  padding:16px;
+  box-shadow: 0 18px 55px rgba(0,0,0,.35);
+}
+.panelTop{display:flex; justify-content:space-between; align-items:center; gap:12px}
+.panelTitle{font-weight:1100; font-size:16px}
+.panelSub{color:#9fb1d3; font-weight:800; font-size:12px; margin-top:4px}
+.panelHint{margin-top:12px; color:#9fb1d3; font-weight:800; font-size:12px}
+
+.actionGrid{
+  margin-top:12px;
+  display:grid;
+  grid-template-columns: repeat(2,1fr);
+  gap:12px;
+}
+@media(max-width: 700px){
+  .actionGrid{grid-template-columns:1fr;}
+}
+.actionBtn{
+  width:100%;
+  display:flex; gap:12px; align-items:center;
+  padding:14px;
+  border-radius:20px;
+  border:1px solid rgba(255,255,255,.10);
+  background:rgba(0,0,0,.18);
+  color:#e7eefc;
+  cursor:pointer;
+  text-align:left;
+  transition: transform .15s ease, background .15s ease;
+}
+.actionBtn:hover{transform: translateY(-1px); background:rgba(255,255,255,.06)}
+.actionBtn.primary{
+  background:linear-gradient(90deg, rgba(109,94,252,.30), rgba(56,212,166,.18));
+  border-color: rgba(109,94,252,.55);
+}
+.actionI{
+  width:44px; height:44px; border-radius:16px;
+  display:flex; align-items:center; justify-content:center;
+  background:rgba(255,255,255,.06);
+  border:1px solid rgba(255,255,255,.10);
+  font-size:18px;
+}
+.actionT{font-weight:1100; font-size:14px}
+.actionS{color:#9fb1d3; font-weight:800; font-size:12px; margin-top:2px}
+
+.chartBox{
+  margin-top:12px;
+  padding:14px;
+  border-radius:20px;
+  background:rgba(0,0,0,.18);
+  border:1px solid rgba(255,255,255,.08);
+}
+.barRow{display:flex; align-items:center; gap:10px; margin:10px 0}
+.barLabel{width:40px; color:#9fb1d3; font-weight:900; font-size:12px}
+.barTrack{
+  flex:1; height:12px; border-radius:999px;
+  background:rgba(255,255,255,.06);
+  overflow:hidden;
+}
+.barFill{
+  height:12px; border-radius:999px;
+  background:linear-gradient(90deg,#6d5efc,#38d4a6);
+}
+.chartNote{margin-top:12px; color:#9fb1d3; font-weight:800; font-size:12px}
+
