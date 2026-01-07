@@ -1,51 +1,101 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>Dashboard | Buckup-Media</title>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Data Duplicater | Buckup-Media</title>
   <link rel="stylesheet" href="./style.css?v=3">
 </head>
-<body>
+<body class="toolBody">
 
-<div class="card card-xl">
-  <div class="brand">Buckup-Media Data Duplicater</div>
-  <div class="sub">Paste data OR upload file → duplicate → copy/download</div>
-
-  <div class="row">
-    <div>
-      <label>Upload File (CSV/TXT)</label>
-      <input type="file" id="fileInput" accept=".csv,.txt">
+  <!-- Top Bar -->
+  <header class="toolTop">
+    <div class="toolBrand">
+      <div class="toolLogo">BM</div>
+      <div>
+        <div class="toolTitle">Data Duplicater</div>
+        <div class="toolSub">Upload / Paste → Duplicate → Copy / Download</div>
+      </div>
     </div>
-    <div style="display:flex;align-items:end;gap:10px;">
-      <button class="primary" id="duplicateBtn" type="button">Duplicate</button>
-      <button class="ghost" id="clearBtn" type="button">Clear</button>
-      <button class="ghost" id="logoutBtn" type="button">Logout</button>
-    </div>
-  </div>
 
-  <div class="row">
-    <div>
-      <label>Paste Input</label>
-      <textarea id="inputBox" rows="10" placeholder="Paste your data here..."></textarea>
+    <div class="toolActions">
+      <button class="toolBtn ghost" id="homeBtn">Home</button>
+      <button class="toolBtn ghost" id="clearBtnTop">Clear</button>
     </div>
-    <div>
-      <label>Duplicated Output</label>
-      <textarea id="outputBox" rows="10" placeholder="Output will appear here..."></textarea>
-    </div>
-  </div>
+  </header>
 
-  <div class="btnRow">
-    <button class="success" id="copyBtn" type="button">Copy Output</button>
-    <button class="info" id="downloadCsvBtn" type="button">Download CSV</button>
-  </div>
+  <!-- Main -->
+  <main class="toolMain">
 
-  <div id="ok" class="msg ok"></div>
-  <div id="er" class="msg err"></div>
-</div>
+    <!-- Upload + Actions -->
+    <section class="toolCard">
+      <div class="toolCardHead">
+        <div>
+          <div class="toolCardTitle">Input Options</div>
+          <div class="toolCardSub">Upload a file or paste text</div>
+        </div>
+        <div class="toolCardRight">
+          <button class="toolBtn primary" id="duplicateBtn" type="button">Duplicate</button>
+        </div>
+      </div>
+
+      <div class="toolRow">
+        <div class="toolField">
+          <label class="toolLabel">Upload File (CSV/TXT)</label>
+          <input class="toolInput" type="file" id="fileInput" accept=".csv,.txt">
+          <div class="toolHint">Tip: After upload, click <b>Duplicate</b></div>
+        </div>
+
+        <div class="toolField">
+          <label class="toolLabel">Download</label>
+          <div class="toolBtnsRow">
+            <button class="toolBtn success" id="copyBtn" type="button">Copy Output</button>
+            <button class="toolBtn info" id="downloadCsvBtn" type="button">Download CSV</button>
+          </div>
+          <div class="toolHint">Output is saved locally per user</div>
+        </div>
+      </div>
+
+      <div id="ok" class="toolMsg ok"></div>
+      <div id="er" class="toolMsg err"></div>
+    </section>
+
+    <!-- Editors -->
+    <section class="toolGrid">
+      <div class="toolCard">
+        <div class="toolCardHead">
+          <div>
+            <div class="toolCardTitle">Paste Input</div>
+            <div class="toolCardSub">Paste name + number lines here</div>
+          </div>
+          <button class="toolBtn ghost" id="clearInputBtn" type="button">Clear Input</button>
+        </div>
+        <textarea class="toolArea" id="inputBox" rows="14" placeholder="Paste your data here..."></textarea>
+      </div>
+
+      <div class="toolCard">
+        <div class="toolCardHead">
+          <div>
+            <div class="toolCardTitle">Duplicated Output</div>
+            <div class="toolCardSub">Every line duplicated below itself</div>
+          </div>
+          <button class="toolBtn ghost" id="clearOutputBtn" type="button">Clear Output</button>
+        </div>
+        <textarea class="toolArea" id="outputBox" rows="14" placeholder="Output will appear here..."></textarea>
+      </div>
+    </section>
+
+    <footer class="toolFoot">
+      <div>© Buckup-Media Data Duplicater</div>
+      <div class="toolMuted">Fast UI • Local storage enabled</div>
+    </footer>
+
+  </main>
 
 <script type="module">
   import { auth } from "./firebase.js";
-  import { signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-  import { getSession, clearSession, getDuplicatedLocal, saveDuplicatedLocal, getProfileLocal } from "./cache.js";
+  import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+  import { getSession, getDuplicatedLocal, saveDuplicatedLocal } from "./cache.js";
 
   const ok = document.getElementById("ok");
   const er = document.getElementById("er");
@@ -56,16 +106,13 @@
   const outputBox = document.getElementById("outputBox");
   const fileInput = document.getElementById("fileInput");
 
+  // session check
   const session = getSession();
   if (!session) location.href = "index.html";
 
   onAuthStateChanged(auth, (user) => {
-    if (!user) location.href = "index.html";
-    if (!user.emailVerified) location.href = "index.html";
+    if (!user || !user.emailVerified) location.href = "index.html";
   });
-
-  // optional profile use (sheet link etc.)
-  const profile = getProfileLocal();
 
   // load last output instantly
   outputBox.value = getDuplicatedLocal();
@@ -80,6 +127,12 @@
     return out.join("\n");
   }
 
+  // Home button
+  document.getElementById("homeBtn").addEventListener("click", () => {
+    location.href = "home.html";
+  });
+
+  // File upload read
   fileInput.addEventListener("change", async () => {
     const f = fileInput.files[0];
     if (!f) return;
@@ -92,6 +145,7 @@
     }
   });
 
+  // Duplicate
   document.getElementById("duplicateBtn").addEventListener("click", () => {
     const result = duplicateLines(inputBox.value);
     outputBox.value = result;
@@ -99,6 +153,7 @@
     showOk("Duplicated ✅");
   });
 
+  // Copy
   document.getElementById("copyBtn").addEventListener("click", async () => {
     try {
       await navigator.clipboard.writeText(outputBox.value);
@@ -108,6 +163,7 @@
     }
   });
 
+  // Download CSV
   document.getElementById("downloadCsvBtn").addEventListener("click", () => {
     const blob = new Blob([outputBox.value], { type: "text/csv" });
     const a = document.createElement("a");
@@ -116,17 +172,24 @@
     a.click();
   });
 
-  document.getElementById("clearBtn").addEventListener("click", () => {
+  // Clear helpers
+  function clearAll() {
     inputBox.value = "";
     outputBox.value = "";
     saveDuplicatedLocal("");
+    fileInput.value = "";
     showOk("Cleared ✅");
-  });
+  }
 
-  document.getElementById("logoutBtn").addEventListener("click", async () => {
-    clearSession();
-    await signOut(auth);
-    location.href = "index.html";
+  document.getElementById("clearBtnTop").addEventListener("click", clearAll);
+  document.getElementById("clearInputBtn").addEventListener("click", () => {
+    inputBox.value = "";
+    showOk("Input cleared ✅");
+  });
+  document.getElementById("clearOutputBtn").addEventListener("click", () => {
+    outputBox.value = "";
+    saveDuplicatedLocal("");
+    showOk("Output cleared ✅");
   });
 </script>
 
